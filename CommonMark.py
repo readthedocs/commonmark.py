@@ -4,6 +4,8 @@
 
 import re
 
+# all the regexps :<
+
 ESCAPABLE = '[!"#$%&\'()*+,./:;<=>?@[\\\\\\]^_`{|}~-]'
 ESCAPED_CHAR = '\\\\' + ESCAPABLE
 IN_DOUBLE_QUOTES = '"(' + ESCAPED_CHAR + '|[^"\\x00])*"'
@@ -43,9 +45,24 @@ reAllTab = re.compile("\t")
 reHrule = re.compile("^(?:(?:\* *){3,}|(?:_ *){3,}|(?:- *){3,}) *$")
 reMain = re.compile("^(?:[\n`\[\]\\!<&*_]|[^\n`\[\]\\!<&*_]+)/", re.MULTILINE)
 
+# utility functions
+
 def unescape(s):
   return reAllEscapedChar.sub('$1', s, 0)
 
 def isBlank(s):
   return bool(re.compile("^\s*$").match(s))
+
+def normalizeReference(s):
+	return re.sub('\s+', ' ', s.strip())
+
+def matchAt(pattern, s, offset):
+	matched = re.match(pattern, s[offset:])
+	if matched.group(0):
+		return s.index(matched.group(0))
+	else:
+		return None
+
+def detabLine(text):
+	return re.sub(reAllTab, ' '*4, text)
 
