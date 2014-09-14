@@ -1,4 +1,6 @@
 #!/usr/bin/env python
+# 2014 - Bibek Kafle & Roland Shoemaker
+# Based on @jgm's JavaScript stmd.js implementation of the CommonMark spec
 
 import re
 
@@ -47,4 +49,3 @@ def unescape(s):
 def isBlank(s):
   return bool(re.compile("^\s*$").match(s))
 
- 
