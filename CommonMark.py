@@ -507,7 +507,7 @@ class HTMLRenderer(object):
 		elif (block.t == "HorizontalRule"):
 			return inTags("hr", [], "", True)
 		else:
-			print "Unknown block type" + block.t
+			print("Unknown block type" + block.t)
 			return ""
 
 	def renderBlocks(self, blocks, in_tight_list):
