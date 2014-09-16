@@ -208,8 +208,60 @@ class InlineParser(object):
 			"can_close": can_close
 		}
 
-	def parseEmphasis(self):
-		pass
+	def parseEmphasis(self, inlines):
+		startpos = self.pos
+		first_close = 0
+		nxt = self.peek()
+		if ((nxt == "*") or (nxt == "_")):
+			c = nxt
+		else:
+			return 0
+
+		res = self.scanDelims(c)
+		numdelims = res.numdelims
+		self.pos += numdelims
+		inlines.append(Block(t="Str", c=self.subject[self.pos - numdelims:numdelims]))
+		delimpos = len(inlines) - 1
+
+		if ((not res["can_open"]) or (numdelims == 0)):
+			return 0
+
+		first_close_delims = 0
+
+		if (numdelims == 1):
+			while (True):
+				res = self.scanDelims(c)
+				if (res.numdelims >= 1 and res.can_close):
+					self.pos += 1
+					inlines[delimpos].t = "Emph"
+					inlines[delimpos].c = inlines[delimpos+1:]
+					inlines = inlines[:delimpos+1]
+					break 
+				else:
+					if (self.parseInline(inlines) == 0):
+						break
+			return (self.pos - startpos)
+		elif (numdelims == 2):
+			while (True):
+				res = self.scanDelims(c)
+				if (res["numdelims"] >= 2 and res["can_close"]):
+					self.pos += 2
+					inlines[delimpos].t = "Strong";
+					inlines[delimpos].c = inlines[delimpos+1:]
+					inlines = inlines[:delimpos+1]
+					break
+				else:
+					if (self.parseInline(inlines) == 0):
+						break
+			return (self.pos - startpos)
+		elif (numdelims == 3):
+			while (True):
+				res = self.scanDelims(c)
+				if (res["numdelims"] >= 1 and res["numdelims"] >= 3 and res["can_close"] and res["num_delims"] != first_close_delims):
+					pass
+
+
+
 
 	def parseLinkTitle(self):
 		title = self.match(reLinkTitle)
