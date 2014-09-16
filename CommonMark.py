@@ -258,7 +258,30 @@ class InlineParser(object):
 			while (True):
 				res = self.scanDelims(c)
 				if (res["numdelims"] >= 1 and res["numdelims"] >= 3 and res["can_close"] and res["num_delims"] != first_close_delims):
-					pass
+					if first_close_delims == 1 and numdelims > 2:
+						res["numdelims"] = 2
+					elif first_close_delims == 2:
+						res['numdelims'] = 1
+					elif res['numdelims'] == 3:
+						res['numdelims'] = 1
+					self.pos += res['numdelims']
+
+					if first_close > 0:
+						inlines[delimpos].t = "Emph" if first_close_delims == 1 else "Strong"
+						inlines[delimpos].c = [Block(t="Emph" if first_close_delims == 1 else "Strong", c=inlines[delimpos+1, first_close]), inlines[first_close+1:]]
+						inlines = inlines[:delimpos+1]
+						break
+					else:
+						inlines.append(Block(t="Str", c=self.subject[self.pos-res["numdelims"]:self.pos]))
+						first_close = len(inlines)-1
+						first_close_delims = res["numdelims"]
+				else:
+					if self.parseInline(inlines) == 0:
+						break
+			return (self.pos-startpos)
+		else:
+			return res
+		
 
 
 
