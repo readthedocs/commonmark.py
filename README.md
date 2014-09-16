@@ -5,6 +5,8 @@ Python Parser and HTML Renderer for the CommonMark specification of the Markdown
 
 (**Note**: This is a work in progress!)
 
+[![Build Status](https://travis-ci.org/rolandshoemaker/CommonMark-py.svg?branch=master)](https://travis-ci.org/rolandshoemaker/CommonMark-py)
+
 Authors
 -------
 * [Bibek Kafle](https://github.com/kafle)
