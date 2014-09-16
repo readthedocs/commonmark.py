@@ -301,7 +301,48 @@ class InlineParser(object):
 				return None
 
 	def parseLinkLabel(self):
-		pass
+		if not self.peek() == "[":
+			return 0
+		startpos = self.pos
+		nest_level = 0
+		if self.label_nest_level > 0:
+			self.label_nest_level -= 1
+			return 0
+		self.pos += 1
+		c = self.peek()
+		while (not c == "]") or (nest_level > 0): # and (c = self.peek()):
+			if c == "`":
+				self.parseBackticks([])
+				break
+			elif c == "<":
+				self.parseAutoLink([])
+				self.parseHtmlTag([])
+				self.parseString([])
+				break
+			elif c == "[":
+				nest_level += 1
+				self.pos += 1
+				break
+			elif c == "]":
+				nest_level -= 1
+				self.pos += 1
+				break
+			elif c == "\\":
+				self.parseEscaped([])
+				break
+			else:
+				self.parseString([])
+			c = self.peek()
+		if c == "]":
+			self.label_nest_level = 0
+			self.pos += 1
+			return self.pos-startpos
+		else:
+			if not c:
+				self.label_nest_level = nest_level
+			self.pos = startpos
+			return 0
+
 
 	def parseRawLabel(self, s):
 		return InlineParser().parse(s[1:-1])
@@ -438,9 +479,10 @@ class HTMLRenderer(object):
 		if (len(attribs) > 0):
 			i = 0
 			attrib = attribs[i]
-			while (len(attribs) > i):
+			while (len(attribs) > i) and (not attribs[i] == None):
 				result += (" " + attrib[0] + '="' + atttrib[1] + '"')
-				i += 1  
+				i += 1
+				attrib = attribs[i]
 		if (len(contents) > 0):
 			result += ('>' + contents + '</' + tag + '>')
 		elif (selfclosing):
