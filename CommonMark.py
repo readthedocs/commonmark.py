@@ -281,10 +281,6 @@ class InlineParser(object):
 			return (self.pos-startpos)
 		else:
 			return res
-		
-
-
-
 
 	def parseLinkTitle(self):
 		title = self.match(reLinkTitle)
@@ -330,7 +326,19 @@ class InlineParser(object):
 			return 0
 
 	def parseNewline(self):
-		pass
+		if self.peek == r'\n':
+			self.pos += 1
+			last = inlines[len(inlines)-1]
+			if last and last.t == "Str" and last.c[-2:] == "  ":
+				last.c = re.sub(' *$', '', last.c)
+				inlines.append(Block(t="Hardbreak"))
+			else:
+				if last and last.t == "Str" and last.c[-2] == " ":
+					last.c = last.c[0:-1]
+				inlines.append(Block(t="Softbreak"))
+			return 1
+		else:
+			return 0
 
 	def parseImage(self):
 		pass
