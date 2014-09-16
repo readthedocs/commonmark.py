@@ -86,9 +86,11 @@ class Block(object):
 		self.strings =  []
 		self.inline_content =  []
 
-	def __init__(self, t="", c=""):
+	def __init__(self, t="", c="", destination="", label=""):
 		self.t = t
 		self.c = c
+		self.destination = destination
+		self.label = label
 
 
 class InlineParser(object):
@@ -104,6 +106,7 @@ class InlineParser(object):
 		match = regex.search(subject, pos)
 		if match:
 			self.pos = match.end()
+			return match.group(0)
 		else:
 			return None
 
@@ -157,7 +160,20 @@ class InlineParser(object):
 			return 0
 
 	def parseAutoLink(self, inlines):
-		pass
+		m = self.match("^<([a-zA-Z0-9.!#$%&'*+\/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*)>")
+		m2 = self.match("^<(?:coap|doi|javascript|aaa|aaas|about|acap|cap|cid|crid|data|dav|dict|dns|file|ftp|geo|go|gopher|h323|http|https|iax|icap|im|imap|info|ipp|iris|iris.beep|iris.xpc|iris.xpcs|iris.lwz|ldap|mailto|mid|msrp|msrps|mtqp|mupdate|news|nfs|ni|nih|nntp|opaquelocktoken|pop|pres|rtsp|service|session|shttp|sieve|sip|sips|sms|snmp|soap.beep|soap.beeps|tag|tel|telnet|tftp|thismessage|tn3270|tip|tv|urn|vemmi|ws|wss|xcon|xcon-userid|xmlrpc.beep|xmlrpc.beeps|xmpp|z39.50r|z39.50s|adiumxtra|afp|afs|aim|apt|attachment|aw|beshare|bitcoin|bolo|callto|chrome|chrome-extension|com-eventbrite-attendee|content|cvs|dlna-playsingle|dlna-playcontainer|dtn|dvb|ed2k|facetime|feed|finger|fish|gg|git|gizmoproject|gtalk|hcp|icon|ipn|irc|irc6|ircs|itms|jar|jms|keyparc|lastfm|ldaps|magnet|maps|market|message|mms|ms-help|msnim|mumble|mvn|notes|oid|palm|paparazzi|platform|proxy|psyc|query|res|resource|rmi|rsync|rtmp|secondlife|sftp|sgn|skype|smb|soldat|spotify|ssh|steam|svn|teamspeak|things|udp|unreal|ut2004|ventrilo|view-source|webcal|wtai|wyciwyg|xfire|xri|ymsgr):[^<>\x00-\x20]*>", "i") 
+		if m:
+			# email
+			dest = m[1:-1]
+			inlines.push(Block(t="Link", label=Block(t="Str", c=dest, destination="mailto:"+dest)))
+			return len(m)
+		elif m2:
+			# link
+			dest2 = m2[1:-1]
+			inlines.push(Block(t="Link", label=Block(t="Str", c=dest2, destination=dest2)))
+			return len(m2)
+		else:
+			return 0
 
 	def parseHtmlTag(self, inlines):
 		m = self.match(reHtmlTag)
@@ -174,22 +190,47 @@ class InlineParser(object):
 		pass
 
 	def parseLinkTitle(self):
-		pass
+		title = self.match(reLinkTitle)
+		if title:
+			return unescape(title[1:-1])
+		else:
+			return None
 
 	def parseLinkDestination(self):
-		pass
+		res = self.match(reLinkDestinationBraces)
+		if res:
+			return unescape(res[1:-1])
+		else:
+			res2 = self.match(reLinkDestination)
+			if res2:
+				return unescape(res2)
+			else:
+				return None
 
 	def parseLinkLabel(self):
 		pass
 
+	def parseRawLabel(self, s):
+		return InlineParser().parse(s[1:-1])
+
 	def parseLink(self):
 		pass
 
-	def parseEntity(self):
-		pass
+	def parseEntity(self, inlines):
+		m = self.match("^&(?:#x[a-f0-9]{1,8}|#[0-9]{1,8}|[a-z][a-z0-9]{1,31});", "i")
+		if m:
+			inlines.append(Block(t="Entity", c=m))
+			return len(m)
+		else:
+			return 0
 
 	def parseString(self):
-		pass
+		m = self.match(reMain)
+		if m:
+			inlines.push(Block(t="Str", c=m))
+			return len(m)
+		else:
+			return 0
 
 	def parseNewline(self):
 		pass
@@ -234,6 +275,7 @@ class InlineParser(object):
 		inlines = []
 		while (self.parseInline(inlines)):
 			pass
+		return inlines
 
 
 	def parse(self, **kwargs):
@@ -254,11 +296,11 @@ class DocParser:
 	def breakOutOfLists(self):
 		pass
 
-	def addLine(self):
-		pass
-
-	def addLine(self):
-		pass
+	def addLine(self, ln, offset):
+		s = ln[offset:]
+		if self.tip.isOpen:
+			# something?
+		this.tip.strings.append(s)
 
 	def addChild(self):
 		pass
