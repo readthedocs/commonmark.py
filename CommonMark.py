@@ -66,9 +66,6 @@ def matchAt(pattern, s, offset):
 def detabLine(text):
 	return re.sub(reAllTab, ' '*4, text)
 
-def spnl(regex):
-	regex.match(r"^ *(?:\n *)?")
-	return 1
 
 class Block(object):
 
@@ -165,12 +162,12 @@ class InlineParser(object):
 		if m:
 			# email
 			dest = m[1:-1]
-			inlines.push(Block(t="Link", label=Block(t="Str", c=dest, destination="mailto:"+dest)))
+			inlines.append(Block(t="Link", label=Block(t="Str", c=dest, destination="mailto:"+dest)))
 			return len(m)
 		elif m2:
 			# link
 			dest2 = m2[1:-1]
-			inlines.push(Block(t="Link", label=Block(t="Str", c=dest2, destination=dest2)))
+			inlines.append(Block(t="Link", label=Block(t="Str", c=dest2, destination=dest2)))
 			return len(m2)
 		else:
 			return 0
@@ -183,8 +180,33 @@ class InlineParser(object):
 		else:
 			return 0
 
-	def scanDelims(self):
-		pass
+	def scanDelims(self, c):
+		numdelims = 0
+		first_close_delims = 0
+		char_before, char_after = None
+		startpos = self.pos
+
+		char_before = "\n" if self.pos == 0 else self.subject[self.pos - 1]
+
+		while (self.peek() == c):
+			numdelims += 1
+			self.pos += 1 
+
+		a = self.peek()
+		char_after = a if a else "\\n"
+
+		can_open = (numdelims > 0) and (numdelims <=3) and (not re.search(r"\s", char_after))
+		can_close = (numdelims > 0) and (numdelims <=3) and (not re.search(r"\s", char_before))
+
+		if (c == "_"):
+			can_open = can_open and (not re.search("[a-z0-9]", re.IGNORECASE), char_before)
+			can_close = can_close and (not re.search("[a-z0-9]", re.IGNORECASE), char_after)
+		self.pos = startpos
+		return {
+			"numdelims": numdelims,
+			"can_open": can_open,
+			"can_close": can_close
+		}
 
 	def parseEmphasis(self):
 		pass
@@ -217,7 +239,7 @@ class InlineParser(object):
 		pass
 
 	def parseEntity(self, inlines):
-		m = self.match("^&(?:#x[a-f0-9]{1,8}|#[0-9]{1,8}|[a-z][a-z0-9]{1,31});", "i")
+		m = self.match("^&(?:#x[a-f0-9]{1,8}|#[0-9]{1,8}|[a-z][a-z0-9]{1,31});", [re.IGNORECASE])
 		if m:
 			inlines.append(Block(t="Entity", c=m))
 			return len(m)
@@ -300,6 +322,7 @@ class DocParser:
 		s = ln[offset:]
 		if self.tip.isOpen:
 			# something?
+			pass
 		this.tip.strings.append(s)
 
 	def addChild(self):
