@@ -50,10 +50,10 @@ for example in examples:
 		actual = writer.renderBlock(reader.parse(re.sub(u'\u2192', r"\t", example['markdown'])))
 		if actual == example['html']:
 			passed += 1
-			print(r"\ntick")
+			print(r"\ntick "+u'\u2713')
 		else:
 			failed += 1
-			print(r"\ncross")
+			print(r"\ncross "+u'\u274C')
 			print(r"=== markdown ===============\n"+showSpaces(example['markdown'])+r"\n=== expected ===============\n"+showSpaces(example['html'])+r"\n=== got ====================\n"+showSpaces(actual))
 
 print(str(passed)+" tests passed, "+str(failed)+" failed")
