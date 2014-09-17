@@ -71,7 +71,24 @@ class Block(object):
 
 	@staticmethod
 	def makeBlock(tag,start_line, start_column):
-		self.t =  tag
+		# self.t =  tag
+		# self.isOpen =  true
+		# self.last_line_blank =  false
+		# self.start_line =  start_line
+		# self.start_column =  start_column
+		# self.end_line =  start_line
+		# self.children =  []
+		# self.parent =  null
+		# self.string_content =  ""
+		# self.strings =  []
+		# self.inline_content =  []
+		return Block(tag, start_line=start_line, start_column=start_column)
+
+	def __init__(self, t="", c="", destination="", label="", tag="", start_line="", start_column=""):
+		self.t = t
+		self.c = c
+		self.destination = destination
+		self.label = label
 		self.isOpen =  true
 		self.last_line_blank =  false
 		self.start_line =  start_line
@@ -82,12 +99,6 @@ class Block(object):
 		self.string_content =  ""
 		self.strings =  []
 		self.inline_content =  []
-
-	def __init__(self, t="", c="", destination="", label=""):
-		self.t = t
-		self.c = c
-		self.destination = destination
-		self.label = label
 
 
 class InlineParser(object):
@@ -449,8 +460,49 @@ class DocParser:
 			pass
 		this.tip.strings.append(s)
 
-	def addChild(self):
-		pass
+	def addChild(self, tag, line_number, offset):
+		if self.tip.t == "Document" or self.tip.t == "BlockQuote" or self.tip.t == "ListItem" or (self.tip.t == "List" and tag == "ListItem"):
+			self.finalize(self.tip.t, line_number)
+		column_number = offset+1
+		newBlock = Block.makeBlock(tag, line_number, offset)
+		self.tip.children.append(newBlock)
+		newBlock.parent = self.tip
+		self.tip = newBlock
+		return newBlock
+
+	def parseListMarker(self, ln, offset):
+		rest = ln[offset:]
+		data = {}
+		if re.match(reHrule, rest):
+			return None
+		match = re.match(re.compile("^[*+-]( +|$)"), rest)
+		if match:
+			spaces_after_marker = len(match.group(2))
+			data['type'] = 'Bullet'
+			data['bullet_char'] = match.group(1)[0]
+		else:
+			return None
+		match2 = re.match(re.compile("^(\d+)([.)])( +|$)"), rest)
+		if match2:
+			spaces_after_marker = len(match2.group(4))
+			data['type'] = 'Ordered'
+			data['start'] = int(match2.group(2))
+			data['delimiter'] = match2.group(3)
+		else:
+			return None
+		blank_item = (len(match.group(1)) == len(rest)) or (len(match2.group(1)) == len(rest))
+		if spaces_after_marker >= 5 or spaces_after_marker < 1 or blank_item:
+			if match:
+				data['padding'] = len(match.group(1))-spaces_after_marker+1
+			elif match2:
+				data['padding'] = len(match2.group(1))-spaces_after_marker+1
+		else:
+			if match:
+				data['padding'] = len(match.group(1))
+			elif match2:
+				data['padding'] = len(match2.group(1))
+		return data
+
 
 	def incorporateLine(self):
 		pass
@@ -458,8 +510,16 @@ class DocParser:
 	def finalize(self):
 		pass
 
-	def processInlines(self):
-		pass
+	def processInlines(self, block):
+		if block.t == "ATXHeader":
+			block.inline_content = self.inlineParser.parse(block.string_content.strip(), self.refmap)
+			block.string_content = ""
+			
+		elif block.t == "Paragraph" or block.t == "SetextHeader":
+			pass
+		if block.children:
+			for i in block.children:
+				self.processInlines(i)
 
 	def parse(self):
 		pass
