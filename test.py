@@ -6,8 +6,8 @@ import pprint
 
 import CommonMark
 
-#writer = CommonMark.HtmlRenderer
-#reader = CommonMark.DocParser
+writer = CommonMark.HTMLRenderer
+reader = CommonMark.DocParser
 
 f = open("spec.txt", "r")
 data = f.read()
@@ -30,7 +30,7 @@ tests = re.sub(r"^<!-- END TESTS -->(.|[\n])*", '', t, flags=re.M)
 testMatch = re.findall(re.compile(r"^\.\n([\s\S]*?)^\.\n([\s\S]*?)^\.$|^#{1,6} *(.*)$", re.M), tests)
 
 for match in testMatch:
-	if match[2]:
+	if not match[2] == "":
 		current_section = match[2]
 	else:
 		example_number += 1
@@ -47,8 +47,18 @@ for example in examples:
 		current_section = example['section']
 		print(current_section)
 
-		actual = wrtier.renderBlock(reader.parse(example['markdown']))
+		actual = writer.renderBlock(reader.parse(re.sub("", r"\t", example['markdown'])))
+		if actual == example['html']:
+			passed += 1
+			print(r"\ntick")
+		else:
+			failed += 1
+			print(r"\ncross")
+			print(r"=== markdown ===============\n"+showSpaces(example['markdown'])+r"\n=== expected ===============\n"+showSpaces(example['html'])+r"\n=== got ====================\n"+showSpaces(actual))
 
+print(str(passed)+" tests passed, "+str(failed)+" failed")
 
 endTime = time.clock()
 runTime = endTime-StartTime
+
+print("runtime: "+str(runTime)+"s")
