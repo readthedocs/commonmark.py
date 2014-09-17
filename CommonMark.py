@@ -503,8 +503,22 @@ class DocParser:
 		self.refmap = {}
 		self.inlineParser = InlineParser()
 
-	def breakOutOfLists(self):
-		pass
+	def breakOutOfLists(self, block, line_number):
+		b = block
+		while True:
+			if (b.t == "List"):
+				last_list = b
+			b = b.parent
+			if not b:
+				break
+
+		if (last_list):
+			while (not block == last_list):
+				self.finalize(block, line_number)
+				block = block.parent
+			self.finalize(last_list, line_number)
+			self.tip = last_list.parent	
+
 
 	def addLine(self, ln, offset):
 		s = ln[offset:]
@@ -690,7 +704,7 @@ class HTMLRenderer(object):
 				result.append(self.renderBlock(blocks[i], in_tight_list))
 		return self.blocksep.join(result)
 
-	def render(self):
-		pass
+	def render(self,  block, in_tight_list):
+		return self.renderBlock( block, in_tight_list)
 
 
