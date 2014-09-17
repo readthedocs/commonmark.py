@@ -89,13 +89,13 @@ class Block(object):
 		self.c = c
 		self.destination = destination
 		self.label = label
-		self.isOpen =  true
-		self.last_line_blank =  false
+		self.isOpen =  True
+		self.last_line_blank =  False
 		self.start_line =  start_line
 		self.start_column =  start_column
 		self.end_line =  start_line
 		self.children =  []
-		self.parent =  null
+		self.parent =  None
 		self.string_content =  ""
 		self.strings =  []
 		self.inline_content =  []
@@ -378,7 +378,7 @@ class InlineParser(object):
 			return 0
 
 	def parseNewline(self):
-		if self.peek == r'\n':
+		if (self.peek() == r'\n'):
 			self.pos += 1
 			last = inlines[len(inlines)-1]
 			if last and last.t == "Str" and last.c[-2:] == "  ":
@@ -392,11 +392,64 @@ class InlineParser(object):
 		else:
 			return 0
 
-	def parseImage(self):
-		pass
+	def parseImage(self, inlines):
+		if (self.match(r"^!")):
+			n = self.parseLink(inlines)
+			if (n == 0):
+				inlines.append(Block(t="Str", c="!"))
+				return 1
+			elif (inlines[len(inlines) - 1] and
+				(inlines[len(inlines)-1].t == "Link")):
+				inlines[len(inlines)-1].t = "Image"
+				return n+1
+			else:
+				raise Exception("Shouldn't happen")
+		else:
+			return 0
 
 	def parseReference(self):
-		pass
+		self.subject = s
+		self.pos = 0
+		startpos = self.pos
+
+		matchChars = self.parseLinkLabel()
+		if (matchChars == 0):
+			return 0
+		else:
+			rawlabel = self.subject[:matchChars]
+
+		if (self.peek() == ":"):
+			self.pos += 1
+		else:
+			self.pos = startpos
+			return 0
+
+		self.spnl()
+
+		dest = self.parseLinkDestination();
+		if (dest == None or len(dest) == 0):
+			self.pos = startpos
+			return 0
+
+		beforetitle = self.pos
+		self.spnl()
+		title = self.parseLinkTitle()
+		if (title == None):
+			title = ""
+			self.pos = beforetitle
+
+		if (self.match(r"^ *(?:\n|$)") == None):
+			self.pos = startpos
+			return 0
+
+		normlabel = normalizeReference(rawlabel)
+
+		if (not refmap(normlabel)):
+			refmap[normlabel] = {
+				"destination": dest,
+				"title": title
+			}
+		return (self.pos - startpos)
 
 	def parseInline(self, inlines):
 		c = self.peek()
@@ -504,10 +557,10 @@ class DocParser:
 		return data
 
 
-	def incorporateLine(self):
+	def incorporateLine(self, ln, line_number):
 		pass
 
-	def finalize(self):
+	def finalize(self, block, line_number):
 		pass
 
 	def processInlines(self, block):
@@ -521,8 +574,18 @@ class DocParser:
 			for i in block.children:
 				self.processInlines(i)
 
-	def parse(self):
-		pass
+	def parse(self, input):
+		self.doc = Block.makeBlock("Document", 1, 1)
+		self.tip = self.doc
+		self.refmap = {};
+		lines = re.split(r"\r\n|\n|\r", re.sub(r"\n$", '', input));
+		length = len(lines)
+		for i in range(length):
+			self.incorporateLine(lines[i], i+1)
+		while (self.tip):
+			self.finalize(self.tip, length-1)
+		self.processInlines(self.doc);
+		return self.doc
 
 class HTMLRenderer(object):
 	blocksep = "\n"

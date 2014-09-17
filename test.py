@@ -6,8 +6,8 @@ import pprint
 
 import CommonMark
 
-writer = CommonMark.HTMLRenderer
-reader = CommonMark.DocParser
+writer = CommonMark.HTMLRenderer()
+reader = CommonMark.DocParser()
 
 f = open("spec.txt", "r")
 data = f.read()
@@ -21,8 +21,8 @@ current_section = ""
 
 def showSpaces(s):
 	t = str(s[:])
-	t = re.sub(r"\t", "", t)
-	t = re.sub(" ", "", t)
+	t = re.sub(r"\t", u'\u2192', t)
+	t = re.sub(" ", u'\u2423', t)
 	return t
 
 t = re.sub(r"\r\n?", r"\n", data)
@@ -47,7 +47,7 @@ for example in examples:
 		current_section = example['section']
 		print(current_section)
 
-		actual = writer.renderBlock(reader.parse(re.sub("", r"\t", example['markdown'])))
+		actual = writer.renderBlock(reader.parse(re.sub(u'\u2192', r"\t", example['markdown'])))
 		if actual == example['html']:
 			passed += 1
 			print(r"\ntick")
