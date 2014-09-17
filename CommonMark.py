@@ -359,7 +359,59 @@ class InlineParser(object):
 		return InlineParser().parse(s[1:-1])
 
 	def parseLink(self):
-		pass
+		startpos = self.pos
+		n = self.parseLinkLabel()
+
+		if n == 0:
+			return 0
+
+		afterlabel = self.pos
+		rawlabel = self.subject[startpos:n]
+
+		if self.peek() == "(":
+			self.pos += 1
+			if self.spnl():
+				dest = self.parseLinkDestination
+				if dest and self.spnl():
+					if re.match(r"^\s", self.subject[self.pos-1]):
+						title = self.parseLinkTitle() or ''
+						if (title or True) and self.spnl() and self.match(re.compile(r"^\)")):
+							inlines.append(Block(t="Link", destination=title, title=title, label=parseRawLabel(rawlabel)))
+							return self.pos-startpos
+						else:
+							self.pos = startpos
+							return 0
+					else:
+						self.pos = startpos
+						return 0
+				else:
+					self.pos = startpos
+					return 0
+			else:
+				self.pos = startpos
+				return 0
+
+		savepos = self.pos
+		self.spnl()
+		beforelabel = self.pos
+		n = self.parseLinkLabel()
+		if n == 2:
+			reflabel = rawlabel
+		elif n > 0:
+			reflabel = self.subject[beforelabel:beforelabel+n]
+		else:
+			self.pos = savepos
+			reflabel = rawlabel
+		link = self.refmap[normalizeReference(reflabel)]
+		if link:
+			inlines.append(Block(t="Link", destination=link.destination, title=link.title, label=parseRawLabel(rawlabel)))
+			return self.pos-startpos
+		else:
+			self.pos = startpos
+			return 0
+		self.pos = startpos
+		return 0
+
 
 	def parseEntity(self, inlines):
 		m = self.match(re.compile("^&(?:#x[a-f0-9]{1,8}|#[0-9]{1,8}|[a-z][a-z0-9]{1,31});", [re.IGNORECASE]))
@@ -572,7 +624,187 @@ class DocParser:
 
 
 	def incorporateLine(self, ln, line_number):
-		pass
+		all_matched = True
+		offset = 0
+		CODE_INDENT = 4
+
+		container = self.doc
+		oldtip = self.tip
+
+		ln = detabLine(ln)
+
+		while len(container.children) > 0:
+			last_child = container.children[len(container.children)-1]
+			if not last_child.isOpen:
+				break
+			container = last_child
+
+			match = self.matchAt(re.compile(r"[^ ]"), ln, offset)
+			if match == None:
+				first_nonspace = len(ln)
+				blank = True
+			else:
+				first_nonspace = match
+				blank = False
+			indent = first_nonspace-offset
+			if container.t == "BlockQuote":
+				matched = indent <= 3 and ln[first_nonspace] == ">"
+				if matched:
+					offset = first_nonspace+1
+					if ln[offset] == " ":
+						offset += 1
+				else:
+					all_matched = False
+				break
+			elif container.t == "IndentedCode":
+				if indent >= CODE_INDENT:
+					offset += CODE_INDENT
+				elif blank:
+					offset = first_nonspace
+				else:
+					all_matched = False
+				break
+			elif container.t == "ATXHeader" or container.t == "SetextHeader" or container.t == "HorizontalRule":
+				all_matched = False
+				break
+			elif container.t == "FencedCode":
+				i = container.fence_offset
+				while i > 0 and ln[offset] == " ":
+					offset += 1
+					i -= 1
+				break
+			elif container.t == "HtmlBlock":
+				if blank:
+					all_matched = False
+				break
+			elif container.t == "Paragraph":
+				if blank:
+					container.last_line_blank = True
+					all_matched = False
+				break
+			if not all_matched:
+				container = container.parent
+				break
+		last_matched_container = container
+
+		def closeUnmatchedBlocks(self, mythis):
+			while not already_done and not oldtip == last_matched_container:
+				mythis.finalize(oldtip, line_number)
+				oldtip = oldtip.parent
+			already_done = True
+
+		if blank and container.last_line_blank:
+			self.breakOutOfLists(container, line_number)
+		while not container.t == "FencedCode" and not container.t == "IndentedCode" and not container.t == "HtmlBlock" and matchAt(re.compile("^[ #`~*+_=<>0-9-]"), ln, offset):
+			match = matchAt(re.compile("[^ ]"), ln, offset)
+			ATXmatch = re.search(re.compile(r"^#{1,6}(?: +|$)"), ln[first_nonspace:])
+			FENmatch = re.search(re.compile(r"^`{3,}(?!.*`)|^~{3,}(?!.*~)"), ln[first_nonspace:])
+			PARmatch = re.search(re.compile(r"^(?:=+|-+) *$"), ln[first_nonspace:])
+			data = parseListMarker(ln, first_nonspace)
+			if not match:
+				first_nonspace = len(ln)
+				blank = True
+			else:
+				first_nonspace = match
+				blank = False
+			indent = first_nonspace-offset
+
+			if indent >= CODE_INDENT:
+				if not self.tip.t == "Paragraph" and not blank:
+					offset += CODE_INDENT
+					closeUnmatchedBlocks(self)
+					container = self.addChild('IndentedCode', line_number, offset)
+				else:
+					break
+			elif ln[first_nonspace] == ">":
+				offset = first_nonspace+1
+				if ln[offset] == " ":
+					offset += 1
+				closeUnmatchedBlocks(self)
+				container = self.addChild("BlockQuote", line_number, offset)
+			elif ATXmatch:
+				offset = first_nonspace+len(ATXmatch.group(1))
+				closeUnmatchedBlocks(self)
+				container = self.addChild("ATXHeader", line_number, first_nonspace)
+				container.level = len(ATXmatch.group(1).strip())
+				container.strings = [re.sub(re.compile("(?:(\\#) *#*| *#+) *$"), "$1", ln[offset:])]
+				break
+			elif FENmatch:
+				fence_length = len(FENmatch.group(1))
+				closeUnmatchedBlocks(self)
+				container = self.addChild("FencedCode", line_number, first_nonspace)
+				container.fence_length = fence_length
+				container.fence_char = FENmatch.group(0)[0]
+				container.fence_offset = first_nonspace-offset
+				offset = first_nonspace+fence_length
+				break
+			elif matchAt(reHtmlBlockOpen, ln, first_nonspace):
+				closeUnmatchedBlocks(self)
+				container = self.addChild('HtmlBlock', line_number, first_nonspace)
+				break
+			elif container.t == "Paragraph" and len(container.strings) == 1 and PARmatch:
+				closeUnmatchedBlocks(self)
+				container.t = "SetextHeader"
+				container.level = 1 if PARmatch.group(1)[0] else 2
+				offset = len(ln)
+			elif matchAt(reHrule, ln, first_nonspace):
+				closeUnmatchedBlocks(self)
+				container = self.addChild("HorizontalRule", line_number, first_nonspace)
+				offset = len(ln)-1
+			elif data:
+				closeUnmatchedBlocks(self)
+				data.marker_offset = indent
+				offset = first_nonspace+data.padding
+				if container.t == "List" or not listsMatch(container.list_data, data):
+					container = self.addChild("List", line_number, first_nonspace)
+					container.list_data = data
+				container = self.addChild("ListItem", line_number, first_nonspace)
+				container.list_data = data
+			else:
+				break
+			if acceptsLines(container.t):
+				break
+		match = matchAt(re.compile(r"[^ ]"), ln, offset)
+		if not match:
+			first_nonspace = len(ln)
+			blank = True
+		else:
+			first_nonspace = match
+			blank = False
+		indent = first_nonspace-offset
+		if not self.tip == last_matched_container and not blank and self.tip.t == "Paragraph" and len(self.tip.strings) > 0:
+			self.last_line_blank = False
+			self.addLine(ln, offset)
+		else:
+			closeUnmatchedBlocks(self)
+			container.last_line_blank = blank and (not container.t == "BlockQuote" or container.t == "FencedCode" or (container.t == "ListItem" and len(container.children) == 0 and container.start_line == line_number))
+			cont = container
+			while cont.parent:
+				cont.parent.last_line_blank = False
+				cont = cont.parent
+			if container.t == "IndentedCode" or container.t == "HtmlBlock":
+				self.addLine(ln, offset)
+			elif container.t == "FencedCode":
+				match = indent <= 3 and ln[first_nonspace] == container.fence_char and re.match(re.compile(r"^(?:`{3,}|~{3,})(?= *$)"), ln[first_nonspace:])
+				FENmatch = re.search(re.compile(r"^(?:`{3,}|~{3,})(?= *$)"), ln[first_nonspace:])
+				if match and len(FENmatch.group(1)) >= container.fence_length:
+					self.finalize(container, line_number)
+				else:
+					self.addLine(ln, offset)
+			elif container.t == "ATXHeader" or container.t == "SetextHeader" or container.t == "HorizontalRule":
+				pass
+			else:
+				if acceptsLines(container.t):
+					self.addLine(ln, first_nonspace)
+				elif blank:
+					pass
+				elif not container == "HorizontalRule" and not container.t == "SetextHeader":
+					container = self.addChild("Paragraph", line_number, first_nonspace)
+					self.addLine(ln, first_nonspace)
+				else:
+					print("Line "+str(line_number)+" with container type "+container.t+" did not match any condition.")
+
+
 
 	def finalize(self, block, line_number):
 		pass
