@@ -52,15 +52,15 @@ for example in examples:
 		actual = renderer.render(parser.parse(re.sub(u'\u2192', r"\t", example['markdown'])))
 		if actual == example['html']:
 			passed += 1
-			print(r"\ntick "+u'\u2713')
+			print("\ntick "+u'\u2713')
 		else:
 			failed += 1
-			print(r"\ncross "+u'\u274C')
-			print(u"=== markdown ===============\\n"+showSpaces(example['markdown'])+u"\\n=== expected ===============\\n"+showSpaces(example['html'])+u"\\n=== got ====================\\n"+showSpaces(actual))
+			print("\ncross "+u'\u274C')
+			print("=== markdown ===============\n"+showSpaces(example['markdown'])+"\n=== expected ===============\n"+showSpaces(example['html'])+"\n=== got ====================\n"+showSpaces(actual))
 
 print(str(passed)+" tests passed, "+str(failed)+" failed")
 
 endTime = time.clock()
-runTime = endTime-StartTime
+runTime = endTime-startTime
 
 print("runtime: "+str(runTime)+"s")
