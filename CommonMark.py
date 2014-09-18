@@ -571,6 +571,7 @@ class DocParser:
 
 	def breakOutOfLists(self, block, line_number):
 		b = block
+		last_list = None
 		while True:
 			if (b.t == "List"):
 				last_list = b
@@ -649,13 +650,12 @@ class DocParser:
 		ln = detabLine(ln)
 
 		while len(container.children) > 0:
-			print(here)
 			last_child = container.children[len(container.children)-1]
 			if not last_child.isOpen:
 				break
 			container = last_child
 
-			match = self.matchAt(re.compile(r"[^ ]"), ln, offset)
+			match = matchAt(re.compile(r"[^ ]"), ln, offset)
 			if match == None:
 				first_nonspace = len(ln)
 				blank = True

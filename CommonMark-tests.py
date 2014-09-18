@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-import re, time
+import re, time, codecs
 import pprint
 import CommonMark
 
@@ -15,9 +15,11 @@ class colors:
 renderer = CommonMark.HTMLRenderer()
 parser = CommonMark.DocParser()
 
-f = open("spec.txt", "r")
-data = f.read()
-f.close()
+f = codecs.open("spec.txt", encoding="utf-8")
+datalist = []
+for line in f:
+	datalist.append(line)
+data = "\n".join(datalist)
 
 passed = 0
 failed = 0
@@ -29,7 +31,7 @@ spaceChar = u'\u2423'
 
 
 def showSpaces(s):
-	s = s.decode("utf-8")
+	s = s
 	#t = str(s[:])
 	t = s
 	t = re.sub(u"\\t", tabChar, t)
@@ -56,8 +58,8 @@ for example in examples:
 		print(colors.HEADER+example['section']+colors.ENDC)
 		current_section = example['section']
 
-	#actual = renderer.render(parser.parse(re.sub(tabChar, "\t", example['markdown'])))
-	actual = renderer.render(parser.parse("	foo	baz		bim"))
+	actual = renderer.render(parser.parse(re.sub(tabChar, "\t", example['markdown'])))
+	#actual = renderer.render(parser.parse("	foo	baz		bim"))
 	if actual == example['html']:
 		passed += 1
 		print(colors.OKGREEN+"\ntick"+colors.ENDC)
