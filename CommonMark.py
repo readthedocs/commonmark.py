@@ -585,9 +585,8 @@ class DocParser:
 
 	def addLine(self, ln, offset):
 		s = ln[offset:]
-		if self.tip.isOpen:
-			# something?
-			pass
+		if not self.tip.isOpen:
+			raise Exception("Attempted to add line (" + ln + ") to closed container." )
 		this.tip.strings.append(s)
 
 	def addChild(self, tag, line_number, offset):
@@ -805,6 +804,7 @@ class DocParser:
 				else:
 					self.addLine(ln, offset)
 			elif container.t == "ATXHeader" or container.t == "SetextHeader" or container.t == "HorizontalRule":
+				# nothing to do; we already added the contents.
 				pass
 			else:
 				if self.acceptsLines(container.t):
@@ -984,13 +984,20 @@ class HTMLRenderer(object):
 			tag = "h" + block.level
 			return self.inTags(tag, [], self.renderInlines(block.inline_content))
 		elif (block.t == "IndentedCode"):
-			pass
+			return HTMLRenderer.inTags('pre', [], HTMLRenderer.inTags('code', [], self.escape(block.string_content)))
 		elif (block.t == "FencedCode"):
-			pass
+			info_words = re.split(r" +", block.info)
+			if ((len(info_words) == 0) or (len(info_words[0]) == 0)):
+				attr = []
+			else:
+				arg = [['class','language-' + self.escape(info_words[0],True)]]
+		    attr = info_words.length == 0
+      return inTags('pre', [],
+              inTags('code', attr, this.escape(block.string_content)));
 		elif (block.t == "HtmlBlock"):
-			pass
+			return block.string_content
 		elif (block.t == "ReferenceDef"):
-			pass
+			return ""
 		elif (block.t == "HorizontalRule"):
 			return inTags("hr", [], "", True)
 		else:
