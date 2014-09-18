@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-import re, time, codecs
+import re, time, codecs, argparse
 import pprint
 import CommonMark
 
@@ -11,6 +11,10 @@ class colors:
     WARNING = '\033[93m'
     FAIL = '\033[91m'
     ENDC = '\033[0m'
+
+parser = argparse.ArgumentParser(description="script to run the CommonMark spec tests against the CommonMark.py parser")
+parser.add_argument('-v', action="store_true", help="Verbose mode for debugging, print more stuff...")
+args = parser.parse_args()
 
 renderer = CommonMark.HTMLRenderer()
 parser = CommonMark.DocParser()
@@ -62,7 +66,8 @@ for example in examples:
 	if actual == example['html']:
 		passed += 1
 		print(colors.OKGREEN+"\ntick"+colors.ENDC)
-		print(colors.OKBLUE+"\t=== markdown ===============\n"+colors.ENDC+showSpaces(example['markdown'])+colors.OKBLUE+"\n\t=== expected ===============\n"+colors.ENDC+showSpaces(example['html'])+colors.OKBLUE+"\n\t=== got ====================\n"+colors.ENDC+showSpaces(actual))
+		if args.v:
+			print(colors.OKBLUE+"\t=== markdown ===============\n"+colors.ENDC+showSpaces(example['markdown'])+colors.OKBLUE+"\n\t=== expected ===============\n"+colors.ENDC+showSpaces(example['html'])+colors.OKBLUE+"\n\t=== got ====================\n"+colors.ENDC+showSpaces(actual))
 	else:
 		failed += 1
 		print(colors.FAIL+"\ncross"+colors.ENDC)
