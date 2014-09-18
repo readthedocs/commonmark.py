@@ -20,9 +20,11 @@ example_number = 0
 current_section = ""
 
 def showSpaces(s):
-	t = str(s[:])
-	t = re.sub(r"\t", u'\u2192', t)
-	t = re.sub(" ", u'\u2423', t)
+	s = s.decode("utf-8")
+	#t = str(s[:])
+	t = s
+	t = re.sub(u"\\t", u'\u2192', t)
+	t = re.sub(u" ", u'\u2423', t)
 	return t
 
 t = re.sub(r"\r\n?", r"\n", data)
@@ -54,7 +56,7 @@ for example in examples:
 		else:
 			failed += 1
 			print(r"\ncross "+u'\u274C')
-			print(r"=== markdown ===============\n"+showSpaces(example['markdown'])+r"\n=== expected ===============\n"+showSpaces(example['html'])+r"\n=== got ====================\n"+showSpaces(actual))
+			print(u"=== markdown ===============\\n"+showSpaces(example['markdown'])+u"\\n=== expected ===============\\n"+showSpaces(example['html'])+u"\\n=== got ====================\\n"+showSpaces(actual))
 
 print(str(passed)+" tests passed, "+str(failed)+" failed")
 
