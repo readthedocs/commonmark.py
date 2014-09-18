@@ -7,7 +7,7 @@ import re
 #debug#
 def dump(obj):
   for attr in dir(obj):
-    print "obj.%s = %s" % (attr, getattr(obj, attr))
+    print("obj.%s = %s" % (attr, getattr(obj, attr)))
  #debug#
 
 # all the regexps :<
@@ -834,7 +834,7 @@ class DocParser:
 			block.end_line = line_number
 
 		if (block.t == "Paragraph"):
-			block.string_content = re.sub(r"^ *", "", r"\n".join(block.strings))
+			block.string_content = re.sub(r"^ *", "", "\n".join(block.strings))
 
 			pos = self.inlineParser.parseReference(block.string_content, self.refmap)
 			while (block.string_content[0] == "[" and pos):
@@ -845,15 +845,15 @@ class DocParser:
 				pos = self.inlineParser.parseReference(block.string_content, self.refmap)
 
 		elif ((block.t == "ATXHeader") or "SetextHeader" or "HtmlBlock"):
-			block.string_content = r"\n".join(block.strings)
+			block.string_content = "\n".join(block.strings)
 		elif (block.t == "IndentedCode"):
-			block.string_content = re.sub(r"(\n *)*$", r"\n", r"\n".join(block.strings))
+			block.string_content = re.sub(r"(\n *)*$", "\n", "\n".join(block.strings))
 		elif (block.t == "FencedCode"):
 			block.info = unescape(block.strings[0].strip())
 			if (block.strings.length == 1):
 				block.string_content = ""
 			else:
-				block.string_content = r"\n".join(block.strings[1:]) + r"\n"
+				block.string_content = "\n".join(block.strings[1:]) + "\n"
 		elif (block.t == "List"):
 			block.tight = True
 
@@ -903,6 +903,7 @@ class DocParser:
 		while (self.tip):
 			self.finalize(self.tip, length-1)
 		self.processInlines(self.doc);
+		dump(input)
 		dump(self.doc.children[0])
 		return self.doc
 
@@ -951,7 +952,7 @@ class HTMLRenderer(object):
 		elif (inline.t == "Softbreak"):
 			return self.softbreak
 		elif inline.t == Hardbreak:
-			return inTags('br', [], "", True)+r"\n"
+			return inTags('br', [], "", True)+"\n"
 		elif inline.t == "Emph":
 			return inTags('em', [], self.renderInlines(inline.c))
 		elif inline.t == "Strong":
@@ -1016,7 +1017,7 @@ class HTMLRenderer(object):
 		elif (block.t == "IndentedCode"):
 			return HTMLRenderer.inTags('pre', [], HTMLRenderer.inTags('code', [], self.escape(block.string_content)))
 		elif (block.t == "FencedCode"):
-			info_words = re.split(r" +", block.info)
+			info_words = re.split(" +", block.info)
 			if ((len(info_words) == 0) or (len(info_words[0]) == 0)):
 				attr = []
 			else:
