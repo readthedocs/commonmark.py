@@ -739,14 +739,14 @@ class DocParser:
 				already_done, oldtip = closeUnmatchedBlocks(self, already_done, oldtip)
 				container = self.addChild("BlockQuote", line_number, offset)
 			elif ATXmatch:
-				offset = first_nonspace+len(ATXmatch.group(1))
+				offset = first_nonspace+len(ATXmatch.group(0))
 				already_done, oldtip = closeUnmatchedBlocks(self, already_done, oldtip)
 				container = self.addChild("ATXHeader", line_number, first_nonspace)
-				container.level = len(ATXmatch.group(1).strip())
+				container.level = len(ATXmatch.group(0).strip())
 				container.strings = [re.sub(re.compile("(?:(\\#) *#*| *#+) *$"), "$1", ln[offset:])]
 				break
 			elif FENmatch:
-				fence_length = len(FENmatch.group(1))
+				fence_length = len(FENmatch.group(0))
 				already_done, oldtip = closeUnmatchedBlocks(self, already_done, oldtip)
 				container = self.addChild("FencedCode", line_number, first_nonspace)
 				container.fence_length = fence_length
@@ -761,7 +761,7 @@ class DocParser:
 			elif container.t == "Paragraph" and len(container.strings) == 1 and PARmatch:
 				already_done, oldtip = closeUnmatchedBlocks(self, already_done, oldtip)
 				container.t = "SetextHeader"
-				container.level = 1 if PARmatch.group(1)[0] else 2
+				container.level = 1 if PARmatch.group(0)[0] == '=' else 2
 				offset = len(ln)
 			elif matchAt(reHrule, ln, first_nonspace):
 				already_done, oldtip = closeUnmatchedBlocks(self, already_done, oldtip)
@@ -803,7 +803,7 @@ class DocParser:
 			elif container.t == "FencedCode":
 				match = indent <= 3 and ln[first_nonspace] == container.fence_char and re.match(re.compile(r"^(?:`{3,}|~{3,})(?= *$)"), ln[first_nonspace:])
 				FENmatch = re.search(re.compile(r"^(?:`{3,}|~{3,})(?= *$)"), ln[first_nonspace:])
-				if match and len(FENmatch.group(1)) >= container.fence_length:
+				if match and len(FENmatch.group(0)) >= container.fence_length:
 					self.finalize(container, line_number)
 				else:
 					self.addLine(ln, offset)
