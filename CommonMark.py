@@ -830,7 +830,7 @@ class DocParser:
 			block.end_line = line_number
 
 		if (block.t == "Paragraph"):
-			block.string_content = re.sub(r"^ *", "", block.strings.join("\n"))
+			block.string_content = re.sub(r"^ *", "", r"\n".join(block.strings))
 
 			pos = self.inlineParser.parseReference(block.string_content, self.refmap)
 			while (block.string_content[0] == "[" and pos):
@@ -841,15 +841,15 @@ class DocParser:
 				pos = self.inlineParser.parseReference(block.string_content, self.refmap)
 
 		elif ((block.t == "ATXHeader") or "SetextHeader" or "HtmlBlock"):
-			block.string_content = block.strings.join("\n")
+			block.string_content = r"\n".join(block.strings)
 		elif (block.t == "IndentedCode"):
-			block.string_content = re.sub(r"(\n *)*$", "\n", block.strings.join("\n"))
+			block.string_content = re.sub(r"(\n *)*$", r"\n", r"\n".join(block.strings))
 		elif (block.t == "FencedCode"):
 			block.info = unescape(block.strings[0].strip())
 			if (block.strings.length == 1):
 				block.string_content = ""
 			else:
-				block.string_content = block.strings.slice(1).join("\n") + "\n"
+				block.string_content = r"\n".join(block.strings[1:]) + r"\n"
 		elif (block.t == "List"):
 			block.tight = True
 
@@ -874,7 +874,7 @@ class DocParser:
 		else:
 			pass
 
-		self.tip = block.parent or self.top
+		self.tip = block.parent or self.tip
 
 
 	def processInlines(self, block):
