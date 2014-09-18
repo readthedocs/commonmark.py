@@ -4,6 +4,12 @@
 
 import re
 
+#debug#
+def dump(obj):
+  for attr in dir(obj):
+    print "obj.%s = %s" % (attr, getattr(obj, attr))
+ #debug#
+
 # all the regexps :<
 
 ESCAPABLE = '[!"#$%&\'()*+,./:;<=>?@[\\\\\\]^_`{|}~-]'
@@ -133,7 +139,7 @@ class InlineParser(object):
 		ticks = self.match(re.compile("^`+"))
 		if not ticks:
 			return 0
-		afterOpenTicks = this.pos
+		afterOpenTicks = self.pos
 		foundCode = false
 		match = None
 		while ((not foundCode) and (match == self.match(re.compile("`+", [re.MULTILINE])))):
@@ -584,11 +590,11 @@ class DocParser:
 		s = ln[offset:]
 		if not self.tip.isOpen:
 			raise Exception("Attempted to add line (" + ln + ") to closed container." )
-		this.tip.strings.append(s)
+		self.tip.strings.append(s)
 
 	def addChild(self, tag, line_number, offset):
-		if self.tip.t == "Document" or self.tip.t == "BlockQuote" or self.tip.t == "ListItem" or (self.tip.t == "List" and tag == "ListItem"):
-			self.finalize(self.tip.t, line_number)
+		while not (self.tip.t == "Document" or self.tip.t == "BlockQuote" or self.tip.t == "ListItem" or (self.tip.t == "List" and tag == "ListItem")):
+			self.finalize(self.tip, line_number)
 		column_number = offset+1
 		newBlock = Block.makeBlock(tag, line_number, offset)
 		self.tip.children.append(newBlock)
@@ -643,6 +649,7 @@ class DocParser:
 		ln = detabLine(ln)
 
 		while len(container.children) > 0:
+			print(here)
 			last_child = container.children[len(container.children)-1]
 			if not last_child.isOpen:
 				break
@@ -704,20 +711,20 @@ class DocParser:
 
 		if blank and container.last_line_blank:
 			self.breakOutOfLists(container, line_number)
-		while not container.t == "FencedCode" and not container.t == "IndentedCode" and not container.t == "HtmlBlock" and matchAt(re.compile("^[ #`~*+_=<>0-9-]"), ln, offset):
+		while not container.t == "FencedCode" and not container.t == "IndentedCode" and not container.t == "HtmlBlock" and not matchAt(re.compile("^[ #`~*+_=<>0-9-]"), ln, offset) == None:
 			match = matchAt(re.compile("[^ ]"), ln, offset)
+			if not match == None:
+				first_nonspace = match
+				blank = True
+			else:
+				first_nonspace = len(ln)
+				blank = False
 			ATXmatch = re.search(re.compile(r"^#{1,6}(?: +|$)"), ln[first_nonspace:])
 			FENmatch = re.search(re.compile(r"^`{3,}(?!.*`)|^~{3,}(?!.*~)"), ln[first_nonspace:])
 			PARmatch = re.search(re.compile(r"^(?:=+|-+) *$"), ln[first_nonspace:])
-			data = parseListMarker(ln, first_nonspace)
-			if not match:
-				first_nonspace = len(ln)
-				blank = True
-			else:
-				first_nonspace = match
-				blank = False
+			data = self.parseListMarker(ln, first_nonspace)
+			
 			indent = first_nonspace-offset
-
 			if indent >= CODE_INDENT:
 				if not self.tip.t == "Paragraph" and not blank:
 					offset += CODE_INDENT
@@ -871,7 +878,7 @@ class DocParser:
 		else:
 			pass
 
-		self.tip = block.parent #or self.top
+		self.tip = block.parent #or self.tip #or self.top
 
 
 	def processInlines(self, block):
@@ -896,6 +903,7 @@ class DocParser:
 		while (self.tip):
 			self.finalize(self.tip, length-1)
 		self.processInlines(self.doc);
+		dump(self.doc.children[0])
 		return self.doc
 
 class HTMLRenderer(object):
@@ -930,9 +938,9 @@ class HTMLRenderer(object):
 
 	def escape(self, s, preserve_entities):
 		if preserve_entities:
-			e = this.escape_pairs
+			e = self.escape_pairs
 		else:
-			e = this.escape_pairs[1:]
+			e = self.escape_pairs[1:]
 		for r in e:
 			s = re.compile(r[0]).sub(s, r[1])
 

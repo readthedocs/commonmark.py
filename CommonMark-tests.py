@@ -24,13 +24,16 @@ failed = 0
 examples = []
 example_number = 0
 current_section = ""
+tabChar = u'\u2192'
+spaceChar = u'\u2423'
+
 
 def showSpaces(s):
 	s = s.decode("utf-8")
 	#t = str(s[:])
 	t = s
-	t = re.sub(u"\\t", u'\u2192', t)
-	t = re.sub(u" ", u'\u2423', t)
+	t = re.sub(u"\\t", tabChar, t)
+	t = re.sub(u" ", spaceChar, t)
 	return t
 
 t = re.sub(r"\r\n?", r"\n", data)
@@ -53,7 +56,8 @@ for example in examples:
 		print(colors.HEADER+example['section']+colors.ENDC)
 		current_section = example['section']
 
-	actual = renderer.render(parser.parse(re.sub(u'\u2192', r"\t", example['markdown'])))
+	#actual = renderer.render(parser.parse(re.sub(tabChar, "\t", example['markdown'])))
+	actual = renderer.render(parser.parse("	foo	baz		bim"))
 	if actual == example['html']:
 		passed += 1
 		print(colors.OKGREEN+"\ntick"+colors.ENDC)
