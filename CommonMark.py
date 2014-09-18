@@ -807,7 +807,62 @@ class DocParser:
 
 
 	def finalize(self, block, line_number):
-		pass
+		if (not block.isOpen):
+			return 0
+
+		block.isOpen = False
+		if (line_number > block.start_line):
+			block.end_line = line_number - 1
+		else:
+			block.end_line = line_number
+
+		if (block.t == "Paragraph"):
+			block.string_content = re.sub(r"^ *", "", block.strings.join("\n"))
+
+			pos = self.inlineParser.parseReference(block.string_content, self.refmap)
+			while (block.string_content[0] == "[" and pos):
+				block.string_content = block.string_content[pos:]
+				if (isBlank(block.string_content)):
+					block.t = "ReferenceDef"
+					break
+				pos = self.inlineParser.parseReference(block.string_content, self.refmap)
+
+		elif ((block.t == "ATXHeader") or "SetextHeader" or "HtmlBlock"):
+			block.string_content = block.strings.join("\n")
+		elif (block.t == "IndentedCode"):
+			block.string_content = re.sub(r"(\n *)*$", "\n", block.strings.join("\n"))
+		elif (block.t == "FencedCode"):
+			block.info = unescape(block.strings[0].strip())
+			if (block.strings.length == 1):
+				block.string_content = ""
+			else:
+				block.string_content = block.strings.slice(1).join("\n") + "\n"
+		elif (block.t == "List"):
+			block.tight = True
+
+			numitems = len(block.children)
+			i = 0
+			while (i < numitems):
+				item = block.children[i]
+				last_item = (i == numitems - 1)
+				if (endsWithBlankLine(item) and not last_item):
+					block.tight = False
+					break
+				numsubitems = item.children.length
+				j = 0
+				while (j < numsubitems):
+					subitem = item.children[j]
+					last_subitem = j == (numsubitems - 1)
+					if (endsWithBlankLine(subitem) and not (last_item and last_subitem)):
+						block.tight = False
+						break
+					j++
+				i++
+		else:
+			pass
+
+		self.tip = block.parent or self.top
+
 
 	def processInlines(self, block):
 		if block.t == "ATXHeader":
