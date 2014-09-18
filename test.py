@@ -6,8 +6,8 @@ import pprint
 
 import CommonMark
 
-writer = CommonMark.HTMLRenderer()
-reader = CommonMark.DocParser()
+renderer = CommonMark.HTMLRenderer()
+parser = CommonMark.DocParser()
 
 f = open("spec.txt", "r")
 data = f.read()
@@ -47,7 +47,7 @@ for example in examples:
 		current_section = example['section']
 		print(current_section)
 
-		actual = writer.renderBlock(reader.parse(re.sub(u'\u2192', r"\t", example['markdown'])))
+		actual = renderer.render(parser.parse(re.sub(u'\u2192', r"\t", example['markdown'])))
 		if actual == example['html']:
 			passed += 1
 			print(r"\ntick "+u'\u2713')

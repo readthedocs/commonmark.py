@@ -539,12 +539,6 @@ class InlineParser(object):
 			pass
 		return inlines
 
-
-	def parse(self, **kwargs):
-		return self.parseInline(self, **kwargs)
-
-
-
 class DocParser:
 
 	def __init__(self, subject=None, pos=0):
@@ -874,7 +868,7 @@ class DocParser:
 		else:
 			pass
 
-		self.tip = block.parent or self.tip
+		self.tip = block.parent #or self.top
 
 
 	def processInlines(self, block):
@@ -1028,14 +1022,14 @@ class HTMLRenderer(object):
 			print("Unknown block type" + block.t)
 			return ""
 
-	def renderBlocks(self, blocks, in_tight_list):
+	def renderBlocks(self, blocks, in_tight_list=None):
 		result = []
 		for i in range(len(blocks)):
 			if blocks[i].t != "ReferenceDef":
 				result.append(self.renderBlock(blocks[i], in_tight_list))
 		return self.blocksep.join(result)
 
-	def render(self,  block, in_tight_list):
-		return self.renderBlock( block, in_tight_list)
+	def render(self,  block, in_tight_list=None):
+		return self.renderBlock(block, in_tight_list)
 
 
