@@ -539,6 +539,9 @@ class InlineParser(object):
 			pass
 		return inlines
 
+	def parse(self, s, refmap = {}):
+		return parseInlines(self, s, refmap)
+
 class DocParser:
 
 	def __init__(self, subject=None, pos=0):
