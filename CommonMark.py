@@ -944,7 +944,32 @@ class HTMLRenderer(object):
 		if (inline.t == "Str"):
 			return self.escape(inline.c)
 		elif (inline.t == "Softbreak"):
-			pass
+			return self.softbreak
+		elif inline.t == Hardbreak:
+			return inTags('br', [], "", True)+r"\n"
+		elif inline.t == "Emph":
+			return inTags('em', [], self.renderInlines(inline.c))
+		elif inline.t == "Strong":
+			return inTags("Strong", [], self.renderInlines(inline.c))
+		elif inline.t == "Html":
+			return inline.c
+		elif inline.t == "Entity":
+			return inline.c
+		elif inline.t == "Link":
+			attrs = [['href', self.escape(inline.destination, True)]]
+			if inline.title:
+				attrs.append(['title', self.escape(inline.title, True)])
+			return inTags('a', attrs, self.renderInlines(inline.label))
+		elif inline.t == "Image":
+			attrs = [['src', self.escape(inline.destination, True)], ['alt', self.escape(self.renderInlines(inline.label))]]
+			if inline.title:
+				attrs.append(['title', self.escape(inline.title, True)])
+			return inTags('img', attrs, "", True)
+		elif inline.t == "Code":
+			return inTags('code', [], self.escape(inline.c))
+		else:
+			print("Unknown inline type "+inline.t)
+			return ""
 
 	def renderInlines(self, inlines):
 		result = ''
