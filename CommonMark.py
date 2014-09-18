@@ -58,7 +58,7 @@ def normalizeReference(s):
 
 def matchAt(pattern, s, offset):
 	matched = re.match(pattern, s[offset:])
-	if matched.group(0):
+	if matched:
 		return s.index(matched.group(0))
 	else:
 		return None
@@ -555,6 +555,17 @@ class DocParser:
 		self.refmap = {}
 		self.inlineParser = InlineParser()
 
+	def acceptsLines(self, block_type):
+		return block_type == "Paragraph" or block_type == "IndentedCode" or block_type == "FencedCode"
+
+	def endsWithBlankLine(self, block):
+		if block.last_line_blank:
+			return True
+		if (block.t == "List" or block.t == "ListItem") and len(block.children) > 0:
+			return self.endsWithBlankLine(block.children[len(block.children)-1])
+		else:
+			return False
+
 	def breakOutOfLists(self, block, line_number):
 		b = block
 		while True:
@@ -627,6 +638,8 @@ class DocParser:
 		all_matched = True
 		offset = 0
 		CODE_INDENT = 4
+		blank = bool()
+		already_done = bool()
 
 		container = self.doc
 		oldtip = self.tip
@@ -687,11 +700,11 @@ class DocParser:
 				break
 		last_matched_container = container
 
-		def closeUnmatchedBlocks(self, mythis):
+		def closeUnmatchedBlocks(self, already_done, oldtip): # , mythis):
 			while not already_done and not oldtip == last_matched_container:
-				mythis.finalize(oldtip, line_number)
+				self.finalize(oldtip, line_number)
 				oldtip = oldtip.parent
-			already_done = True
+			return True, oldtip
 
 		if blank and container.last_line_blank:
 			self.breakOutOfLists(container, line_number)
@@ -712,7 +725,7 @@ class DocParser:
 			if indent >= CODE_INDENT:
 				if not self.tip.t == "Paragraph" and not blank:
 					offset += CODE_INDENT
-					closeUnmatchedBlocks(self)
+					already_done, oldtip = closeUnmatchedBlocks(self, already_done, oldtip)
 					container = self.addChild('IndentedCode', line_number, offset)
 				else:
 					break
@@ -720,18 +733,18 @@ class DocParser:
 				offset = first_nonspace+1
 				if ln[offset] == " ":
 					offset += 1
-				closeUnmatchedBlocks(self)
+				already_done, oldtip = closeUnmatchedBlocks(self, already_done, oldtip)
 				container = self.addChild("BlockQuote", line_number, offset)
 			elif ATXmatch:
 				offset = first_nonspace+len(ATXmatch.group(1))
-				closeUnmatchedBlocks(self)
+				already_done, oldtip = closeUnmatchedBlocks(self, already_done, oldtip)
 				container = self.addChild("ATXHeader", line_number, first_nonspace)
 				container.level = len(ATXmatch.group(1).strip())
 				container.strings = [re.sub(re.compile("(?:(\\#) *#*| *#+) *$"), "$1", ln[offset:])]
 				break
 			elif FENmatch:
 				fence_length = len(FENmatch.group(1))
-				closeUnmatchedBlocks(self)
+				already_done, oldtip = closeUnmatchedBlocks(self, already_done, oldtip)
 				container = self.addChild("FencedCode", line_number, first_nonspace)
 				container.fence_length = fence_length
 				container.fence_char = FENmatch.group(0)[0]
@@ -739,20 +752,20 @@ class DocParser:
 				offset = first_nonspace+fence_length
 				break
 			elif matchAt(reHtmlBlockOpen, ln, first_nonspace):
-				closeUnmatchedBlocks(self)
+				already_done, oldtip = closeUnmatchedBlocks(self, already_done, oldtip)
 				container = self.addChild('HtmlBlock', line_number, first_nonspace)
 				break
 			elif container.t == "Paragraph" and len(container.strings) == 1 and PARmatch:
-				closeUnmatchedBlocks(self)
+				already_done, oldtip = closeUnmatchedBlocks(self, already_done, oldtip)
 				container.t = "SetextHeader"
 				container.level = 1 if PARmatch.group(1)[0] else 2
 				offset = len(ln)
 			elif matchAt(reHrule, ln, first_nonspace):
-				closeUnmatchedBlocks(self)
+				already_done, oldtip = closeUnmatchedBlocks(self, already_done, oldtip)
 				container = self.addChild("HorizontalRule", line_number, first_nonspace)
 				offset = len(ln)-1
 			elif data:
-				closeUnmatchedBlocks(self)
+				already_done, oldtip = closeUnmatchedBlocks(self, already_done, oldtip)
 				data.marker_offset = indent
 				offset = first_nonspace+data.padding
 				if container.t == "List" or not listsMatch(container.list_data, data):
@@ -762,7 +775,7 @@ class DocParser:
 				container.list_data = data
 			else:
 				break
-			if acceptsLines(container.t):
+			if self.acceptsLines(container.t):
 				break
 		match = matchAt(re.compile(r"[^ ]"), ln, offset)
 		if not match:
@@ -776,7 +789,7 @@ class DocParser:
 			self.last_line_blank = False
 			self.addLine(ln, offset)
 		else:
-			closeUnmatchedBlocks(self)
+			already_done, oldtip = closeUnmatchedBlocks(self, already_done, oldtip)
 			container.last_line_blank = blank and (not container.t == "BlockQuote" or container.t == "FencedCode" or (container.t == "ListItem" and len(container.children) == 0 and container.start_line == line_number))
 			cont = container
 			while cont.parent:
@@ -794,7 +807,7 @@ class DocParser:
 			elif container.t == "ATXHeader" or container.t == "SetextHeader" or container.t == "HorizontalRule":
 				pass
 			else:
-				if acceptsLines(container.t):
+				if self.acceptsLines(container.t):
 					self.addLine(ln, first_nonspace)
 				elif blank:
 					pass
