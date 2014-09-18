@@ -36,9 +36,9 @@ bold == still todo
 
 * DocParser()
   * makeBlock(tag, start_line, start_column)
-  * canContain(parent_type, child_type)
+  * **canContain(parent_type, child_type)**
   * **acceptsLines(block_type)**
-  * endsWithBlankLine(block)
+  * **endsWithBlankLine(block)**
   * breakOutOfLists(block, line_number)
   * **addLine(ln, offset)**
   * addChild(tag, line_number, offset)
