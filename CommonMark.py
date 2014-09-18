@@ -610,30 +610,30 @@ class DocParser:
 			return None
 		match = re.match(re.compile("^[*+-]( +|$)"), rest)
 		if match:
-			spaces_after_marker = len(match.group(2))
+			spaces_after_marker = len(match.group(1))
 			data['type'] = 'Bullet'
-			data['bullet_char'] = match.group(1)[0]
+			data['bullet_char'] = match.group(0)[0]
 		else:
 			return None
 		match2 = re.match(re.compile("^(\d+)([.)])( +|$)"), rest)
 		if match2:
-			spaces_after_marker = len(match2.group(4))
+			spaces_after_marker = len(match2.group(3))
 			data['type'] = 'Ordered'
-			data['start'] = int(match2.group(2))
-			data['delimiter'] = match2.group(3)
+			data['start'] = int(match2.group(1))
+			data['delimiter'] = match2.group(2)
 		else:
 			return None
-		blank_item = (len(match.group(1)) == len(rest)) or (len(match2.group(1)) == len(rest))
+		blank_item = (len(match.group(0)) == len(rest)) or (len(match2.group(0)) == len(rest))
 		if spaces_after_marker >= 5 or spaces_after_marker < 1 or blank_item:
 			if match:
-				data['padding'] = len(match.group(1))-spaces_after_marker+1
+				data['padding'] = len(match.group(0))-spaces_after_marker+1
 			elif match2:
-				data['padding'] = len(match2.group(1))-spaces_after_marker+1
+				data['padding'] = len(match2.group(0))-spaces_after_marker+1
 		else:
 			if match:
-				data['padding'] = len(match.group(1))
+				data['padding'] = len(match.group(0))
 			elif match2:
-				data['padding'] = len(match2.group(1))
+				data['padding'] = len(match2.group(0))
 		return data
 
 
