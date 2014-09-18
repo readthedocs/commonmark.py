@@ -555,14 +555,16 @@ class DocParser:
 		self.refmap = {}
 		self.inlineParser = InlineParser()
 
-	def conContain(self, parent_type, child_type):
-		pass
-
 	def acceptsLines(self, block_type):
-		pass
+		return block_type == "Paragraph" or block_type == "IndentedCode" or block_type == "FencedCode"
 
 	def endsWithBlankLine(self, block):
-		pass
+		if block.last_line_blank:
+			return True
+		if (block.t == "List" or block.t == "ListItem") and len(block.children) > 0:
+			return self.endsWithBlankLine(block.children[len(block.children)-1])
+		else:
+			return False
 
 	def breakOutOfLists(self, block, line_number):
 		b = block
