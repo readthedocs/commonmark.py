@@ -1,10 +1,16 @@
 #!/usr/bin/env python
 
 import re, time
-
 import pprint
-
 import CommonMark
+
+class colors:
+    HEADER = '\033[95m'
+    OKBLUE = '\033[94m'
+    OKGREEN = '\033[92m'
+    WARNING = '\033[93m'
+    FAIL = '\033[91m'
+    ENDC = '\033[0m'
 
 renderer = CommonMark.HTMLRenderer()
 parser = CommonMark.DocParser()
@@ -43,20 +49,18 @@ current_section = ""
 startTime = time.clock()
 
 for example in examples:
-	if not example['section'] == current_section:
-		if not current_section == "":
-			print("")
+	if not example['section'] == "" and not current_section == example['section']:
+		print(colors.HEADER+example['section']+colors.ENDC)
 		current_section = example['section']
-		print(current_section)
 
-		actual = renderer.render(parser.parse(re.sub(u'\u2192', r"\t", example['markdown'])))
-		if actual == example['html']:
-			passed += 1
-			print("\ntick "+u'\u2713')
-		else:
-			failed += 1
-			print("\ncross "+u'\u274C')
-			print("=== markdown ===============\n"+showSpaces(example['markdown'])+"\n=== expected ===============\n"+showSpaces(example['html'])+"\n=== got ====================\n"+showSpaces(actual))
+	actual = renderer.render(parser.parse(re.sub(u'\u2192', r"\t", example['markdown'])))
+	if actual == example['html']:
+		passed += 1
+		print(colors.OKGREEN+"\ntick"+colors.ENDC)
+	else:
+		failed += 1
+		print(colors.FAIL+"\ncross"+colors.ENDC)
+		print(colors.WARNING+"\t=== markdown ===============\n"+colors.ENDC+showSpaces(example['markdown'])+colors.WARNING+"\n\t=== expected ===============\n"+colors.ENDC+showSpaces(example['html'])+colors.WARNING+"\n\t=== got ====================\n"+colors.ENDC+showSpaces(actual))
 
 print(str(passed)+" tests passed, "+str(failed)+" failed")
 
