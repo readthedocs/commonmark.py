@@ -70,7 +70,16 @@ def matchAt(pattern, s, offset):
 		return None
 
 def detabLine(text):
-	return re.sub(reAllTab, ' '*4, text)
+	if re.match('\t', text) and text.index('\t') == -1:
+		return text
+	else:
+		def tabber(m):
+			result = "    "[(m.end()-1-tabber.lastStop)%4:]
+			tabber.lastStop = m.end()
+			return result
+		tabber.lastStop = 0
+		text = re.sub("\t", tabber, text)
+		return text
 
 
 class Block(object):
@@ -117,7 +126,7 @@ class InlineParser(object):
 
 	def match(self, regexString, reCompileFlags):
 		#regex = re.compile(regexString, flags=reCompileFlags)
-		match = regex.search(subject, pos)
+		match = re.search(regexString, subject, pos, flags=reCompileFlags)
 		if match:
 			self.pos = match.end()
 			return match.group(0)
@@ -131,18 +140,18 @@ class InlineParser(object):
 			return None
 
 	def spnl(self):
-		self.match(re.compile("^ *(?:\n *)?"))
+		self.match(r"^ *(?:\n *)?")
 		return 1
 
 	def parseBackticks(self, inlines):
 		startpos = self.pos
-		ticks = self.match(re.compile("^`+"))
+		ticks = self.match(r"^`+")
 		if not ticks:
 			return 0
 		afterOpenTicks = self.pos
 		foundCode = false
 		match = None
-		while ((not foundCode) and (match == self.match(re.compile("`+", [re.MULTILINE])))):
+		while (not foundCode) and (match == self.match(r"`+", [re.MULTILINE])):
 			if (match == ticks):
 				c = self.subject[afterOpenTicks:(self.pos-len(ticks))]
 				c = re.sub(r"[ \n]+", ' ', c)
@@ -174,8 +183,8 @@ class InlineParser(object):
 			return 0
 
 	def parseAutoLink(self, inlines):
-		m = self.match(re.compile("^<([a-zA-Z0-9.!#$%&'*+\/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*)>"))
-		m2 = self.match(re.compile("^<(?:coap|doi|javascript|aaa|aaas|about|acap|cap|cid|crid|data|dav|dict|dns|file|ftp|geo|go|gopher|h323|http|https|iax|icap|im|imap|info|ipp|iris|iris.beep|iris.xpc|iris.xpcs|iris.lwz|ldap|mailto|mid|msrp|msrps|mtqp|mupdate|news|nfs|ni|nih|nntp|opaquelocktoken|pop|pres|rtsp|service|session|shttp|sieve|sip|sips|sms|snmp|soap.beep|soap.beeps|tag|tel|telnet|tftp|thismessage|tn3270|tip|tv|urn|vemmi|ws|wss|xcon|xcon-userid|xmlrpc.beep|xmlrpc.beeps|xmpp|z39.50r|z39.50s|adiumxtra|afp|afs|aim|apt|attachment|aw|beshare|bitcoin|bolo|callto|chrome|chrome-extension|com-eventbrite-attendee|content|cvs|dlna-playsingle|dlna-playcontainer|dtn|dvb|ed2k|facetime|feed|finger|fish|gg|git|gizmoproject|gtalk|hcp|icon|ipn|irc|irc6|ircs|itms|jar|jms|keyparc|lastfm|ldaps|magnet|maps|market|message|mms|ms-help|msnim|mumble|mvn|notes|oid|palm|paparazzi|platform|proxy|psyc|query|res|resource|rmi|rsync|rtmp|secondlife|sftp|sgn|skype|smb|soldat|spotify|ssh|steam|svn|teamspeak|things|udp|unreal|ut2004|ventrilo|view-source|webcal|wtai|wyciwyg|xfire|xri|ymsgr):[^<>\x00-\x20]*>", [re.IGNORECASE])) 
+		m = self.match(r"^<([a-zA-Z0-9.!#$%&'*+\/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*)>")
+		m2 = self.match(r"^<(?:coap|doi|javascript|aaa|aaas|about|acap|cap|cid|crid|data|dav|dict|dns|file|ftp|geo|go|gopher|h323|http|https|iax|icap|im|imap|info|ipp|iris|iris.beep|iris.xpc|iris.xpcs|iris.lwz|ldap|mailto|mid|msrp|msrps|mtqp|mupdate|news|nfs|ni|nih|nntp|opaquelocktoken|pop|pres|rtsp|service|session|shttp|sieve|sip|sips|sms|snmp|soap.beep|soap.beeps|tag|tel|telnet|tftp|thismessage|tn3270|tip|tv|urn|vemmi|ws|wss|xcon|xcon-userid|xmlrpc.beep|xmlrpc.beeps|xmpp|z39.50r|z39.50s|adiumxtra|afp|afs|aim|apt|attachment|aw|beshare|bitcoin|bolo|callto|chrome|chrome-extension|com-eventbrite-attendee|content|cvs|dlna-playsingle|dlna-playcontainer|dtn|dvb|ed2k|facetime|feed|finger|fish|gg|git|gizmoproject|gtalk|hcp|icon|ipn|irc|irc6|ircs|itms|jar|jms|keyparc|lastfm|ldaps|magnet|maps|market|message|mms|ms-help|msnim|mumble|mvn|notes|oid|palm|paparazzi|platform|proxy|psyc|query|res|resource|rmi|rsync|rtmp|secondlife|sftp|sgn|skype|smb|soldat|spotify|ssh|steam|svn|teamspeak|things|udp|unreal|ut2004|ventrilo|view-source|webcal|wtai|wyciwyg|xfire|xri|ymsgr):[^<>\x00-\x20]*>", [re.IGNORECASE]) 
 		if m:
 			# email
 			dest = m[1:-1]
@@ -381,7 +390,7 @@ class InlineParser(object):
 				if dest and self.spnl():
 					if re.match(r"^\s", self.subject[self.pos-1]):
 						title = self.parseLinkTitle() or ''
-						if (title or True) and self.spnl() and self.match(re.compile(r"^\)")):
+						if (title or True) and self.spnl() and self.match(r"^\)"):
 							inlines.append(Block(t="Link", destination=title, title=title, label=parseRawLabel(rawlabel)))
 							return self.pos-startpos
 						else:
@@ -420,7 +429,7 @@ class InlineParser(object):
 
 
 	def parseEntity(self, inlines):
-		m = self.match(re.compile("^&(?:#x[a-f0-9]{1,8}|#[0-9]{1,8}|[a-z][a-z0-9]{1,31});", [re.IGNORECASE]))
+		m = self.match(r"^&(?:#x[a-f0-9]{1,8}|#[0-9]{1,8}|[a-z][a-z0-9]{1,31});", [re.IGNORECASE])
 		if m:
 			inlines.append(Block(t="Entity", c=m))
 			return len(m)
@@ -608,14 +617,14 @@ class DocParser:
 		data = {}
 		if re.match(reHrule, rest):
 			return None
-		match = re.match(re.compile("^[*+-]( +|$)"), rest)
+		match = re.match(r"^[*+-]( +|$)", rest)
 		if match:
 			spaces_after_marker = len(match.group(1))
 			data['type'] = 'Bullet'
 			data['bullet_char'] = match.group(0)[0]
 		else:
 			return None
-		match2 = re.match(re.compile("^(\d+)([.)])( +|$)"), rest)
+		match2 = re.match(r"^(\d+)([.)])( +|$)", rest)
 		if match2:
 			spaces_after_marker = len(match2.group(3))
 			data['type'] = 'Ordered'
@@ -655,7 +664,7 @@ class DocParser:
 				break
 			container = last_child
 
-			match = matchAt(re.compile(r"[^ ]"), ln, offset)
+			match = matchAt(r"[^ ]", ln, offset)
 			if match == None:
 				first_nonspace = len(ln)
 				blank = True
@@ -711,17 +720,17 @@ class DocParser:
 
 		if blank and container.last_line_blank:
 			self.breakOutOfLists(container, line_number)
-		while not container.t == "FencedCode" and not container.t == "IndentedCode" and not container.t == "HtmlBlock" and not matchAt(re.compile("^[ #`~*+_=<>0-9-]"), ln, offset) == None:
-			match = matchAt(re.compile("[^ ]"), ln, offset)
+		while not container.t == "FencedCode" and not container.t == "IndentedCode" and not container.t == "HtmlBlock" and not matchAt(r"^[ #`~*+_=<>0-9-]", ln, offset) == None:
+			match = matchAt(r"[^ ]", ln, offset)
 			if not match == None:
 				first_nonspace = match
 				blank = True
 			else:
 				first_nonspace = len(ln)
 				blank = False
-			ATXmatch = re.search(re.compile(r"^#{1,6}(?: +|$)"), ln[first_nonspace:])
-			FENmatch = re.search(re.compile(r"^`{3,}(?!.*`)|^~{3,}(?!.*~)"), ln[first_nonspace:])
-			PARmatch = re.search(re.compile(r"^(?:=+|-+) *$"), ln[first_nonspace:])
+			ATXmatch = re.search(r"^#{1,6}(?: +|$)", ln[first_nonspace:])
+			FENmatch = re.search(r"^`{3,}(?!.*`)|^~{3,}(?!.*~)", ln[first_nonspace:])
+			PARmatch = re.search(r"^(?:=+|-+) *$", ln[first_nonspace:])
 			data = self.parseListMarker(ln, first_nonspace)
 			
 			indent = first_nonspace-offset
@@ -743,7 +752,7 @@ class DocParser:
 				already_done, oldtip = closeUnmatchedBlocks(self, already_done, oldtip)
 				container = self.addChild("ATXHeader", line_number, first_nonspace)
 				container.level = len(ATXmatch.group(0).strip())
-				container.strings = [re.sub(re.compile("(?:(\\#) *#*| *#+) *$"), "$1", ln[offset:])]
+				container.strings = [re.sub(r"(?:(\\#) *#*| *#+) *$", "$1", ln[offset:])]
 				break
 			elif FENmatch:
 				fence_length = len(FENmatch.group(0))
@@ -780,7 +789,7 @@ class DocParser:
 				break
 			if self.acceptsLines(container.t):
 				break
-		match = matchAt(re.compile(r"[^ ]"), ln, offset)
+		match = matchAt(r"[^ ]", ln, offset)
 		if not match:
 			first_nonspace = len(ln)
 			blank = True
@@ -801,8 +810,8 @@ class DocParser:
 			if container.t == "IndentedCode" or container.t == "HtmlBlock":
 				self.addLine(ln, offset)
 			elif container.t == "FencedCode":
-				match = indent <= 3 and ln[first_nonspace] == container.fence_char and re.match(re.compile(r"^(?:`{3,}|~{3,})(?= *$)"), ln[first_nonspace:])
-				FENmatch = re.search(re.compile(r"^(?:`{3,}|~{3,})(?= *$)"), ln[first_nonspace:])
+				match = indent <= 3 and ln[first_nonspace] == container.fence_char and re.match(r"^(?:`{3,}|~{3,})(?= *$)", ln[first_nonspace:])
+				FENmatch = re.search(r"^(?:`{3,}|~{3,})(?= *$)", ln[first_nonspace:])
 				if match and len(FENmatch.group(0)) >= container.fence_length:
 					self.finalize(container, line_number)
 				else:
@@ -903,8 +912,7 @@ class DocParser:
 		while (self.tip):
 			self.finalize(self.tip, length-1)
 		self.processInlines(self.doc);
-		dump(input)
-		dump(self.doc.children[0])
+		#dump(self.doc.children[0])
 		return self.doc
 
 class HTMLRenderer(object):
@@ -914,10 +922,11 @@ class HTMLRenderer(object):
 	escape_pairs = (("[&](?![#](x[a-f0-9]{1,8}|[0-9]{1,8});|[a-z][a-z0-9]{1,31};)", '&amp;'),
 			("[<]", '&lt;'),
 			("[>]", '&gt;'),
-			(r'["]', '&quot;'))
+			(r'["]', '&quot;'),
+			(r"[&]",'&amp;'))
 
 	@staticmethod
-	def inTags(tag, attribs, contents, selfclosing):
+	def inTags(tag, attribs, contents, selfclosing=None):
 		result = "<" + tag
 		if (len(attribs) > 0):
 			i = 0
@@ -937,13 +946,14 @@ class HTMLRenderer(object):
 	def __init__(self):
 		pass
 
-	def escape(self, s, preserve_entities):
+	def escape(self, s, preserve_entities=None):
 		if preserve_entities:
-			e = self.escape_pairs
+			e = self.escape_pairs[:-1]
 		else:
 			e = self.escape_pairs[1:]
 		for r in e:
-			s = re.compile(r[0]).sub(s, r[1])
+			s = re.sub(r[0], r[1], s)
+		return s
 
 	def renderInline(self, inline):
 		attrs = None
@@ -985,6 +995,7 @@ class HTMLRenderer(object):
 
 	def renderBlock(self,  block, in_tight_list):
 		tag = attr = info_words = None
+		block = block.children[0]
 		if (block.t == "Document"):
 			whole_doc = self.renderBlocks(block.inline_content)
 			if (whole_doc == ""):
@@ -1015,7 +1026,7 @@ class HTMLRenderer(object):
 			tag = "h" + block.level
 			return self.inTags(tag, [], self.renderInlines(block.inline_content))
 		elif (block.t == "IndentedCode"):
-			return HTMLRenderer.inTags('pre', [], HTMLRenderer.inTags('code', [], self.escape(block.string_content)))
+			return '\n'+HTMLRenderer.inTags('pre', [], HTMLRenderer.inTags('code', [], self.escape(block.string_content)+'\n\n'))+'\n\n'
 		elif (block.t == "FencedCode"):
 			info_words = re.split(" +", block.info)
 			if ((len(info_words) == 0) or (len(info_words[0]) == 0)):

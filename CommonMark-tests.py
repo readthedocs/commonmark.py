@@ -55,11 +55,10 @@ startTime = time.clock()
 
 for example in examples:
 	if not example['section'] == "" and not current_section == example['section']:
-		print(colors.HEADER+example['section']+colors.ENDC)
+		print(colors.HEADER+"\n"+example['section']+colors.ENDC)
 		current_section = example['section']
 
 	actual = renderer.render(parser.parse(re.sub(tabChar, "\t", example['markdown'])))
-	#actual = renderer.render(parser.parse("	foo	baz		bim"))
 	if actual == example['html']:
 		passed += 1
 		print(colors.OKGREEN+"\ntick"+colors.ENDC)
@@ -67,6 +66,7 @@ for example in examples:
 		failed += 1
 		print(colors.FAIL+"\ncross"+colors.ENDC)
 		print(colors.WARNING+"\t=== markdown ===============\n"+colors.ENDC+showSpaces(example['markdown'])+colors.WARNING+"\n\t=== expected ===============\n"+colors.ENDC+showSpaces(example['html'])+colors.WARNING+"\n\t=== got ====================\n"+colors.ENDC+showSpaces(actual))
+	#exit(0)
 
 print(str(passed)+" tests passed, "+str(failed)+" failed")
 
