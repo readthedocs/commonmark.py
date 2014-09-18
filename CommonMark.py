@@ -773,7 +773,7 @@ class DocParser:
 				container.list_data = data
 			else:
 				break
-			if acceptsLines(container.t):
+			if self.acceptsLines(container.t):
 				break
 		match = matchAt(re.compile(r"[^ ]"), ln, offset)
 		if not match:
@@ -805,7 +805,7 @@ class DocParser:
 			elif container.t == "ATXHeader" or container.t == "SetextHeader" or container.t == "HorizontalRule":
 				pass
 			else:
-				if acceptsLines(container.t):
+				if self.acceptsLines(container.t):
 					self.addLine(ln, first_nonspace)
 				elif blank:
 					pass
