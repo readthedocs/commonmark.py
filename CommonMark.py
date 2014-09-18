@@ -49,7 +49,7 @@ reAllEscapedChar = re.compile('\\\\(' + ESCAPABLE + ')')
 reEscapedChar = re.compile('^\\\\(' + ESCAPABLE + ')')
 reAllTab = re.compile("\t")
 reHrule = re.compile("^(?:(?:\* *){3,}|(?:_ *){3,}|(?:- *){3,}) *$")
-reMain = re.compile("^(?:[\n`\[\]\\!<&*_]|[^\n`\[\]\\!<&*_]+)/", re.MULTILINE)
+reMain = r"^(?:[\n`\[\]\\!<&*_]|[^\n`\[\]\\!<&*_]+)/"
 
 # utility functions
 
@@ -124,9 +124,9 @@ class InlineParser(object):
 		self.pos = 0
 		self.refmap = {}
 
-	def match(self, regexString, reCompileFlags):
+	def match(self, regexString, reCompileFlags=None):
 		#regex = re.compile(regexString, flags=reCompileFlags)
-		match = re.search(regexString, subject, pos, flags=reCompileFlags)
+		match = re.search(regexString, self.subject[self.pos:], flags=reCompileFlags)
 		if match:
 			self.pos = match.end()
 			return match.group(0)
@@ -436,8 +436,8 @@ class InlineParser(object):
 		else:
 			return 0
 
-	def parseString(self):
-		m = self.match(reMain)
+	def parseString(self, inlines):
+		m = self.match(reMain, re.MULTILINE)
 		if m:
 			inlines.push(Block(t="Str", c=m))
 			return len(m)
@@ -474,7 +474,7 @@ class InlineParser(object):
 		else:
 			return 0
 
-	def parseReference(self):
+	def parseReference(self, s, refmap):
 		self.subject = s
 		self.pos = 0
 		startpos = self.pos
@@ -555,7 +555,7 @@ class InlineParser(object):
 		return inlines
 
 	def parse(self, s, refmap = {}):
-		return parseInlines(self, s, refmap)
+		return self.parseInlines(s, refmap)
 
 class DocParser:
 
@@ -673,7 +673,10 @@ class DocParser:
 				blank = False
 			indent = first_nonspace-offset
 			if container.t == "BlockQuote":
-				matched = indent <= 3 and ln[first_nonspace] == ">"
+				matched = bool()
+				if len(ln) > 0:
+					matched = ln[first_nonspace] == ">"
+				matched = indent <= 3 and matched
 				if matched:
 					offset = first_nonspace+1
 					if ln[offset] == " ":
@@ -995,7 +998,8 @@ class HTMLRenderer(object):
 
 	def renderBlock(self,  block, in_tight_list):
 		tag = attr = info_words = None
-		block = block.children[0]
+		if len(block.children) > 0:
+			block = block.children[0]
 		if (block.t == "Document"):
 			whole_doc = self.renderBlocks(block.inline_content)
 			if (whole_doc == ""):
@@ -1023,7 +1027,7 @@ class HTMLRenderer(object):
 				tag = "ol"
 			pass
 		elif ((block.t == "ATXHeader") or (block.t == "SetextHeader")):
-			tag = "h" + block.level
+			tag = "h" + str(block.level)
 			return self.inTags(tag, [], self.renderInlines(block.inline_content))
 		elif (block.t == "IndentedCode"):
 			return '\n'+HTMLRenderer.inTags('pre', [], HTMLRenderer.inTags('code', [], self.escape(block.string_content)+'\n\n'))+'\n\n'

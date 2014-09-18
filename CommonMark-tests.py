@@ -62,6 +62,7 @@ for example in examples:
 	if actual == example['html']:
 		passed += 1
 		print(colors.OKGREEN+"\ntick"+colors.ENDC)
+		print(colors.OKBLUE+"\t=== markdown ===============\n"+colors.ENDC+showSpaces(example['markdown'])+colors.OKBLUE+"\n\t=== expected ===============\n"+colors.ENDC+showSpaces(example['html'])+colors.OKBLUE+"\n\t=== got ====================\n"+colors.ENDC+showSpaces(actual))
 	else:
 		failed += 1
 		print(colors.FAIL+"\ncross"+colors.ENDC)
