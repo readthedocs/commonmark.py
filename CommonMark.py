@@ -869,8 +869,8 @@ class DocParser:
 					if (endsWithBlankLine(subitem) and not (last_item and last_subitem)):
 						block.tight = False
 						break
-					j++
-				i++
+					j += 1
+				i += 1
 		else:
 			pass
 
@@ -1016,9 +1016,8 @@ class HTMLRenderer(object):
 				attr = []
 			else:
 				arg = [['class','language-' + self.escape(info_words[0],True)]]
-		    attr = info_words.length == 0
-      return inTags('pre', [],
-              inTags('code', attr, this.escape(block.string_content)));
+			attr = info_words.length == 0
+			return inTags('pre', [], inTags('code', attr, self.escape(block.string_content)));
 		elif (block.t == "HtmlBlock"):
 			return block.string_content
 		elif (block.t == "ReferenceDef"):
