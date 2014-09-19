@@ -12,7 +12,7 @@ class colors:
     FAIL = '\033[91m'
     ENDC = '\033[0m'
 
-parser = argparse.ArgumentParser(description="script to run the CommonMark spec tests against the CommonMark.py parser")
+parser = argparse.ArgumentParser(description="script to run the CommonMark specification tests against the CommonMark.py parser")
 parser.add_argument('-v', action="store_true", help="Verbose mode for debugging, print more stuff...")
 args = parser.parse_args()
 
@@ -67,11 +67,11 @@ for example in examples:
 		passed += 1
 		print(colors.OKGREEN+"\ntick"+colors.ENDC)
 		if args.v:
-			print(colors.OKBLUE+"\t=== markdown ===============\n"+colors.ENDC+showSpaces(example['markdown'])+colors.OKBLUE+"\n\t=== expected ===============\n"+colors.ENDC+showSpaces(example['html'])+colors.OKBLUE+"\n\t=== got ====================\n"+colors.ENDC+showSpaces(actual))
+			print(colors.OKBLUE+"=== markdown ===============\n"+colors.ENDC+showSpaces(example['markdown'])+colors.OKBLUE+"\n=== expected ===============\n"+colors.ENDC+showSpaces(example['html'])+colors.OKBLUE+"\n=== got ====================\n"+colors.ENDC+showSpaces(actual))
 	else:
 		failed += 1
 		print(colors.FAIL+"\ncross"+colors.ENDC)
-		print(colors.WARNING+"\t=== markdown ===============\n"+colors.ENDC+showSpaces(example['markdown'])+colors.WARNING+"\n\t=== expected ===============\n"+colors.ENDC+showSpaces(example['html'])+colors.WARNING+"\n\t=== got ====================\n"+colors.ENDC+showSpaces(actual))
+		print(colors.WARNING+"=== markdown ===============\n"+colors.ENDC+showSpaces(example['markdown'])+colors.WARNING+"\n=== expected ===============\n"+colors.ENDC+showSpaces(example['html'])+colors.WARNING+"\n=== got ====================\n"+colors.ENDC+showSpaces(actual))
 	#exit(0)
 
 print(str(passed)+" tests passed, "+str(failed)+" failed")
