@@ -97,9 +97,9 @@ class Block(object):
 		# self.string_content =  ""
 		# self.strings =  []
 		# self.inline_content =  []
-		return Block(tag, start_line=start_line, start_column=start_column)
+		return Block(t=tag, start_line=start_line, start_column=start_column)
 
-	def __init__(self, t="", c="", destination="", label="", tag="", start_line="", start_column=""):
+	def __init__(self, t="", c="", destination="", label="", start_line="", start_column=""):
 		self.t = t
 		self.c = c
 		self.destination = destination
@@ -359,7 +359,7 @@ class InlineParser(object):
 				break
 			else:
 				self.parseString([])
-			c = self.peek()
+				c = self.peek()
 		if c == "]":
 			self.label_nest_level = 0
 			self.pos += 1
@@ -859,8 +859,7 @@ class DocParser:
 					block.t = "ReferenceDef"
 					break
 				pos = self.inlineParser.parseReference(block.string_content, self.refmap)
-
-		elif ((block.t == "ATXHeader") or "SetextHeader" or "HtmlBlock"):
+		elif (block.t in ["ATXHeader", "SetextHeader", "HtmlBlock"]):
 			block.string_content = "\n".join(block.strings)
 		elif (block.t == "IndentedCode"):
 			block.string_content = re.sub(r"(\n *)*$", "\n", "\n".join(block.strings))
@@ -937,11 +936,11 @@ class HTMLRenderer(object):
 		result = "<" + tag
 		if (len(attribs) > 0):
 			i = 0
-			attrib = attribs[i]
+			#attrib = attribs[i]
 			while (len(attribs) > i) and (not attribs[i] == None):
-				result += (" " + attrib[0] + '="' + atttrib[1] + '"')
-				i += 1
 				attrib = attribs[i]
+				result += (" " + attrib[0] + '="' + attrib[1] + '"')
+				i += 1
 		if (len(contents) > 0):
 			result += ('>' + contents + '</' + tag + '>')
 		elif (selfclosing):
@@ -1004,15 +1003,16 @@ class HTMLRenderer(object):
 		tag = attr = info_words = None
 		if len(block.children) > 0:
 			block = block.children[0]
+		#dump(block)
 		if (block.t == "Document"):
-			whole_doc = self.renderBlocks(block.inline_content)
+			whole_doc = self.renderBlocks(block.children)
 			if (whole_doc == ""):
 				return ""
 			else:
 				return (whole_doc + "\n")
 		elif (block.t == "Paragraph"):
 			if (in_tight_list):
-				return self.render(block.inline_content)
+				return self.renderInlines(block.inline_content)
 			else:
 				return self.inTags('p', [], self.renderInlines(block.inline_content))
 		elif (block.t == "BlockQuote"):
@@ -1034,11 +1034,11 @@ class HTMLRenderer(object):
 			tag = "h" + str(block.level)
 			return self.inTags(tag, [], self.renderInlines(block.inline_content))
 		elif (block.t == "IndentedCode"):
-			return '\n'+HTMLRenderer.inTags('pre', [], HTMLRenderer.inTags('code', [], self.escape(block.string_content)+'\n\n'))+'\n\n'
+			return '\n'+HTMLRenderer.inTags('pre', [], HTMLRenderer.inTags('code', [], self.escape(block.string_content)+'\n'))+'\n\n'
 		elif (block.t == "FencedCode"):
 			info_words = []
 			if block.info:
-				info_words = block.info.split(" +", block.info)
+				info_words = block.info.split(" +")
 			if ((len(info_words) == 0) or (len(info_words[0]) == 0)):
 				attr = []
 			else:
@@ -1058,7 +1058,7 @@ class HTMLRenderer(object):
 	def renderBlocks(self, blocks, in_tight_list=None):
 		result = []
 		for i in range(len(blocks)):
-			if blocks[i].t != "ReferenceDef":
+			if not blocks[i].t == "ReferenceDef":
 				result.append(self.renderBlock(blocks[i], in_tight_list))
 		return self.blocksep.join(result)
 
