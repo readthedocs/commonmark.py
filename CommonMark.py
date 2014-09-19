@@ -1001,8 +1001,8 @@ class HTMLRenderer(object):
 
 	def renderBlock(self,  block, in_tight_list):
 		tag = attr = info_words = None
-		if len(block.children) > 0:
-			block = block.children[0]
+		#if len(block.children) > 0:
+		#	block = block.children[0]
 		#dump(block)
 		if (block.t == "Document"):
 			whole_doc = self.renderBlocks(block.children)
@@ -1034,7 +1034,7 @@ class HTMLRenderer(object):
 			tag = "h" + str(block.level)
 			return self.inTags(tag, [], self.renderInlines(block.inline_content))
 		elif (block.t == "IndentedCode"):
-			return '\n'+HTMLRenderer.inTags('pre', [], HTMLRenderer.inTags('code', [], self.escape(block.string_content)+'\n'))+'\n\n'
+			return '\n'+HTMLRenderer.inTags('pre', [], HTMLRenderer.inTags('code', [], self.escape(block.string_content)+'\n'))+'\n'
 		elif (block.t == "FencedCode"):
 			info_words = []
 			if block.info:
