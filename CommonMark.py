@@ -65,7 +65,7 @@ def normalizeReference(s):
 def matchAt(pattern, s, offset):
 	matched = re.match(pattern, s[offset:])
 	if matched:
-		return s.index(matched.group(0))
+		return offset+s[offset:].index(matched.group(0))
 	else:
 		return None
 
@@ -114,6 +114,7 @@ class Block(object):
 		self.string_content =  ""
 		self.strings =  []
 		self.inline_content =  []
+		self.info = ""
 
 
 class InlineParser(object):
@@ -124,11 +125,11 @@ class InlineParser(object):
 		self.pos = 0
 		self.refmap = {}
 
-	def match(self, regexString, reCompileFlags=None):
+	def match(self, regexString, reCompileFlags=0):
 		#regex = re.compile(regexString, flags=reCompileFlags)
 		match = re.search(regexString, self.subject[self.pos:], flags=reCompileFlags)
 		if match:
-			self.pos = match.end()
+			self.pos += match.end()
 			return match.group(0)
 		else:
 			return None
@@ -336,7 +337,7 @@ class InlineParser(object):
 			return 0
 		self.pos += 1
 		c = self.peek()
-		while (not c == "]") or (nest_level > 0): # and (c = self.peek()):
+		while c and ((not c == "]") or (nest_level > 0)): # and (c = self.peek()):
 			if c == "`":
 				self.parseBackticks([])
 				break
@@ -439,7 +440,7 @@ class InlineParser(object):
 	def parseString(self, inlines):
 		m = self.match(reMain, re.MULTILINE)
 		if m:
-			inlines.push(Block(t="Str", c=m))
+			inlines.append(Block(t="Str", c=m))
 			return len(m)
 		else:
 			return 0
@@ -666,7 +667,7 @@ class DocParser:
 
 			match = matchAt(r"[^ ]", ln, offset)
 			if match == None:
-				first_nonspace = len(ln)
+				first_nonspace = len(ln)-1
 				blank = True
 			else:
 				first_nonspace = match
@@ -729,7 +730,7 @@ class DocParser:
 				first_nonspace = match
 				blank = True
 			else:
-				first_nonspace = len(ln)
+				first_nonspace = len(ln)-1
 				blank = False
 			ATXmatch = re.search(r"^#{1,6}(?: +|$)", ln[first_nonspace:])
 			FENmatch = re.search(r"^`{3,}(?!.*`)|^~{3,}(?!.*~)", ln[first_nonspace:])
@@ -794,7 +795,7 @@ class DocParser:
 				break
 		match = matchAt(r"[^ ]", ln, offset)
 		if not match:
-			first_nonspace = len(ln)
+			first_nonspace = len(ln)-1
 			blank = True
 		else:
 			first_nonspace = match
@@ -813,7 +814,10 @@ class DocParser:
 			if container.t == "IndentedCode" or container.t == "HtmlBlock":
 				self.addLine(ln, offset)
 			elif container.t == "FencedCode":
-				match = indent <= 3 and ln[first_nonspace] == container.fence_char and re.match(r"^(?:`{3,}|~{3,})(?= *$)", ln[first_nonspace:])
+				match = bool()
+				if len(ln) > 0:
+					match = ln[first_nonspace] == container.fence_char and re.match(r"^(?:`{3,}|~{3,})(?= *$)", ln[first_nonspace:])
+				match = indent <= 3 and match
 				FENmatch = re.search(r"^(?:`{3,}|~{3,})(?= *$)", ln[first_nonspace:])
 				if match and len(FENmatch.group(0)) >= container.fence_length:
 					self.finalize(container, line_number)
@@ -862,7 +866,7 @@ class DocParser:
 			block.string_content = re.sub(r"(\n *)*$", "\n", "\n".join(block.strings))
 		elif (block.t == "FencedCode"):
 			block.info = unescape(block.strings[0].strip())
-			if (block.strings.length == 1):
+			if (len(block.strings) == 1):
 				block.string_content = ""
 			else:
 				block.string_content = "\n".join(block.strings[1:]) + "\n"
@@ -877,7 +881,7 @@ class DocParser:
 				if (endsWithBlankLine(item) and not last_item):
 					block.tight = False
 					break
-				numsubitems = item.children.length
+				numsubitems = len(item.children)
 				j = 0
 				while (j < numsubitems):
 					subitem = item.children[j]
@@ -1032,19 +1036,21 @@ class HTMLRenderer(object):
 		elif (block.t == "IndentedCode"):
 			return '\n'+HTMLRenderer.inTags('pre', [], HTMLRenderer.inTags('code', [], self.escape(block.string_content)+'\n\n'))+'\n\n'
 		elif (block.t == "FencedCode"):
-			info_words = re.split(" +", block.info)
+			info_words = []
+			if block.info:
+				info_words = block.info.split(" +", block.info)
 			if ((len(info_words) == 0) or (len(info_words[0]) == 0)):
 				attr = []
 			else:
 				arg = [['class','language-' + self.escape(info_words[0],True)]]
-			attr = info_words.length == 0
-			return inTags('pre', [], inTags('code', attr, self.escape(block.string_content)));
+			attr = [] if len(info_words) == 0 else [["class", "language-"+self.escape(info_words[0], True)]]
+			return self.inTags('pre', [], self.inTags('code', attr, self.escape(block.string_content)));
 		elif (block.t == "HtmlBlock"):
 			return block.string_content
 		elif (block.t == "ReferenceDef"):
 			return ""
 		elif (block.t == "HorizontalRule"):
-			return inTags("hr", [], "", True)
+			return self.inTags("hr", [], "", True)
 		else:
 			print("Unknown block type" + block.t)
 			return ""
