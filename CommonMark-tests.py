@@ -20,7 +20,7 @@ def trace_calls(frame, event, arg):
 	line_no = frame.f_lineno
 	filename = co.co_filename
 	if event == "call" and not re.match("__", func_name) and re.search("CommonMark.py", filename) and not func_name == "dumpAST":
-		print("-> "+frame.f_back.f_code.co_name+" called "+func_name+" at "+str(line_no)+" in "+filename)
+		print("-> "+frame.f_back.f_code.co_name+" at "+str(frame.f_back.f_lineno)+" called "+func_name+" at "+str(line_no)+" in "+filename)
 		return trace_calls
 	return
 
