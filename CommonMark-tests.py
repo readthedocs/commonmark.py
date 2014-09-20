@@ -19,9 +19,10 @@ def trace_calls(frame, event, arg):
 		return
 	line_no = frame.f_lineno
 	filename = co.co_filename
-	if event == "call" and not re.match("__", func_name) and re.search("CommonMark", filename) and not func_name == "dumpAST":
+	if event == "call" and not re.match("__", func_name) and re.search("CommonMark.py", filename) and not func_name == "dumpAST":
 		print("Called "+func_name+" at "+str(line_no)+" in "+filename)
 		return trace_calls
+	return
 
 parser = argparse.ArgumentParser(description="script to run the CommonMark specification tests against the CommonMark.py parser")
 parser.add_argument('-t', help="Single test to run or comma seperated list of tests (-t 10 or -t 10,11,12,13)")
