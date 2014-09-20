@@ -41,20 +41,20 @@ HTMLBLOCKOPEN = "<(?:" + BLOCKTAGNAME + "[\\s/>]" + "|" + "/" + BLOCKTAGNAME + "
 
 reHtmlTag = re.compile('^' + HTMLTAG, re.IGNORECASE)
 reHtmlBlockOpen = re.compile('^' + HTMLBLOCKOPEN, re.IGNORECASE)
-reLinkTitle = r'^(?:"(' + ESCAPED_CHAR + '|[^"\\x00])*"' + '|' + '\'(' + ESCAPED_CHAR + '|[^\'\\x00])*\'' + '|' + '\\((' + ESCAPED_CHAR + '|[^)\\x00])*\\))'
-reLinkDestinationBraces = r'^(?:[<](?:[^<>\\n\\\\\\x00]' + '|' + ESCAPED_CHAR + '|' + '\\\\)*[>])'
-reLinkDestination = r'^(?:' + REG_CHAR + '+|' + ESCAPED_CHAR + '|' + IN_PARENS_NOSP + ')*'
-reEscapable = ESCAPABLE
-reAllEscapedChar = r'\\\\(' + ESCAPABLE + ')'
-reEscapedChar = r'^\\\\(' + ESCAPABLE + ')'
-reAllTab = r"\t"
-reHrule = r"^(?:(?:\* *){3,}|(?:_ *){3,}|(?:- *){3,}) *$"
-reMain = r"^(?:[\n`\[\]\\!<&*_]|[^\n`\[\]\\!<&*_]+)/"
+reLinkTitle = re.compile('^(?:"(' + ESCAPED_CHAR + '|[^"\\x00])*"' + '|' + '\'(' + ESCAPED_CHAR + '|[^\'\\x00])*\'' + '|' + '\\((' + ESCAPED_CHAR + '|[^)\\x00])*\\))')
+reLinkDestinationBraces = re.compile('^(?:[<](?:[^<>\\n\\\\\\x00]' + '|' + ESCAPED_CHAR + '|' + '\\\\)*[>])')
+reLinkDestination = re.compile('^(?:' + REG_CHAR + '+|' + ESCAPED_CHAR + '|' + IN_PARENS_NOSP + ')*')
+reEscapable = re.compile(ESCAPABLE)
+reAllEscapedChar = re.compile('\\\\(' + ESCAPABLE + ')')
+reEscapedChar = re.compile('^\\\\(' + ESCAPABLE + ')')
+reAllTab = re.compile("\t")
+reHrule = re.compile("^(?:(?:\* *){3,}|(?:_ *){3,}|(?:- *){3,}) *$")
+reMain = r"^(?:[\n`\[\]\\!<&*_]|[^\n`\[\]\\!<&*_]+)"
 
 # utility functions
 
 def unescape(s):
-  return re.sub(reAllEscapedChar, '$1', s, 0)
+  return reAllEscapedChar.sub('$1', s, 0)
 
 def isBlank(s):
   return bool(re.compile("^\s*$").match(s))
@@ -93,7 +93,7 @@ class Block(object):
 		# self.start_column =  start_column
 		# self.end_line =  start_line
 		# self.children =  []
-		# self.parent =  null
+		# self.parent =  None
 		# self.string_content =  ""
 		# self.strings =  []
 		# self.inline_content =  []
@@ -150,9 +150,9 @@ class InlineParser(object):
 		if not ticks:
 			return 0
 		afterOpenTicks = self.pos
-		foundCode = false
+		foundCode = False
 		match = None
-		while (not foundCode) and (match == self.match(r"`+", [re.MULTILINE])):
+		while (not foundCode) and (match == self.match(r"`+", re.MULTILINE)):
 			if (match == ticks):
 				c = self.subject[afterOpenTicks:(self.pos-len(ticks))]
 				c = re.sub(r"[ \n]+", ' ', c)
@@ -210,7 +210,7 @@ class InlineParser(object):
 	def scanDelims(self, c):
 		numdelims = 0
 		first_close_delims = 0
-		char_before, char_after = None
+		char_before = char_after = None
 		startpos = self.pos
 
 		char_before = "\n" if self.pos == 0 else self.subject[self.pos - 1]
@@ -245,7 +245,7 @@ class InlineParser(object):
 			return 0
 
 		res = self.scanDelims(c)
-		numdelims = res.numdelims
+		numdelims = res["numdelims"]
 		self.pos += numdelims
 		inlines.append(Block(t="Str", c=self.subject[self.pos - numdelims:numdelims]))
 		delimpos = len(inlines) - 1
@@ -258,7 +258,7 @@ class InlineParser(object):
 		if (numdelims == 1):
 			while (True):
 				res = self.scanDelims(c)
-				if (res.numdelims >= 1 and res.can_close):
+				if (res["numdelims"] >= 1 and res["can_close"]):
 					self.pos += 1
 					inlines[delimpos].t = "Emph"
 					inlines[delimpos].c = inlines[delimpos+1:]
@@ -512,7 +512,7 @@ class InlineParser(object):
 
 		normlabel = normalizeReference(rawlabel)
 
-		if (not refmap(normlabel)):
+		if (not refmap.get(normlabel, None)):
 			refmap[normlabel] = {
 				"destination": dest,
 				"title": title
@@ -680,8 +680,11 @@ class DocParser:
 				matched = indent <= 3 and matched
 				if matched:
 					offset = first_nonspace+1
-					if ln[offset] == " ":
-						offset += 1
+					try:
+						if ln[offset] == " ":
+								offset += 1
+					except IndexError:
+						pass
 				else:
 					all_matched = False
 				break
@@ -747,8 +750,11 @@ class DocParser:
 					break
 			elif ln[first_nonspace] == ">":
 				offset = first_nonspace+1
-				if ln[offset] == " ":
-					offset += 1
+				try:
+					if ln[offset] == " ":
+						offset += 1
+				except IndexError:
+					pass
 				already_done, oldtip = closeUnmatchedBlocks(self, already_done, oldtip)
 				container = self.addChild("BlockQuote", line_number, offset)
 			elif ATXmatch:
@@ -967,12 +973,12 @@ class HTMLRenderer(object):
 			return self.escape(inline.c)
 		elif (inline.t == "Softbreak"):
 			return self.softbreak
-		elif inline.t == Hardbreak:
-			return inTags('br', [], "", True)+"\n"
+		elif inline.t == "Hardbreak":
+			return self.inTags('br', [], "", True)+"\n"
 		elif inline.t == "Emph":
-			return inTags('em', [], self.renderInlines(inline.c))
+			return self.inTags('em', [], self.renderInlines(inline.c))
 		elif inline.t == "Strong":
-			return inTags("Strong", [], self.renderInlines(inline.c))
+			return self.inTags("Strong", [], self.renderInlines(inline.c))
 		elif inline.t == "Html":
 			return inline.c
 		elif inline.t == "Entity":
@@ -981,14 +987,14 @@ class HTMLRenderer(object):
 			attrs = [['href', self.escape(inline.destination, True)]]
 			if inline.title:
 				attrs.append(['title', self.escape(inline.title, True)])
-			return inTags('a', attrs, self.renderInlines(inline.label))
+			return self.inTags('a', attrs, self.renderInlines(inline.label))
 		elif inline.t == "Image":
 			attrs = [['src', self.escape(inline.destination, True)], ['alt', self.escape(self.renderInlines(inline.label))]]
 			if inline.title:
 				attrs.append(['title', self.escape(inline.title, True)])
-			return inTags('img', attrs, "", True)
+			return self.inTags('img', attrs, "", True)
 		elif inline.t == "Code":
-			return inTags('code', [], self.escape(inline.c))
+			return self.inTags('code', [], self.escape(inline.c))
 		else:
 			print("Unknown inline type "+inline.t)
 			return ""

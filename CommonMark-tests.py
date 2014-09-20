@@ -57,17 +57,18 @@ current_section = ""
 
 startTime = time.clock()
 
-for example in examples:
+for i,example in enumerate(examples):
 	if not example['section'] == "" and not current_section == example['section']:
 		print(colors.HEADER+"\n"+example['section']+colors.ENDC)
 		current_section = example['section']
-
+	print("Number: %i" % i)
 	actual = renderer.render(parser.parse(re.sub(tabChar, "\t", example['markdown'])))
 	if actual == example['html']:
 		passed += 1
 		print(colors.OKGREEN+"\ntick"+colors.ENDC)
 		if args.v:
 			print(colors.OKBLUE+"=== markdown ===============\n"+colors.ENDC+showSpaces(example['markdown'])+colors.OKBLUE+"\n=== expected ===============\n"+colors.ENDC+showSpaces(example['html'])+colors.OKBLUE+"\n=== got ====================\n"+colors.ENDC+showSpaces(actual))
+ 
 	else:
 		failed += 1
 		print(colors.FAIL+"\ncross"+colors.ENDC)
