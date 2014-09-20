@@ -611,6 +611,7 @@ class DocParser:
 		if len(obj.strings) > 0: print((indChar*(ind+1))+"Strings: ["+", ".join(obj.strings)+"]")
 		if len(obj.inline_content) > 0: print((indChar*(ind+1))+"Inline content: ["+", ".join(obj.inline_content)+"]")
 		if len(obj.children) > 0:
+			print((indChar*(ind+1)+"Children: ")
 			for b in obj.children:
 				self.dumpAST(b, ind+2)	
 
