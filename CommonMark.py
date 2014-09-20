@@ -41,20 +41,20 @@ HTMLBLOCKOPEN = "<(?:" + BLOCKTAGNAME + "[\\s/>]" + "|" + "/" + BLOCKTAGNAME + "
 
 reHtmlTag = re.compile('^' + HTMLTAG, re.IGNORECASE)
 reHtmlBlockOpen = re.compile('^' + HTMLBLOCKOPEN, re.IGNORECASE)
-reLinkTitle = re.compile('^(?:"(' + ESCAPED_CHAR + '|[^"\\x00])*"' + '|' + '\'(' + ESCAPED_CHAR + '|[^\'\\x00])*\'' + '|' + '\\((' + ESCAPED_CHAR + '|[^)\\x00])*\\))')
-reLinkDestinationBraces = re.compile('^(?:[<](?:[^<>\\n\\\\\\x00]' + '|' + ESCAPED_CHAR + '|' + '\\\\)*[>])')
-reLinkDestination = re.compile('^(?:' + REG_CHAR + '+|' + ESCAPED_CHAR + '|' + IN_PARENS_NOSP + ')*')
-reEscapable = re.compile(ESCAPABLE)
-reAllEscapedChar = re.compile('\\\\(' + ESCAPABLE + ')')
-reEscapedChar = re.compile('^\\\\(' + ESCAPABLE + ')')
-reAllTab = re.compile("\t")
-reHrule = re.compile("^(?:(?:\* *){3,}|(?:_ *){3,}|(?:- *){3,}) *$")
+reLinkTitle = r'^(?:"(' + ESCAPED_CHAR + '|[^"\\x00])*"' + '|' + '\'(' + ESCAPED_CHAR + '|[^\'\\x00])*\'' + '|' + '\\((' + ESCAPED_CHAR + '|[^)\\x00])*\\))'
+reLinkDestinationBraces = r'^(?:[<](?:[^<>\\n\\\\\\x00]' + '|' + ESCAPED_CHAR + '|' + '\\\\)*[>])'
+reLinkDestination = r'^(?:' + REG_CHAR + '+|' + ESCAPED_CHAR + '|' + IN_PARENS_NOSP + ')*'
+reEscapable = ESCAPABLE
+reAllEscapedChar = r'\\\\(' + ESCAPABLE + ')'
+reEscapedChar = r'^\\\\(' + ESCAPABLE + ')'
+reAllTab = r"\t"
+reHrule = r"^(?:(?:\* *){3,}|(?:_ *){3,}|(?:- *){3,}) *$"
 reMain = r"^(?:[\n`\[\]\\!<&*_]|[^\n`\[\]\\!<&*_]+)/"
 
 # utility functions
 
 def unescape(s):
-  return reAllEscapedChar.sub('$1', s, 0)
+  return re.sub(reAllEscapedChar, '$1', s, 0)
 
 def isBlank(s):
   return bool(re.compile("^\s*$").match(s))
