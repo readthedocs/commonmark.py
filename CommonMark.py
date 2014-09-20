@@ -597,23 +597,23 @@ class DocParser:
 	def dumpAST(self, obj, ind=0):
 		#for attr in dir(obj):
 		#	print("obj.%s = %s" % (attr, getattr(obj, attr)))
-		indChar = "\t"
-		print((indChar*ind)+"["+obj.t+"]")
-		if not obj.c == "": print((indChar*(ind+1))+"c: "+obj.c)
-		if not obj.info == "": print((indChar*(ind+1))+"Info: "+obj.info)
-		if not obj.destination == "": print((indChar*(ind+1))+"Destination: "+obj.destination)
-		if not obj.label == "": print((indChar*(ind+1))+"Label: "+obj.label)
-		if obj.isOpen: print((indChar*(ind+1))+"Open: "+str(obj.isOpen))
-		if obj.last_line_blank: print((indChar*(ind+1))+"Last line blank: "+str(obj.last_line_blank))
-		if obj.start_line: print((indChar*(ind+1))+"Start line: "+str(obj.start_line))
-		if obj.start_column: print((indChar*(ind+1))+"Start Column: "+str(obj.start_column))
-		if not obj.string_content == "": print((indChar*(ind+1))+"String content: "+obj.string_content)
-		if len(obj.strings) > 0: print((indChar*(ind+1))+"Strings: ["+", ".join(obj.strings)+"]")
-		if len(obj.inline_content) > 0: print((indChar*(ind+1))+"Inline content: ["+", ".join(obj.inline_content)+"]")
+		indChar = ("\t"*ind)+"-> " if ind else ""
+		print(indChar+"["+obj.t+"]")
+		if not obj.c == "": print("\t"+indChar+"c: "+obj.c)
+		if not obj.info == "": print("\t"+indChar+"Info: "+obj.info)
+		if not obj.destination == "": print("\t"+indChar+"Destination: "+obj.destination)
+		if not obj.label == "": print("\t"+indChar+"Label: "+obj.label)
+		if obj.isOpen: print("\t"+indChar+"Open: "+str(obj.isOpen))
+		if obj.last_line_blank: print("\t"+indChar+"Last line blank: "+str(obj.last_line_blank))
+		if obj.start_line: print("\t"+indChar+"Start line: "+str(obj.start_line))
+		if obj.start_column: print("\t"+indChar+"Start Column: "+str(obj.start_column))
+		if not obj.string_content == "": print("\t"+indChar+"String content: "+obj.string_content)
+		if len(obj.strings) > 0: print("\t"+indChar+"Strings: ["+", ".join(obj.strings)+"]")
+		if len(obj.inline_content) > 0: print("\t"+indChar+"Inline content: ["+", ".join(obj.inline_content)+"]")
 		if len(obj.children) > 0:
-			print((indChar*(ind+1)+"Children: "))
+			print("\t"+indChar+"Children: ")
 			for b in obj.children:
-				self.dumpAST(b, ind+2)	
+				self.dumpAST(b, ind+2)
 
 	def acceptsLines(self, block_type):
 		return block_type == "Paragraph" or block_type == "IndentedCode" or block_type == "FencedCode"
