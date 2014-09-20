@@ -52,10 +52,7 @@ tabChar = u'\u2192'
 spaceChar = u'\u2423'
 
 
-def showSpaces(s):
-	s = s
-	#t = str(s[:])
-	t = s
+def showSpaces(t):
 	t = re.sub(u"\\t", tabChar, t)
 	t = re.sub(u" ", spaceChar, t)
 	return t
@@ -102,7 +99,10 @@ for i, example in enumerate(examples): # [0,examples[0]]
 		print(colors.HEADER+"\n"+example['section']+colors.ENDC)
 		current_section = example['section']
 
-	print("Test #"+str(i+1))
+	if args.t:
+		print("Test #"+str(args.t.split(",")[i]))
+	else:
+		print("Test #"+str(i+1))
 	ast = parser.parse(re.sub(tabChar, "\t", example['markdown']))
 	actual = renderer.render(ast)
 	if actual == example['html']:
