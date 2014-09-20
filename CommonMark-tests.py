@@ -13,7 +13,9 @@ class colors:
     ENDC = '\033[0m'
 
 parser = argparse.ArgumentParser(description="script to run the CommonMark specification tests against the CommonMark.py parser")
+parser.add_argument('-t', help="Single test to run or comma seperated list of tests (-t 10 or -t 10,11,12,13)")
 parser.add_argument('-v', action="store_true", help="Verbose mode for debugging, print more stuff...")
+parser.add_argument('-i', action="store_true", help="Interactive Markdown input mode")
 args = parser.parse_args()
 
 renderer = CommonMark.HTMLRenderer()
@@ -57,23 +59,45 @@ current_section = ""
 
 startTime = time.clock()
 
-for i,example in enumerate(examples):
+if args.i:
+	while True:
+		s = raw_input(colors.OKBLUE+"Markdown: "+colors.ENDC)
+		ast = parser.parse(s)
+		html = renderer.render(ast)
+		print(colors.WARNING+"="*10+colors.ENDC)
+		parser.dumpAST(ast)
+		print(colors.WARNING+"="*10+colors.ENDC)
+		print(html)
+	exit(0)
+
+# some tests?
+if args.t:
+	tests = args.t.split(",")
+	choice_examples = []
+	for t in tests:
+		if not t == "" and len(examples) > int(t):
+			choice_examples.append(examples[int(t)-1])
+	examples = choice_examples
+
+# all tests
+
+for i, example in enumerate(examples): # [0,examples[0]]
 	if not example['section'] == "" and not current_section == example['section']:
 		print(colors.HEADER+"\n"+example['section']+colors.ENDC)
 		current_section = example['section']
-	print("Number: %i" % i)
-	actual = renderer.render(parser.parse(re.sub(tabChar, "\t", example['markdown'])))
+
+	print("Test #"+str(i+1))
+	ast = parser.parse(re.sub(tabChar, "\t", example['markdown']))
+	actual = renderer.render(ast)
 	if actual == example['html']:
 		passed += 1
 		print(colors.OKGREEN+"\ntick"+colors.ENDC)
 		if args.v:
 			print(colors.OKBLUE+"=== markdown ===============\n"+colors.ENDC+showSpaces(example['markdown'])+colors.OKBLUE+"\n=== expected ===============\n"+colors.ENDC+showSpaces(example['html'])+colors.OKBLUE+"\n=== got ====================\n"+colors.ENDC+showSpaces(actual))
- 
 	else:
 		failed += 1
 		print(colors.FAIL+"\ncross"+colors.ENDC)
 		print(colors.WARNING+"=== markdown ===============\n"+colors.ENDC+showSpaces(example['markdown'])+colors.WARNING+"\n=== expected ===============\n"+colors.ENDC+showSpaces(example['html'])+colors.WARNING+"\n=== got ====================\n"+colors.ENDC+showSpaces(actual))
-	#exit(0)
 
 print(str(passed)+" tests passed, "+str(failed)+" failed")
 
