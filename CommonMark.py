@@ -1,6 +1,14 @@
 #!/usr/bin/env python
 # 2014 - Bibek Kafle & Roland Shoemaker
-# Based on @jgm's JavaScript stmd.js implementation of the CommonMark spec
+# Port of @jgm's JavaScript stmd.js implementation of the CommonMark spec
+
+# Basic usage:
+#
+# import CommonMark
+# parser = CommonMark.DocParser();
+# renderer = CommonMark.HtmlRenderer();
+# print(renderer.render(parser.parse('Hello *world*')));
+
 
 import re
 
@@ -10,7 +18,7 @@ def dump(obj):
     print("obj.%s = %s" % (attr, getattr(obj, attr)))
  #debug#
 
-# all the regexps :<
+# Some of the regexps used in inline parser :<
 
 ESCAPABLE = '[!"#$%&\'()*+,./:;<=>?@[\\\\\\]^_`{|}~-]'
 ESCAPED_CHAR = '\\\\' + ESCAPABLE
@@ -49,20 +57,29 @@ reAllEscapedChar = re.compile('\\\\(' + ESCAPABLE + ')')
 reEscapedChar = re.compile('^\\\\(' + ESCAPABLE + ')')
 reAllTab = re.compile("\t")
 reHrule = re.compile("^(?:(?:\* *){3,}|(?:_ *){3,}|(?:- *){3,}) *$")
+
+# Matches a character with a special meaning in markdown,
+# or a string of non-special characters.
 reMain = r"^(?:[\n`\[\]\\!<&*_]|[^\n`\[\]\\!<&*_]+)"
 
-# utility functions
+# Utility functions
 
 def unescape(s):
+  """ Replace backslash escapes with literal characters."""
   return reAllEscapedChar.sub('$1', s, 0)
 
 def isBlank(s):
+  """ Returns True if string contains only space characters."""
   return bool(re.compile("^\s*$").match(s))
 
 def normalizeReference(s):
-	return re.sub('\s+', ' ', s.strip())
+	""" Normalize reference label: collapse internal whitespace to
+	 single space, remove leading/trailing whitespace, case fold."""
+	return re.sub(r'\s+', ' ', s.strip())
 
 def matchAt(pattern, s, offset):
+	""" Attempt to match a regex in string s at offset offset.
+	Return index of match or None."""
 	matched = re.match(pattern, s[offset:])
 	if matched:
 		return offset+s[offset:].index(matched.group(0))
@@ -70,6 +87,7 @@ def matchAt(pattern, s, offset):
 		return None
 
 def detabLine(text):
+	""" Convert tabs to spaces on each line using a 4-space tab stop."""
 	if re.match('\t', text) and text.index('\t') == -1:
 		return text
 	else:
@@ -118,6 +136,14 @@ class Block(object):
 
 
 class InlineParser(object):
+	"""  INLINE PARSER
+
+	 These are methods of an InlineParser class, defined below.
+	 An InlineParser keeps track of a subject (a string to be
+	 parsed) and a position in that subject.
+
+	 If re matches at current position in the subject, advance
+	 position in subject and return the match; otherwise return null."""
 
 	def __init__(self):
 		self.subject = ""
