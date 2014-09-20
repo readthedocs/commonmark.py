@@ -782,8 +782,8 @@ class DocParser:
 				offset = len(ln)-1
 			elif data:
 				already_done, oldtip = closeUnmatchedBlocks(self, already_done, oldtip)
-				data.marker_offset = indent
-				offset = first_nonspace+data.padding
+				data['marker_offset'] = indent
+				offset = first_nonspace+data['padding']
 				if container.t == "List" or not listsMatch(container.list_data, data):
 					container = self.addChild("List", line_number, first_nonspace)
 					container.list_data = data
@@ -1025,7 +1025,7 @@ class HTMLRenderer(object):
 		elif (block.t == "ListItem"):
 			return self.inTags("li", [], self.renderBlocks(block.children, in_tight_list).strip())
 		elif (block.t == "List"):
-			if (block.list_data.type == "Bullet"):
+			if (block.list_data['type'] == "Bullet"):
 				tag = "ul"
 			else:
 				tag = "ol"
