@@ -79,9 +79,9 @@ if args.i:
 		s = raw_input(colors.OKBLUE+"Markdown: "+colors.ENDC)
 		ast = parser.parse(s)
 		html = renderer.render(ast)
-		print(colors.WARNING+"="*10+colors.ENDC)
+		print(colors.WARNING+"="*10+"AST====="+colors.ENDC)
 		parser.dumpAST(ast)
-		print(colors.WARNING+"="*10+colors.ENDC)
+		print(colors.WARNING+"="*10+"HTML===="+colors.ENDC)
 		print(html)
 	exit(0)
 

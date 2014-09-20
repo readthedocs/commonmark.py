@@ -609,9 +609,13 @@ class DocParser:
 		if obj.start_column: print("\t"+indChar+"Start Column: "+str(obj.start_column))
 		if not obj.string_content == "": print("\t"+indChar+"String content: "+obj.string_content)
 		if len(obj.strings) > 0: print("\t"+indChar+"Strings: ["+", ".join(obj.strings)+"]")
-		if len(obj.inline_content) > 0: print("\t"+indChar+"Inline content: ["+", ".join(obj.inline_content)+"]")
+		if len(obj.inline_content) > 0:
+			#print("\t"+indChar+"Inline content: ["+", ".join(obj.inline_content)+"]")
+			print("\t"+indChar+"Inline content:")
+			for b in obj.inline_content:
+				self.dumpAST(b, ind+2)
 		if len(obj.children) > 0:
-			print("\t"+indChar+"Children: ")
+			print("\t"+indChar+"Children:")
 			for b in obj.children:
 				self.dumpAST(b, ind+2)
 
