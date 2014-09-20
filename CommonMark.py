@@ -5,9 +5,9 @@
 # Basic usage:
 #
 # import CommonMark
-# parser = CommonMark.DocParser();
-# renderer = CommonMark.HtmlRenderer();
-# print(renderer.render(parser.parse('Hello *world*')));
+# parser = CommonMark.DocParser()
+# renderer = CommonMark.HtmlRenderer()
+# print(renderer.render(parser.parse('Hello *world*')))
 
 
 import re
@@ -132,6 +132,7 @@ class Block(object):
 		self.string_content =  ""
 		self.strings =  []
 		self.inline_content =  []
+		self.list_data = {}
 		self.info = ""
 
 
@@ -299,7 +300,7 @@ class InlineParser(object):
 				res = self.scanDelims(c)
 				if (res["numdelims"] >= 2 and res["can_close"]):
 					self.pos += 2
-					inlines[delimpos].t = "Strong";
+					inlines[delimpos].t = "Strong"
 					inlines[delimpos].c = inlines[delimpos+1:]
 					inlines = inlines[:delimpos+1]
 					break
@@ -520,7 +521,7 @@ class InlineParser(object):
 
 		self.spnl()
 
-		dest = self.parseLinkDestination();
+		dest = self.parseLinkDestination()
 		if (dest == None or len(dest) == 0):
 			self.pos = startpos
 			return 0
@@ -664,27 +665,31 @@ class DocParser:
 		self.tip = newBlock
 		return newBlock
 
+	def listsMatch(self, list_data, item_data):
+		if hasattr(list_data, "type") and hasattr(item_data, "type") and hasattr(list_data, "delimiter") and hasattr(item_data, "delimiter") and hasattr(list_data, "bullet_char") and hasattr(item_data, "bullet_char"):
+			return list_data['type'] == item_data['type'] and list_data['delimiter'] == item_data['delimiter'] and list_data['bullet_char'] == item_data['bullet_char']
+
 	def parseListMarker(self, ln, offset):
 		rest = ln[offset:]
 		data = {}
 		if re.match(reHrule, rest):
 			return None
-		match = re.match(r"^[*+-]( +|$)", rest)
+		match = re.search(r"^[*+-]( +|$)", rest)
+		match2 = re.search(r"^(\d+)([.)])( +|$)", rest)
 		if match:
 			spaces_after_marker = len(match.group(1))
 			data['type'] = 'Bullet'
 			data['bullet_char'] = match.group(0)[0]
-		else:
-			return None
-		match2 = re.match(r"^(\d+)([.)])( +|$)", rest)
-		if match2:
+			blank_item = match.group(0) == len(rest)
+		elif match2:
 			spaces_after_marker = len(match2.group(3))
 			data['type'] = 'Ordered'
 			data['start'] = int(match2.group(1))
 			data['delimiter'] = match2.group(2)
+			blank_item = match2.group(0) == len(rest)
 		else:
 			return None
-		blank_item = (len(match.group(0)) == len(rest)) or (len(match2.group(0)) == len(rest))
+		#blank_item = (len(match.group(0)) == len(rest)) or (len(match2.group(0)) == len(rest))
 		if spaces_after_marker >= 5 or spaces_after_marker < 1 or blank_item:
 			if match:
 				data['padding'] = len(match.group(0))-spaces_after_marker+1
@@ -841,7 +846,7 @@ class DocParser:
 				already_done, oldtip = closeUnmatchedBlocks(self, already_done, oldtip)
 				data['marker_offset'] = indent
 				offset = first_nonspace+data['padding']
-				if container.t == "List" or not listsMatch(container.list_data, data):
+				if container.t == "List" or not self.listsMatch(container.list_data, data):
 					container = self.addChild("List", line_number, first_nonspace)
 					container.list_data = data
 				container = self.addChild("ListItem", line_number, first_nonspace)
@@ -934,7 +939,7 @@ class DocParser:
 			while (i < numitems):
 				item = block.children[i]
 				last_item = (i == numitems - 1)
-				if (endsWithBlankLine(item) and not last_item):
+				if (self.endsWithBlankLine(item) and not last_item):
 					block.tight = False
 					break
 				numsubitems = len(item.children)
@@ -942,7 +947,7 @@ class DocParser:
 				while (j < numsubitems):
 					subitem = item.children[j]
 					last_subitem = j == (numsubitems - 1)
-					if (endsWithBlankLine(subitem) and not (last_item and last_subitem)):
+					if (self.endsWithBlankLine(subitem) and not (last_item and last_subitem)):
 						block.tight = False
 						break
 					j += 1
@@ -967,15 +972,14 @@ class DocParser:
 	def parse(self, input):
 		self.doc = Block.makeBlock("Document", 1, 1)
 		self.tip = self.doc
-		self.refmap = {};
-		lines = re.split(r"\r\n|\n|\r", re.sub(r"\n$", '', input));
+		self.refmap = {}
+		lines = re.split(r"\r\n|\n|\r", re.sub(r"\n$", '', input))
 		length = len(lines)
 		for i in range(length):
 			self.incorporateLine(lines[i], i+1)
 		while (self.tip):
 			self.finalize(self.tip, length-1)
-		self.processInlines(self.doc);
-		#dump(self.doc.children[0])
+		self.processInlines(self.doc)
 		return self.doc
 
 class HTMLRenderer(object):
@@ -1086,7 +1090,8 @@ class HTMLRenderer(object):
 				tag = "ul"
 			else:
 				tag = "ol"
-			pass
+			attr = [] if (not hasattr(block.list_data, 'start')) or block.list_data['start'] == 1 else [['start', str(block.list_data['start'])]]
+			return self.inTags(tag, attr, self.innersep+self.renderBlocks(block.children, block.tight)+self.innersep)
 		elif ((block.t == "ATXHeader") or (block.t == "SetextHeader")):
 			tag = "h" + str(block.level)
 			return self.inTags(tag, [], self.renderInlines(block.inline_content))
@@ -1101,7 +1106,7 @@ class HTMLRenderer(object):
 			else:
 				arg = [['class','language-' + self.escape(info_words[0],True)]]
 			attr = [] if len(info_words) == 0 else [["class", "language-"+self.escape(info_words[0], True)]]
-			return self.inTags('pre', [], self.inTags('code', attr, self.escape(block.string_content)));
+			return self.inTags('pre', [], self.inTags('code', attr, self.escape(block.string_content)))
 		elif (block.t == "HtmlBlock"):
 			return block.string_content
 		elif (block.t == "ReferenceDef"):
@@ -1116,6 +1121,7 @@ class HTMLRenderer(object):
 		result = []
 		for i in range(len(blocks)):
 			if not blocks[i].t == "ReferenceDef":
+				#DocParser.dumpAST(DocParser(), blocks[i])
 				result.append(self.renderBlock(blocks[i], in_tight_list))
 		return self.blocksep.join(result)
 

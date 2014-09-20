@@ -108,7 +108,7 @@ for i, example in enumerate(examples): # [0,examples[0]]
 	if actual == example['html']:
 		passed += 1
 		print(colors.OKGREEN+"\ntick"+colors.ENDC)
-		if args.v:
+		if args.v or args.d:
 			print(colors.OKBLUE+"=== markdown ===============\n"+colors.ENDC+showSpaces(example['markdown'])+colors.OKBLUE+"\n=== expected ===============\n"+colors.ENDC+showSpaces(example['html'])+colors.OKBLUE+"\n=== got ====================\n"+colors.ENDC+showSpaces(actual))
 	else:
 		failed += 1
