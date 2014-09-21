@@ -80,7 +80,7 @@ def normalizeReference(s):
 def matchAt(pattern, s, offset):
 	""" Attempt to match a regex in string s at offset offset.
 	Return index of match or None."""
-	matched = re.match(pattern, s[offset:])
+	matched = re.search(pattern, s[offset:])
 	if matched:
 		return offset+s[offset:].index(matched.group(0))
 	else:
@@ -608,7 +608,7 @@ class DocParser:
 		if not obj.c == "": print("\t"+indChar+"c: "+obj.c)
 		if not obj.info == "": print("\t"+indChar+"Info: "+obj.info)
 		if not obj.destination == "": print("\t"+indChar+"Destination: "+obj.destination)
-		if not obj.label == "": print("\t"+indChar+"Label: "+obj.label)
+		if obj.label: print("\t"+indChar+"Label: "+", ".join(obj.label))
 		if obj.isOpen: print("\t"+indChar+"Open: "+str(obj.isOpen))
 		if obj.last_line_blank: print("\t"+indChar+"Last line blank: "+str(obj.last_line_blank))
 		if obj.start_line: print("\t"+indChar+"Start line: "+str(obj.start_line))
@@ -720,8 +720,6 @@ class DocParser:
 
 		ln = detabLine(ln)
 
-		#self.dumpAST(container)
-
 		while len(container.children) > 0:
 			last_child = container.children[len(container.children)-1]
 			if not last_child.isOpen:
@@ -764,7 +762,7 @@ class DocParser:
 				break
 			elif container.t == "FencedCode":
 				i = container.fence_offset
-				while i > 0 and ln[offset] == " ":
+				while i > 0 and len(ln) > offset and ln[offset] == " ":
 					offset += 1
 					i -= 1
 				break
@@ -791,13 +789,13 @@ class DocParser:
 		if blank and container.last_line_blank:
 			self.breakOutOfLists(container, line_number)
 		while not container.t == "FencedCode" and not container.t == "IndentedCode" and not container.t == "HtmlBlock" and not matchAt(r"^[ #`~*+_=<>0-9-]", ln, offset) == None:
-			match = matchAt(r"[^ ]", ln, offset)
-			if not match == None:
-				first_nonspace = match
-				blank = False
-			else:
+			match = matchAt("[^ ]", ln, offset)
+			if match == None:
 				first_nonspace = len(ln)
 				blank = True
+			else:
+				first_nonspace = match
+				blank = False
 			ATXmatch = re.search(r"^#{1,6}(?: +|$)", ln[first_nonspace:])
 			FENmatch = re.search(r"^`{3,}(?!.*`)|^~{3,}(?!.*~)", ln[first_nonspace:])
 			PARmatch = re.search(r"^(?:=+|-+) *$", ln[first_nonspace:])
@@ -1127,7 +1125,6 @@ class HTMLRenderer(object):
 		result = []
 		for i in range(len(blocks)):
 			if not blocks[i].t == "ReferenceDef":
-				#DocParser.dumpAST(DocParser(), blocks[i])
 				result.append(self.renderBlock(blocks[i], in_tight_list))
 		return self.blocksep.join(result)
 
