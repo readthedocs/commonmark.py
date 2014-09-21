@@ -6,4 +6,4 @@ python:
   - "3.3"
   - "3.4"
 # test command
-script: python CommonMark.py
+script: python CommonMark-tests.py -np
