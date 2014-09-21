@@ -789,10 +789,10 @@ class DocParser:
 			match = matchAt(r"[^ ]", ln, offset)
 			if not match == None:
 				first_nonspace = match
-				blank = True
+				blank = False
 			else:
 				first_nonspace = len(ln)
-				blank = False
+				blank = True
 			ATXmatch = re.search(r"^#{1,6}(?: +|$)", ln[first_nonspace:])
 			FENmatch = re.search(r"^`{3,}(?!.*`)|^~{3,}(?!.*~)", ln[first_nonspace:])
 			PARmatch = re.search(r"^(?:=+|-+) *$", ln[first_nonspace:])
@@ -857,9 +857,9 @@ class DocParser:
 				break
 			if self.acceptsLines(container.t):
 				break
-		match = matchAt(r"[^ ]", ln, offset)
 
-		if not match:
+		match = matchAt(r"[^ ]", ln, offset)
+		if match == None:
 			first_nonspace = len(ln)
 			blank = True
 		else:
@@ -962,12 +962,10 @@ class DocParser:
 
 
 	def processInlines(self, block):
-		if block.t == "ATXHeader":
+		if block.t == "ATXHeader" or block.t == "Paragraph" or block.t == "SetextHeader":
 			block.inline_content = self.inlineParser.parse(block.string_content.strip(), self.refmap)
 			block.string_content = ""
-			
-		elif block.t == "Paragraph" or block.t == "SetextHeader":
-			pass
+
 		if block.children:
 			for i in block.children:
 				self.processInlines(i)
