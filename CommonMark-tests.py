@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-
+from __future__ import division
 import re, time, codecs, argparse, sys
 import pprint
 import CommonMark
@@ -31,6 +31,7 @@ parser.add_argument('-f', action="store_true", help="Print failed tests (during 
 parser.add_argument('-i', action="store_true", help="Interactive Markdown input mode")
 parser.add_argument('-d', action="store_true", help="Debug stuff")
 parser.add_argument('-np', action="store_true", help="Don't print the normal stuff...")
+parser.add_argument('-s', action="store_true", help="Show % of tests passed by category")
 args = parser.parse_args()
 
 if args.d:
@@ -47,6 +48,7 @@ data = "\n".join(datalist)
 
 passed = 0
 failed = 0
+catStats = {}
 examples = []
 example_number = 0
 current_section = ""
@@ -107,22 +109,26 @@ if args.t:
 
 for i, example in enumerate(examples): # [0,examples[0]]
 	if not example['section'] == "" and not current_section == example['section']:
-		print(colors.HEADER+example['section']+colors.ENDC)
+		print(colors.HEADER+"["+example['section']+"]"+colors.ENDC)
 		current_section = example['section']
+		catStats.update({current_section:[0,0,0]})
 
 	if args.t:
 		print("Test #"+str(args.t.split(",")[i]))
 	else:
 		print("Test #"+str(i+1))
+	catStats[current_section][2] += 1
 	ast = parser.parse(re.sub(tabChar, "\t", example['markdown']))
 	actual = renderer.render(ast)
 	if actual == example['html']:
 		passed += 1
+		catStats[current_section][0] += 1
 		print(colors.OKGREEN+"tick"+colors.ENDC)
 		if args.p or args.d and not args.np:
 			print(colors.OKBLUE+"=== markdown ===============\n"+colors.ENDC+showSpaces(example['markdown'])+colors.OKBLUE+"\n=== expected ===============\n"+colors.ENDC+showSpaces(example['html'])+colors.OKBLUE+"\n=== got ====================\n"+colors.ENDC+showSpaces(actual))
 	else:
 		failed += 1
+		catStats[current_section][1] += 1
 		print(colors.FAIL+"cross"+colors.ENDC)
 		#parser.dumpAST(ast)
 		if not args.np or args.f:
@@ -132,5 +138,10 @@ print(str(passed)+" tests passed, "+str(failed)+" failed")
 
 endTime = time.clock()
 runTime = endTime-startTime
+
+if args.s:
+	for i in catStats.keys():
+		per = catStats[i][0]/catStats[i][2]
+		print(colors.HEADER+"["+i+"]"+colors.ENDC+"\t"+str(per*100)+"% Passed")
 
 print("runtime: "+str(runTime)+"s")
