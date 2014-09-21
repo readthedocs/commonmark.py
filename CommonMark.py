@@ -725,7 +725,7 @@ class DocParser:
 
 			match = matchAt(r"[^ ]", ln, offset)
 			if match == None:
-				first_nonspace = len(ln)-1
+				first_nonspace = len(ln)
 				blank = True
 			else:
 				first_nonspace = match
@@ -791,7 +791,7 @@ class DocParser:
 				first_nonspace = match
 				blank = True
 			else:
-				first_nonspace = len(ln)-1
+				first_nonspace = len(ln)
 				blank = False
 			ATXmatch = re.search(r"^#{1,6}(?: +|$)", ln[first_nonspace:])
 			FENmatch = re.search(r"^`{3,}(?!.*`)|^~{3,}(?!.*~)", ln[first_nonspace:])
@@ -859,8 +859,8 @@ class DocParser:
 				break
 		match = matchAt(r"[^ ]", ln, offset)
 
-		if match:
-			first_nonspace = len(ln)-1
+		if not match:
+			first_nonspace = len(ln)
 			blank = True
 		else:
 			first_nonspace = match
