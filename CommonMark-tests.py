@@ -26,12 +26,12 @@ def trace_calls(frame, event, arg):
 
 parser = argparse.ArgumentParser(description="script to run the CommonMark specification tests against the CommonMark.py parser")
 parser.add_argument('-t', help="Single test to run or comma seperated list of tests (-t 10 or -t 10,11,12,13)")
-parser.add_argument('-p', action="store_true", help="Print passed test stuff")
+parser.add_argument('-p', action="store_true", help="Print passed test information")
 parser.add_argument('-f', action="store_true", help="Print failed tests (during -np...)")
 parser.add_argument('-i', action="store_true", help="Interactive Markdown input mode")
-parser.add_argument('-d', action="store_true", help="Debug stuff")
-parser.add_argument('-np', action="store_true", help="Don't print the normal stuff...")
-parser.add_argument('-s', action="store_true", help="Show % of tests passed by category")
+parser.add_argument('-d', action="store_true", help="Debug, trace calls")
+parser.add_argument('-np', action="store_true", help="Only print section header, tick, or cross")
+parser.add_argument('-s', action="store_true", help="Print percent of tests passed by category")
 args = parser.parse_args()
 
 if args.d:
