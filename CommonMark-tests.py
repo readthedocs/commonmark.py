@@ -98,7 +98,7 @@ if args.t:
 
 for i, example in enumerate(examples): # [0,examples[0]]
 	if not example['section'] == "" and not current_section == example['section']:
-		print(colors.HEADER+"\n"+example['section']+colors.ENDC)
+		print(colors.HEADER+example['section']+colors.ENDC)
 		current_section = example['section']
 
 	if args.t:
@@ -109,12 +109,12 @@ for i, example in enumerate(examples): # [0,examples[0]]
 	actual = renderer.render(ast)
 	if actual == example['html']:
 		passed += 1
-		print(colors.OKGREEN+"\ntick"+colors.ENDC)
+		print(colors.OKGREEN+"tick"+colors.ENDC)
 		if args.v or args.d and not args.np:
 			print(colors.OKBLUE+"=== markdown ===============\n"+colors.ENDC+showSpaces(example['markdown'])+colors.OKBLUE+"\n=== expected ===============\n"+colors.ENDC+showSpaces(example['html'])+colors.OKBLUE+"\n=== got ====================\n"+colors.ENDC+showSpaces(actual))
 	else:
 		failed += 1
-		print(colors.FAIL+"\ncross"+colors.ENDC)
+		print(colors.FAIL+"cross"+colors.ENDC)
 		#parser.dumpAST(ast)
 		if not args.np:
 			print(colors.WARNING+"=== markdown ===============\n"+colors.ENDC+showSpaces(example['markdown'])+colors.WARNING+"\n=== expected ===============\n"+colors.ENDC+showSpaces(example['html'])+colors.WARNING+"\n=== got ====================\n"+colors.ENDC+showSpaces(actual))
