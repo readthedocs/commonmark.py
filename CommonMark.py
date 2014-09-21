@@ -65,7 +65,7 @@ reMain = r"^(?:[\n`\[\]\\!<&*_]|[^\n`\[\]\\!<&*_]+)"
 # Utility functions
 
 def unescape(s):
-  	""" Replace backslash escapes with literal characters."""
+	""" Replace backslash escapes with literal characters."""
 	return re.sub(reAllEscapedChar, r"\g<1>", s)
 
 def isBlank(s):
