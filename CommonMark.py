@@ -715,7 +715,7 @@ class DocParser:
 
 		ln = detabLine(ln)
 
-		self.dumpAST(container)
+		#self.dumpAST(container)
 
 		while len(container.children) > 0:
 			last_child = container.children[len(container.children)-1]
@@ -733,7 +733,7 @@ class DocParser:
 			indent = first_nonspace-offset
 			if container.t == "BlockQuote":
 				matched = bool()
-				if len(ln) > 0:
+				if len(ln) > first_nonspace and len(ln) > 0:
 					matched = ln[first_nonspace] == ">"
 				matched = indent <= 3 and matched
 				if matched:
@@ -806,7 +806,7 @@ class DocParser:
 					container = self.addChild('IndentedCode', line_number, offset)
 				else:
 					break
-			elif ln[first_nonspace] == ">":
+			elif len(ln) > first_nonspace and ln[first_nonspace] == ">":
 				offset = first_nonspace+1
 				try:
 					if ln[offset] == " ":
@@ -820,7 +820,7 @@ class DocParser:
 				already_done, oldtip = closeUnmatchedBlocks(self, already_done, oldtip)
 				container = self.addChild("ATXHeader", line_number, first_nonspace)
 				container.level = len(ATXmatch.group(0).strip())
-				container.strings = [re.sub(r"(?:(\\#) *#*| *#+) *$", "$1", ln[offset:])]
+				container.strings = [re.sub(r"(?:(\\#) *#*| *#+) *$", "", ln[offset:])]
 				break
 			elif FENmatch:
 				fence_length = len(FENmatch.group(0))
@@ -881,7 +881,7 @@ class DocParser:
 			elif container.t == "FencedCode":
 				match = bool()
 				if len(ln) > 0:
-					match = ln[first_nonspace] == container.fence_char and re.match(r"^(?:`{3,}|~{3,})(?= *$)", ln[first_nonspace:])
+					match = len(ln) > first_nonspace and ln[first_nonspace] == container.fence_char and re.match(r"^(?:`{3,}|~{3,})(?= *$)", ln[first_nonspace:])
 				match = indent <= 3 and match
 				FENmatch = re.search(r"^(?:`{3,}|~{3,})(?= *$)", ln[first_nonspace:])
 				if match and len(FENmatch.group(0)) >= container.fence_length:
@@ -1097,7 +1097,7 @@ class HTMLRenderer(object):
 			return self.inTags(tag, attr, self.innersep+self.renderBlocks(block.children, block.tight)+self.innersep)
 		elif ((block.t == "ATXHeader") or (block.t == "SetextHeader")):
 			tag = "h" + str(block.level)
-			return self.inTags(tag, [], self.renderInlines(block.inline_content))
+			return "\n"+self.inTags(tag, [], self.renderInlines(block.inline_content))+"\n"
 		elif (block.t == "IndentedCode"):
 			return '\n'+HTMLRenderer.inTags('pre', [], HTMLRenderer.inTags('code', [], self.escape(block.string_content)+'\n'))+'\n'
 		elif (block.t == "FencedCode"):
