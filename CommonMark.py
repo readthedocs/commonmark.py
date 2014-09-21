@@ -1079,7 +1079,7 @@ class HTMLRenderer(object):
 			if (in_tight_list):
 				return self.renderInlines(block.inline_content)
 			else:
-				return self.inTags('p', [], self.renderInlines(block.inline_content))+"\n"
+				return "\n"+self.inTags('p', [], self.renderInlines(block.inline_content))+"\n"
 		elif (block.t == "BlockQuote"):
 			filling = self.renderBlocks(block.children)
 			if (filling == ""):
@@ -1095,7 +1095,7 @@ class HTMLRenderer(object):
 			else:
 				tag = "ol"
 			attr = [] if (not hasattr(block.list_data, 'start')) or block.list_data['start'] == 1 else [['start', str(block.list_data['start'])]]
-			return "\n"+self.inTags(tag, attr, "\n"+self.innersep+self.renderBlocks(block.children, block.tight)+self.innersep)+"\n"
+			return "\n"+self.inTags(tag, attr, "\n"+self.innersep+self.renderBlocks(block.children, block.tight)+self.innersep)
 		elif ((block.t == "ATXHeader") or (block.t == "SetextHeader")):
 			tag = "h" + str(block.level)
 			return "\n"+self.inTags(tag, [], self.renderInlines(block.inline_content))+"\n"
