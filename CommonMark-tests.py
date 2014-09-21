@@ -77,6 +77,7 @@ current_section = ""
 startTime = time.clock()
 
 if args.i:
+	print(colors.OKGREEN+"(To end input of Markdown block enter 'end' on it's own line, to quit enter 'quit')"+colors.ENDC)
 	while True:
 		s = ""
 		while True:
@@ -87,7 +88,7 @@ if args.i:
 				s = s[:-1]
 				break
 			elif inp =="quit":
-				print("bye!")
+				print(colors.HEADER+"bye!"+colors.ENDC)
 				exit(0)
 		ast = parser.parse(s)
 		html = renderer.render(ast)
