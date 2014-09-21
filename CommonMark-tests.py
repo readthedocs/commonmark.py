@@ -76,15 +76,23 @@ startTime = time.clock()
 
 if args.i:
 	while True:
-		s = raw_input(colors.OKBLUE+"Markdown: "+colors.ENDC)
-		s = re.sub(r"\\n", "\n", s)
+		s = ""
+		while True:
+			inp = raw_input(colors.OKBLUE+"Markdown: "+colors.ENDC)
+			if not inp == "end" and not inp == "quit":
+				s += inp+"\n"
+			elif inp == "end":
+				s = s[:-1]
+				break
+			elif inp =="quit":
+				print("bye!")
+				exit(0)
 		ast = parser.parse(s)
 		html = renderer.render(ast)
 		print(colors.WARNING+"="*10+"AST====="+colors.ENDC)
 		parser.dumpAST(ast)
 		print(colors.WARNING+"="*10+"HTML===="+colors.ENDC)
 		print(html)
-	exit(0)
 
 # some tests?
 if args.t:
