@@ -29,6 +29,7 @@ parser.add_argument('-t', help="Single test to run or comma seperated list of te
 parser.add_argument('-v', action="store_true", help="Verbose mode for debugging, print more stuff...")
 parser.add_argument('-i', action="store_true", help="Interactive Markdown input mode")
 parser.add_argument('-d', action="store_true", help="Debug stuff")
+parser.add_argument('-np', action="store_true", help="Don't print the normal stuff...")
 args = parser.parse_args()
 
 if args.d:
@@ -109,12 +110,14 @@ for i, example in enumerate(examples): # [0,examples[0]]
 	if actual == example['html']:
 		passed += 1
 		print(colors.OKGREEN+"\ntick"+colors.ENDC)
-		if args.v or args.d:
+		if args.v or args.d and not args.np:
 			print(colors.OKBLUE+"=== markdown ===============\n"+colors.ENDC+showSpaces(example['markdown'])+colors.OKBLUE+"\n=== expected ===============\n"+colors.ENDC+showSpaces(example['html'])+colors.OKBLUE+"\n=== got ====================\n"+colors.ENDC+showSpaces(actual))
 	else:
 		failed += 1
 		print(colors.FAIL+"\ncross"+colors.ENDC)
-		print(colors.WARNING+"=== markdown ===============\n"+colors.ENDC+showSpaces(example['markdown'])+colors.WARNING+"\n=== expected ===============\n"+colors.ENDC+showSpaces(example['html'])+colors.WARNING+"\n=== got ====================\n"+colors.ENDC+showSpaces(actual))
+		#parser.dumpAST(ast)
+		if not args.np:
+			print(colors.WARNING+"=== markdown ===============\n"+colors.ENDC+showSpaces(example['markdown'])+colors.WARNING+"\n=== expected ===============\n"+colors.ENDC+showSpaces(example['html'])+colors.WARNING+"\n=== got ====================\n"+colors.ENDC+showSpaces(actual))
 
 print(str(passed)+" tests passed, "+str(failed)+" failed")
 
