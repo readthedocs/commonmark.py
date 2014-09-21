@@ -117,7 +117,7 @@ class Block(object):
 		# self.inline_content =  []
 		return Block(t=tag, start_line=start_line, start_column=start_column)
 
-	def __init__(self, t="", c="", destination="", label="", start_line="", start_column=""):
+	def __init__(self, t="", c="", destination="", label=[], start_line="", start_column=""):
 		self.t = t
 		self.c = c
 		self.destination = destination
@@ -133,6 +133,7 @@ class Block(object):
 		self.strings =  []
 		self.inline_content =  []
 		self.list_data = {}
+		self.title = ""
 		self.info = ""
 
 
@@ -196,12 +197,12 @@ class InlineParser(object):
 		subj = self.subject
 		pos = self.pos
 		if (subj[pos] == "\\"):
-			if (subj[pos+1] == "\n"):
+			if (subj[pos:pos+1] == "\n"):
 				inlines.append(Block(t="Hardbreak"))
 				self.pos += 2
 				return 2
-			elif (reEscapable.search(subj[pos+1])):
-				inlines.append(Block(t="Str", c=subj[pos+1]))
+			elif (reEscapable.search(subj[pos:pos+1])):
+				inlines.append(Block(t="Str", c=subj[pos:pos+1]))
 				self.pos += 2
 				return 2
 			else:
@@ -217,12 +218,12 @@ class InlineParser(object):
 		if m:
 			# email
 			dest = m[1:-1]
-			inlines.append(Block(t="Link", label=Block(t="Str", c=dest, destination="mailto:"+dest)))
+			inlines.append(Block(t="Link", label=[Block(t="Str", c=dest, destination="mailto:"+dest)]))
 			return len(m)
 		elif m2:
 			# link
 			dest2 = m2[1:-1]
-			inlines.append(Block(t="Link", label=Block(t="Str", c=dest2, destination=dest2)))
+			inlines.append(Block(t="Link", label=[Block(t="Str", c=dest2, destination=dest2)]))
 			return len(m2)
 		else:
 			return 0
@@ -312,7 +313,7 @@ class InlineParser(object):
 		elif (numdelims == 3):
 			while (True):
 				res = self.scanDelims(c)
-				if (res["numdelims"] >= 1 and res["numdelims"] >= 3 and res["can_close"] and res["num_delims"] != first_close_delims):
+				if (res["numdelims"] >= 1 and res["numdelims"] >= 3 and res["can_close"] and res["numdelims"] != first_close_delims):
 					if first_close_delims == 1 and numdelims > 2:
 						res["numdelims"] = 2
 					elif first_close_delims == 2:
@@ -446,7 +447,10 @@ class InlineParser(object):
 		else:
 			self.pos = savepos
 			reflabel = rawlabel
-		link = self.refmap[normalizeReference(reflabel)]
+		if hasattr(self.refmap, normalizeReference(reflabel)):
+			link = self.refmap[normalizeReference(reflabel)]
+		else: 
+			link = None
 		if link:
 			inlines.append(Block(t="Link", destination=link.destination, title=link.title, label=parseRawLabel(rawlabel)))
 			return self.pos-startpos
@@ -458,7 +462,7 @@ class InlineParser(object):
 
 
 	def parseEntity(self, inlines):
-		m = self.match(r"^&(?:#x[a-f0-9]{1,8}|#[0-9]{1,8}|[a-z][a-z0-9]{1,31});", [re.IGNORECASE])
+		m = self.match(r"^&(?:#x[a-f0-9]{1,8}|#[0-9]{1,8}|[a-z][a-z0-9]{1,31});", re.IGNORECASE)
 		if m:
 			inlines.append(Block(t="Entity", c=m))
 			return len(m)
