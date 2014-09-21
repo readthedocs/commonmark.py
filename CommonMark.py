@@ -1079,7 +1079,7 @@ class HTMLRenderer(object):
 			if (in_tight_list):
 				return self.renderInlines(block.inline_content)
 			else:
-				return self.inTags('p', [], self.renderInlines(block.inline_content))
+				return self.inTags('p', [], self.renderInlines(block.inline_content))+"\n"
 		elif (block.t == "BlockQuote"):
 			filling = self.renderBlocks(block.children)
 			if (filling == ""):
@@ -1088,14 +1088,14 @@ class HTMLRenderer(object):
 				a = self.innersep + self.renderBlocks(block.children) + self.innersep
 			return self.inTags('blockquote', [], a)
 		elif (block.t == "ListItem"):
-			return self.inTags("li", [], self.renderBlocks(block.children, in_tight_list).strip())
+			return self.inTags("li", [], self.renderBlocks(block.children, in_tight_list).strip())+"\n"
 		elif (block.t == "List"):
 			if (block.list_data['type'] == "Bullet"):
 				tag = "ul"
 			else:
 				tag = "ol"
 			attr = [] if (not hasattr(block.list_data, 'start')) or block.list_data['start'] == 1 else [['start', str(block.list_data['start'])]]
-			return self.inTags(tag, attr, self.innersep+self.renderBlocks(block.children, block.tight)+self.innersep)
+			return "\n"+self.inTags(tag, attr, "\n"+self.innersep+self.renderBlocks(block.children, block.tight)+self.innersep)+"\n"
 		elif ((block.t == "ATXHeader") or (block.t == "SetextHeader")):
 			tag = "h" + str(block.level)
 			return "\n"+self.inTags(tag, [], self.renderInlines(block.inline_content))+"\n"
