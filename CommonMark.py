@@ -53,7 +53,7 @@ reLinkTitle = re.compile('^(?:"(' + ESCAPED_CHAR + '|[^"\\x00])*"' + '|' + '\'('
 reLinkDestinationBraces = re.compile('^(?:[<](?:[^<>\\n\\\\\\x00]' + '|' + ESCAPED_CHAR + '|' + '\\\\)*[>])')
 reLinkDestination = re.compile('^(?:' + REG_CHAR + '+|' + ESCAPED_CHAR + '|' + IN_PARENS_NOSP + ')*')
 reEscapable = re.compile(ESCAPABLE)
-reAllEscapedChar = re.compile('\\\\(' + ESCAPABLE + ')')
+reAllEscapedChar = '\\\\(' + ESCAPABLE + ')'
 reEscapedChar = re.compile('^\\\\(' + ESCAPABLE + ')')
 reAllTab = re.compile("\t")
 reHrule = re.compile("^(?:(?:\* *){3,}|(?:_ *){3,}|(?:- *){3,}) *$")
@@ -65,8 +65,8 @@ reMain = r"^(?:[\n`\[\]\\!<&*_]|[^\n`\[\]\\!<&*_]+)"
 # Utility functions
 
 def unescape(s):
-  """ Replace backslash escapes with literal characters."""
-  return reAllEscapedChar.sub('$1', s, 0)
+  	""" Replace backslash escapes with literal characters."""
+	return re.sub(reAllEscapedChar, r"\g<1>", s)
 
 def isBlank(s):
   """ Returns True if string contains only space characters."""
@@ -197,7 +197,7 @@ class InlineParser(object):
 		subj = self.subject
 		pos = self.pos
 		if (subj[pos] == "\\"):
-			if (subj[pos:pos+1] == "\n"):
+			if (subj[pos+1] == "\n"):
 				inlines.append(Block(t="Hardbreak"))
 				self.pos += 2
 				return 2
