@@ -26,7 +26,8 @@ def trace_calls(frame, event, arg):
 
 parser = argparse.ArgumentParser(description="script to run the CommonMark specification tests against the CommonMark.py parser")
 parser.add_argument('-t', help="Single test to run or comma seperated list of tests (-t 10 or -t 10,11,12,13)")
-parser.add_argument('-v', action="store_true", help="Verbose mode for debugging, print more stuff...")
+parser.add_argument('-p', action="store_true", help="Print passed test stuff")
+parser.add_argument('-f', action="store_true", help="Print failed tests (during -np...)")
 parser.add_argument('-i', action="store_true", help="Interactive Markdown input mode")
 parser.add_argument('-d', action="store_true", help="Debug stuff")
 parser.add_argument('-np', action="store_true", help="Don't print the normal stuff...")
@@ -110,13 +111,13 @@ for i, example in enumerate(examples): # [0,examples[0]]
 	if actual == example['html']:
 		passed += 1
 		print(colors.OKGREEN+"tick"+colors.ENDC)
-		if args.v or args.d and not args.np:
+		if args.p or args.d and not args.np:
 			print(colors.OKBLUE+"=== markdown ===============\n"+colors.ENDC+showSpaces(example['markdown'])+colors.OKBLUE+"\n=== expected ===============\n"+colors.ENDC+showSpaces(example['html'])+colors.OKBLUE+"\n=== got ====================\n"+colors.ENDC+showSpaces(actual))
 	else:
 		failed += 1
 		print(colors.FAIL+"cross"+colors.ENDC)
 		#parser.dumpAST(ast)
-		if not args.np:
+		if not args.np or args.f:
 			print(colors.WARNING+"=== markdown ===============\n"+colors.ENDC+showSpaces(example['markdown'])+colors.WARNING+"\n=== expected ===============\n"+colors.ENDC+showSpaces(example['html'])+colors.WARNING+"\n=== got ====================\n"+colors.ENDC+showSpaces(actual))
 
 print(str(passed)+" tests passed, "+str(failed)+" failed")
