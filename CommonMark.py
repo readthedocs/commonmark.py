@@ -715,6 +715,8 @@ class DocParser:
 
 		ln = detabLine(ln)
 
+		self.dumpAST(container)
+
 		while len(container.children) > 0:
 			last_child = container.children[len(container.children)-1]
 			if not last_child.isOpen:
@@ -856,7 +858,8 @@ class DocParser:
 			if self.acceptsLines(container.t):
 				break
 		match = matchAt(r"[^ ]", ln, offset)
-		if not match:
+
+		if match:
 			first_nonspace = len(ln)-1
 			blank = True
 		else:
