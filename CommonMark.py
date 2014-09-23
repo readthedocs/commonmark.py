@@ -388,6 +388,9 @@ class InlineParser(object):
 				self.parseString([])
 			c = self.peek()
 		if c == "]":
+			print(startpos)
+			print(self.pos)
+			print(self.subject[startpos:self.pos+1])
 			self.label_nest_level = 0
 			self.pos += 1
 			return self.pos-startpos
@@ -402,13 +405,19 @@ class InlineParser(object):
 
 	def parseLink(self, inlines):
 		startpos = self.pos
+		print(self.pos)
 		n = self.parseLinkLabel()
+		if startpos > 0:
+			n += startpos
+		print(startpos)
+		print(n)
 
 		if n == 0:
 			return 0
 
 		afterlabel = self.pos
 		rawlabel = self.subject[startpos:n]
+		print(rawlabel)
 
 		if self.peek() == "(":
 			self.pos += 1
@@ -452,8 +461,6 @@ class InlineParser(object):
 		else: 
 			link = None
 		if link:
-			print(link)
-			print("i has link!")
 			if link.get("title", None):
 			 	title = link['title']
 			else:
@@ -481,6 +488,7 @@ class InlineParser(object):
 
 	def parseString(self, inlines):
 		m = self.match(reMain, re.MULTILINE)
+		print(m)
 		if m:
 			inlines.append(Block(t="Str", c=m))
 			return len(m)
@@ -503,7 +511,8 @@ class InlineParser(object):
 			return 0
 
 	def parseImage(self, inlines):
-		if (self.match(r"^!")):
+		if (self.match("^!")):
+			print(self.pos)
 			n = self.parseLink(inlines)
 			if (n == 0):
 				inlines.append(Block(t="Str", c="!"))
@@ -1015,11 +1024,10 @@ class HTMLRenderer(object):
 	blocksep = "\n"
 	innersep = "\n"
 	softbreak = "\n"
-	escape_pairs = (("[&](?![#](x[a-f0-9]{1,8}|[0-9]{1,8});|[a-z][a-z0-9]{1,31};)", '&amp;'),
+	escape_pairs = (("[&]",'&amp;'), 
 			("[<]", '&lt;'),
 			("[>]", '&gt;'),
-			(r'["]', '&quot;'),
-			(r"[&]",'&amp;'))
+			('["]', '&quot;'))
 
 	@staticmethod
 	def inTags(tag, attribs, contents, selfclosing=None):
@@ -1044,9 +1052,10 @@ class HTMLRenderer(object):
 
 	def escape(self, s, preserve_entities=None):
 		if preserve_entities:
-			e = self.escape_pairs[:-1]
-		else:
 			e = self.escape_pairs[1:]
+			s = re.sub("[&](?![#](x[a-f0-9]{1,8}|[0-9]{1,8});|[a-z][a-z0-9]{1,31};)", "&amp;", s, re.IGNORECASE)
+		else:
+			e = self.escape_pairs
 		for r in e:
 			s = re.sub(r[0], r[1], s)
 		return s
