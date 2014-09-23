@@ -10,7 +10,7 @@
 # print(renderer.render(parser.parse('Hello *world*')))
 
 
-import re, urllib, HTMLParser
+import re
 
 #debug#
 def dump(obj):
@@ -1058,17 +1058,6 @@ class HTMLRenderer(object):
 		for r in e:
 			s = re.sub(r[0], r[1], s)
 		return s
-
-	# WIP this needs to be... a lot better ._.
-	def URLescape(self, s):
-		match = re.match("(http://|https://)", s)
-		if match:
-			s[match.end():] = self.escape(s[match.end():], True)
-			s[match.end():] = HTMLParser.HTMLParser().unescape(s[match.end():])
-		else:
-			s = self.escape(s[match.end():], True)
-			s = HTMLParser.HTMLParser().unescape(s)
-		return urllib.quote(s)
 
 	def renderInline(self, inline):
 		attrs = None
