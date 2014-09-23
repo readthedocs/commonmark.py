@@ -251,12 +251,12 @@ class InlineParser(object):
 		a = self.peek()
 		char_after = a if a else "\\n"
 
-		can_open = (numdelims > 0) and (numdelims <=3) and (not re.search(r"\s", char_after))
-		can_close = (numdelims > 0) and (numdelims <=3) and (not re.search(r"\s", char_before))
+		can_open = (numdelims > 0) and (numdelims <=3) and (not re.match("\s", char_after))
+		can_close = (numdelims > 0) and (numdelims <=3) and (not re.match("\s", char_before))
 
 		if (c == "_"):
-			can_open = can_open and (not re.search("[a-z0-9]", char_before, re.IGNORECASE))
-			can_close = can_close and (not re.search("[a-z0-9]", char_after, re.IGNORECASE))
+			can_open = can_open and (not re.match("[a-z0-9]", char_before, re.IGNORECASE))
+			can_close = can_close and (not re.match("[a-z0-9]", char_after, re.IGNORECASE))
 		self.pos = startpos
 		return {
 			"numdelims": numdelims,
@@ -294,7 +294,8 @@ class InlineParser(object):
 					self.pos += 1
 					inlines[delimpos].t = "Emph"
 					inlines[delimpos].c = inlines[delimpos+1:]
-					inlines.pop(delimpos+1) #inlines[:delimpos+1]
+					if len(inlines) > 1:
+						inlines.pop(delimpos+1) #inlines[:delimpos+1]
 					break 
 				else:
 					if (self.parseInline(inlines) == 0):
@@ -329,7 +330,8 @@ class InlineParser(object):
 					if first_close > 0:
 						inlines[delimpos].t = "Emph" if first_close_delims == 1 else "Strong"
 						inlines[delimpos].c = [Block(t="Emph" if first_close_delims == 1 else "Strong", c=inlines[delimpos+1, first_close]), inlines[first_close+1:]]
-						inlines = inlines[:delimpos+1]
+						#inlines = inlines[:delimpos+1]
+						inlines.pop(delimpos+1)
 						break
 					else:
 						inlines.append(Block(t="Str", c=self.subject[self.pos-res["numdelims"]:self.pos]))
@@ -1068,7 +1070,7 @@ class HTMLRenderer(object):
 		elif inline.t == "Emph":
 			return self.inTags('em', [], self.renderInlines(inline.c))
 		elif inline.t == "Strong":
-			return self.inTags("Strong", [], self.renderInlines(inline.c))
+			return self.inTags("strong", [], self.renderInlines(inline.c))
 		elif inline.t == "Html":
 			return inline.c
 		elif inline.t == "Entity":
