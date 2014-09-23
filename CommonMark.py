@@ -276,7 +276,10 @@ class InlineParser(object):
 		res = self.scanDelims(c)
 		numdelims = res["numdelims"]
 		self.pos += numdelims
-		inlines.append(Block(t="Str", c=self.subject[self.pos - numdelims:numdelims]))
+		if startpos > 0:
+			inlines.append(Block(t="Str", c=self.subject[self.pos - numdelims:numdelims+startpos]))
+		else:
+			inlines.append(Block(t="Str", c=self.subject[self.pos - numdelims:numdelims]))
 		delimpos = len(inlines) - 1
 
 		if ((not res["can_open"]) or (numdelims == 0)):
@@ -291,7 +294,7 @@ class InlineParser(object):
 					self.pos += 1
 					inlines[delimpos].t = "Emph"
 					inlines[delimpos].c = inlines[delimpos+1:]
-					inlines = inlines[:delimpos+1]
+					inlines.pop(delimpos+1) #inlines[:delimpos+1]
 					break 
 				else:
 					if (self.parseInline(inlines) == 0):
@@ -304,7 +307,8 @@ class InlineParser(object):
 					self.pos += 2
 					inlines[delimpos].t = "Strong"
 					inlines[delimpos].c = inlines[delimpos+1:]
-					inlines = inlines[:delimpos+1]
+					#inlines = inlines[:delimpos+1]
+					inlines.pop(delimpos+1)
 					break
 				else:
 					if (self.parseInline(inlines) == 0):
@@ -613,7 +617,7 @@ class DocParser:
 		indChar = ("\t"*ind)+"-> " if ind else ""
 		print(indChar+"["+obj.t+"]")
 		if not obj.title == "": print("\t"+indChar+"Title: "+obj.title)
-		if not obj.c == "": print("\t"+indChar+"c: "+obj.c)
+		#if not obj.c == "": print("\t"+indChar+"c: "+obj.c)
 		if not obj.info == "": print("\t"+indChar+"Info: "+obj.info)
 		if not obj.destination == "": print("\t"+indChar+"Destination: "+obj.destination)
 		#if obj.label: print("\t"+indChar+"Label: "+", ".join(obj.label))
@@ -625,6 +629,10 @@ class DocParser:
 		if not obj.string_content == "": print("\t"+indChar+"String content: "+obj.string_content)
 		if not obj.info == "": print("\t"+indChar+"Info: "+obj.info)
 		if len(obj.strings) > 0: print("\t"+indChar+"Strings: ["+", ".join(obj.strings)+"]")
+		if obj.c:
+			print("\t"+indChar+"c:")
+			for b in obj.c:
+				print(b)
 		if obj.label:
 			print("\t"+indChar+"Label:")
 			for b in obj.label:
