@@ -295,7 +295,8 @@ class InlineParser(object):
 					inlines[delimpos].t = "Emph"
 					inlines[delimpos].c = inlines[delimpos+1:]
 					if len(inlines) > 1:
-						inlines.pop(delimpos+1) #inlines[:delimpos+1]
+						for x in range(delimpos+1, len(inlines)):
+							inlines.pop(len(inlines)-1)
 					break 
 				else:
 					if (self.parseInline(inlines) == 0):
@@ -308,8 +309,9 @@ class InlineParser(object):
 					self.pos += 2
 					inlines[delimpos].t = "Strong"
 					inlines[delimpos].c = inlines[delimpos+1:]
-					#inlines = inlines[:delimpos+1]
-					inlines.pop(delimpos+1)
+					if len(inlines) > 1:
+						for x in range(delimpos+1, len(inlines)):
+							inlines.pop(len(inlines)-1)
 					break
 				else:
 					if (self.parseInline(inlines) == 0):
@@ -330,8 +332,9 @@ class InlineParser(object):
 					if first_close > 0:
 						inlines[delimpos].t = "Emph" if first_close_delims == 1 else "Strong"
 						inlines[delimpos].c = [Block(t="Emph" if first_close_delims == 1 else "Strong", c=inlines[delimpos+1, first_close]), inlines[first_close+1:]]
-						#inlines = inlines[:delimpos+1]
-						inlines.pop(delimpos+1)
+						if len(inlines) > 1:
+							for x in range(delimpos+1, len(inlines)):
+								inlines.pop(len(inlines)-1)
 						break
 					else:
 						inlines.append(Block(t="Str", c=self.subject[self.pos-res["numdelims"]:self.pos]))
