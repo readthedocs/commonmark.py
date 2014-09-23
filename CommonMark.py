@@ -133,7 +133,7 @@ class Block(object):
 		self.strings =  []
 		self.inline_content =  []
 		self.list_data = {}
-		self.title = ""
+		self.title = title
 		self.info = ""
 
 
@@ -418,7 +418,9 @@ class InlineParser(object):
 					title = self.parseLinkTitle() or ''
 					if re.match(r"^\s", self.subject[self.pos-1]) and (not title == None) or True:
 						if (title or True) and self.spnl() and self.match(r"^\)"):
+							print(title)
 							inlines.append(Block(t="Link", destination=dest, title=title, label=self.parseRawLabel(rawlabel)))
+							DocParser.dumpAST(DocParser(), inlines[len(inlines)-1])
 							return self.pos-startpos
 						else:
 							self.pos = startpos
@@ -1067,6 +1069,7 @@ class HTMLRenderer(object):
 			return inline.c
 		elif inline.t == "Link":
 			attrs = [['href', self.escape(inline.destination, True)]]
+			print(inline.title)
 			if inline.title:
 				attrs.append(['title', self.escape(inline.title, True)])
 			return self.inTags('a', attrs, self.renderInlines(inline.label))
