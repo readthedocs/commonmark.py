@@ -56,7 +56,7 @@ reEscapable = re.compile(ESCAPABLE)
 reAllEscapedChar = '\\\\(' + ESCAPABLE + ')'
 reEscapedChar = re.compile('^\\\\(' + ESCAPABLE + ')')
 reAllTab = re.compile("\t")
-reHrule = re.compile("^(?:(?:\* *){3,}|(?:_ *){3,}|(?:- *){3,}) *$")
+reHrule = re.compile(r"^(?:(?:\* *){3,}|(?:_ *){3,}|(?:- *){3,}) *$")
 
 # Matches a character with a special meaning in markdown,
 # or a string of non-special characters.
@@ -75,7 +75,7 @@ def isBlank(s):
 def normalizeReference(s):
 	""" Normalize reference label: collapse internal whitespace to
 	 single space, remove leading/trailing whitespace, case fold."""
-	return re.sub(r'\s+', ' ', s.strip())
+	return re.sub(r'\s+', ' ', s.strip()).upper()
 
 def matchAt(pattern, s, offset):
 	""" Attempt to match a regex in string s at offset offset.
@@ -117,7 +117,7 @@ class Block(object):
 		# self.inline_content =  []
 		return Block(t=tag, start_line=start_line, start_column=start_column)
 
-	def __init__(self, t="", c="", destination="", label=[], start_line="", start_column=""):
+	def __init__(self, t="", c="", destination="", label=[], start_line="", start_column="", title=""):
 		self.t = t
 		self.c = c
 		self.destination = destination
@@ -366,14 +366,12 @@ class InlineParser(object):
 			return 0
 		self.pos += 1
 		c = self.peek()
-		while c and ((not c == "]") or (nest_level > 0)): # and (c = self.peek()):
+		while ((not c == "]") or (nest_level > 0)) and not c == None: # and (c = self.peek()):
 			if c == "`":
 				self.parseBackticks([])
 				break
 			elif c == "<":
-				self.parseAutoLink([])
-				self.parseHtmlTag([])
-				self.parseString([])
+				self.parseAutoLink([]) or self.parseHtmlTag([]) or self.parseString([])
 				break
 			elif c == "[":
 				nest_level += 1
@@ -388,17 +386,16 @@ class InlineParser(object):
 				break
 			else:
 				self.parseString([])
-				c = self.peek()
+			c = self.peek()
 		if c == "]":
 			self.label_nest_level = 0
 			self.pos += 1
 			return self.pos-startpos
 		else:
-			if not c:
+			if c == None:
 				self.label_nest_level = nest_level
 			self.pos = startpos
 			return 0
-
 
 	def parseRawLabel(self, s):
 		return InlineParser().parse(s[1:-1])
@@ -416,12 +413,12 @@ class InlineParser(object):
 		if self.peek() == "(":
 			self.pos += 1
 			if self.spnl():
-				dest = self.parseLinkDestination
+				dest = self.parseLinkDestination()
 				if dest and self.spnl():
-					if re.match(r"^\s", self.subject[self.pos-1]):
-						title = self.parseLinkTitle() or ''
+					title = self.parseLinkTitle() or ''
+					if re.match(r"^\s", self.subject[self.pos-1]) and (not title == None) or True:
 						if (title or True) and self.spnl() and self.match(r"^\)"):
-							inlines.append(Block(t="Link", destination=title, title=title, label=parseRawLabel(rawlabel)))
+							inlines.append(Block(t="Link", destination=dest, title=title, label=self.parseRawLabel(rawlabel)))
 							return self.pos-startpos
 						else:
 							self.pos = startpos
@@ -447,12 +444,20 @@ class InlineParser(object):
 		else:
 			self.pos = savepos
 			reflabel = rawlabel
-		if hasattr(self.refmap, normalizeReference(reflabel)):
+		if normalizeReference(reflabel) in self.refmap:
 			link = self.refmap[normalizeReference(reflabel)]
 		else: 
 			link = None
 		if link:
-			inlines.append(Block(t="Link", destination=link.destination, title=link.title, label=parseRawLabel(rawlabel)))
+			if hasattr(link, "title"):
+			 	title = link.title
+			else:
+			 	title = ""
+			if hasattr(link, "destination"):
+				destination = link.destination
+			else:
+				destination = ""
+			inlines.append(Block(t="Link", destination=destination, title=title, label=self.parseRawLabel(rawlabel)))
 			return self.pos-startpos
 		else:
 			self.pos = startpos
@@ -518,7 +523,8 @@ class InlineParser(object):
 		else:
 			rawlabel = self.subject[:matchChars]
 
-		if (self.peek() == ":"):
+		test = self.peek()
+		if (test == ":"):
 			self.pos += 1
 		else:
 			self.pos = startpos
@@ -563,7 +569,7 @@ class InlineParser(object):
 		elif ((c == "*") or (c == "_")):
 			res = self.parseEmphasis(inlines)
 		elif (c == "["):
-			res = self.parseImage(inlines)
+			res = self.parseLink(inlines)
 		elif (c == "!"):
 			res = self.parseImage(inlines)
 		elif (c == "<"):
@@ -681,12 +687,13 @@ class DocParser:
 		return newBlock
 
 	def listsMatch(self, list_data, item_data):
-		if hasattr(list_data, "type") and hasattr(item_data, "type") and hasattr(list_data, "delimiter") and hasattr(item_data, "delimiter") and hasattr(list_data, "bullet_char") and hasattr(item_data, "bullet_char"):
+		if "type" in list_data and "type" in item_data and "delimiter" in list_data and "delimiter" in item_data and "bullet_char" in list_data and "bullet_char" in item_data:
 			return list_data['type'] == item_data['type'] and list_data['delimiter'] == item_data['delimiter'] and list_data['bullet_char'] == item_data['bullet_char']
 
 	def parseListMarker(self, ln, offset):
 		rest = ln[offset:]
 		data = {}
+		blank_item = bool()
 		if re.match(reHrule, rest):
 			return None
 		match = re.search(r"^[*+-]( +|$)", rest)
@@ -704,7 +711,6 @@ class DocParser:
 			blank_item = match2.group(0) == len(rest)
 		else:
 			return None
-		#blank_item = (len(match.group(0)) == len(rest)) or (len(match2.group(0)) == len(rest))
 		if spaces_after_marker >= 5 or spaces_after_marker < 1 or blank_item:
 			if match:
 				data['padding'] = len(match.group(0))-spaces_after_marker+1
@@ -729,6 +735,8 @@ class DocParser:
 		oldtip = self.tip
 
 		ln = detabLine(ln)
+
+		#self.dumpAST(container)
 
 		while len(container.children) > 0:
 			last_child = container.children[len(container.children)-1]
@@ -928,7 +936,7 @@ class DocParser:
 			block.end_line = line_number
 
 		if (block.t == "Paragraph"):
-			block.string_content = re.sub(r"^ *", "", "\n".join(block.strings))
+			block.string_content = re.sub(r"^ *", "", "\n".join(block.strings), re.MULTILINE)
 
 			pos = self.inlineParser.parseReference(block.string_content, self.refmap)
 			while (block.string_content[0] == "[" and pos):
@@ -1076,9 +1084,6 @@ class HTMLRenderer(object):
 
 	def renderBlock(self,  block, in_tight_list):
 		tag = attr = info_words = None
-		#if len(block.children) > 0:
-		#	block = block.children[0]
-		#dump(block)
 		if (block.t == "Document"):
 			whole_doc = self.renderBlocks(block.children)
 			if (whole_doc == ""):
