@@ -437,6 +437,7 @@ class InlineParser(object):
 		self.spnl()
 		beforelabel = self.pos
 		n = self.parseLinkLabel()
+		print(self.refmap)
 		if n == 2:
 			reflabel = rawlabel
 		elif n > 0:
@@ -449,12 +450,14 @@ class InlineParser(object):
 		else: 
 			link = None
 		if link:
-			if hasattr(link, "title"):
-			 	title = link.title
+			print(link)
+			print("i has link!")
+			if link.get("title", None):
+			 	title = link['title']
 			else:
 			 	title = ""
-			if hasattr(link, "destination"):
-				destination = link.destination
+			if link.get("destination", None):
+				destination = link['destination']
 			else:
 				destination = ""
 			inlines.append(Block(t="Link", destination=destination, title=title, label=self.parseRawLabel(rawlabel)))
@@ -529,7 +532,6 @@ class InlineParser(object):
 		else:
 			self.pos = startpos
 			return 0
-
 		self.spnl()
 
 		dest = self.parseLinkDestination()
@@ -549,7 +551,6 @@ class InlineParser(object):
 			return 0
 
 		normlabel = normalizeReference(rawlabel)
-
 		if (not refmap.get(normlabel, None)):
 			refmap[normlabel] = {
 				"destination": dest,
@@ -615,7 +616,7 @@ class DocParser:
 		if not obj.c == "": print("\t"+indChar+"c: "+obj.c)
 		if not obj.info == "": print("\t"+indChar+"Info: "+obj.info)
 		if not obj.destination == "": print("\t"+indChar+"Destination: "+obj.destination)
-		if obj.label: print("\t"+indChar+"Label: "+", ".join(obj.label))
+		#if obj.label: print("\t"+indChar+"Label: "+", ".join(obj.label))
 		if obj.isOpen: print("\t"+indChar+"Open: "+str(obj.isOpen))
 		if obj.last_line_blank: print("\t"+indChar+"Last line blank: "+str(obj.last_line_blank))
 		if obj.start_line: print("\t"+indChar+"Start line: "+str(obj.start_line))
@@ -624,6 +625,10 @@ class DocParser:
 		if not obj.string_content == "": print("\t"+indChar+"String content: "+obj.string_content)
 		if not obj.info == "": print("\t"+indChar+"Info: "+obj.info)
 		if len(obj.strings) > 0: print("\t"+indChar+"Strings: ["+", ".join(obj.strings)+"]")
+		if obj.label:
+			print("\t"+indChar+"Label:")
+			for b in obj.label:
+				self.dumpAST(b, ind+2)
 		if hasattr(obj.list_data, "type"):
 			print("\t"+indChar+"List Data: ")
 			print("\t\t"+indChar+"[type] = "+obj.list_data['type'])
