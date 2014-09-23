@@ -5,7 +5,7 @@ Pure Python port of [jgm](https://github.com/jgm)'s [stmd.js](https://github.com
 
 When the project is semi-stable we will move to a Python package format (PyPi) and include both a module and cli tool to render HTML (also some format to represent the intermediate AST, and maybe other things like PDF, etc in the future) files from Markdown files.
 
-(**Note**: This is a work in progress! **112**/**443** tests currently passing)
+(**Note**: This is a work in progress! **125**/**443** tests currently passing)
 
 [![Build Status](https://travis-ci.org/rolandshoemaker/CommonMark-py.svg?branch=master)](https://travis-ci.org/rolandshoemaker/CommonMark-py)
 

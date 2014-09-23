@@ -213,17 +213,17 @@ class InlineParser(object):
 			return 0
 
 	def parseAutoLink(self, inlines):
-		m = self.match(r"^<([a-zA-Z0-9.!#$%&'*+\/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*)>")
-		m2 = self.match(r"^<(?:coap|doi|javascript|aaa|aaas|about|acap|cap|cid|crid|data|dav|dict|dns|file|ftp|geo|go|gopher|h323|http|https|iax|icap|im|imap|info|ipp|iris|iris.beep|iris.xpc|iris.xpcs|iris.lwz|ldap|mailto|mid|msrp|msrps|mtqp|mupdate|news|nfs|ni|nih|nntp|opaquelocktoken|pop|pres|rtsp|service|session|shttp|sieve|sip|sips|sms|snmp|soap.beep|soap.beeps|tag|tel|telnet|tftp|thismessage|tn3270|tip|tv|urn|vemmi|ws|wss|xcon|xcon-userid|xmlrpc.beep|xmlrpc.beeps|xmpp|z39.50r|z39.50s|adiumxtra|afp|afs|aim|apt|attachment|aw|beshare|bitcoin|bolo|callto|chrome|chrome-extension|com-eventbrite-attendee|content|cvs|dlna-playsingle|dlna-playcontainer|dtn|dvb|ed2k|facetime|feed|finger|fish|gg|git|gizmoproject|gtalk|hcp|icon|ipn|irc|irc6|ircs|itms|jar|jms|keyparc|lastfm|ldaps|magnet|maps|market|message|mms|ms-help|msnim|mumble|mvn|notes|oid|palm|paparazzi|platform|proxy|psyc|query|res|resource|rmi|rsync|rtmp|secondlife|sftp|sgn|skype|smb|soldat|spotify|ssh|steam|svn|teamspeak|things|udp|unreal|ut2004|ventrilo|view-source|webcal|wtai|wyciwyg|xfire|xri|ymsgr):[^<>\x00-\x20]*>", re.IGNORECASE) 
+		m = self.match("^<([a-zA-Z0-9.!#$%&'*+\/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*)>")
+		m2 = self.match("^<(?:coap|doi|javascript|aaa|aaas|about|acap|cap|cid|crid|data|dav|dict|dns|file|ftp|geo|go|gopher|h323|http|https|iax|icap|im|imap|info|ipp|iris|iris.beep|iris.xpc|iris.xpcs|iris.lwz|ldap|mailto|mid|msrp|msrps|mtqp|mupdate|news|nfs|ni|nih|nntp|opaquelocktoken|pop|pres|rtsp|service|session|shttp|sieve|sip|sips|sms|snmp|soap.beep|soap.beeps|tag|tel|telnet|tftp|thismessage|tn3270|tip|tv|urn|vemmi|ws|wss|xcon|xcon-userid|xmlrpc.beep|xmlrpc.beeps|xmpp|z39.50r|z39.50s|adiumxtra|afp|afs|aim|apt|attachment|aw|beshare|bitcoin|bolo|callto|chrome|chrome-extension|com-eventbrite-attendee|content|cvs|dlna-playsingle|dlna-playcontainer|dtn|dvb|ed2k|facetime|feed|finger|fish|gg|git|gizmoproject|gtalk|hcp|icon|ipn|irc|irc6|ircs|itms|jar|jms|keyparc|lastfm|ldaps|magnet|maps|market|message|mms|ms-help|msnim|mumble|mvn|notes|oid|palm|paparazzi|platform|proxy|psyc|query|res|resource|rmi|rsync|rtmp|secondlife|sftp|sgn|skype|smb|soldat|spotify|ssh|steam|svn|teamspeak|things|udp|unreal|ut2004|ventrilo|view-source|webcal|wtai|wyciwyg|xfire|xri|ymsgr):[^<>\x00-\x20]*>", re.IGNORECASE) 
 		if m:
 			# email
 			dest = m[1:-1]
-			inlines.append(Block(t="Link", label=[Block(t="Str", c=dest, destination="mailto:"+dest)]))
+			inlines.append(Block(t="Link", label=[Block(t="Str", c=dest)], destination="mailto:"+dest))
 			return len(m)
 		elif m2:
 			# link
 			dest2 = m2[1:-1]
-			inlines.append(Block(t="Link", label=[Block(t="Str", c=dest2, destination=dest2)]))
+			inlines.append(Block(t="Link", label=[Block(t="Str", c=dest2)], destination=dest2))
 			return len(m2)
 		else:
 			return 0
@@ -388,9 +388,6 @@ class InlineParser(object):
 				self.parseString([])
 			c = self.peek()
 		if c == "]":
-			print(startpos)
-			print(self.pos)
-			print(self.subject[startpos:self.pos+1])
 			self.label_nest_level = 0
 			self.pos += 1
 			return self.pos-startpos
@@ -405,19 +402,15 @@ class InlineParser(object):
 
 	def parseLink(self, inlines):
 		startpos = self.pos
-		print(self.pos)
 		n = self.parseLinkLabel()
 		if startpos > 0:
 			n += startpos
-		print(startpos)
-		print(n)
 
 		if n == 0:
 			return 0
 
 		afterlabel = self.pos
 		rawlabel = self.subject[startpos:n]
-		print(rawlabel)
 
 		if self.peek() == "(":
 			self.pos += 1
@@ -427,7 +420,6 @@ class InlineParser(object):
 					title = self.parseLinkTitle() or ''
 					if re.match(r"^\s", self.subject[self.pos-1]) and (not title == None) or True:
 						if (title or True) and self.spnl() and self.match(r"^\)"):
-							print(title)
 							inlines.append(Block(t="Link", destination=dest, title=title, label=self.parseRawLabel(rawlabel)))
 							DocParser.dumpAST(DocParser(), inlines[len(inlines)-1])
 							return self.pos-startpos
@@ -448,7 +440,6 @@ class InlineParser(object):
 		self.spnl()
 		beforelabel = self.pos
 		n = self.parseLinkLabel()
-		print(self.refmap)
 		if n == 2:
 			reflabel = rawlabel
 		elif n > 0:
@@ -488,7 +479,6 @@ class InlineParser(object):
 
 	def parseString(self, inlines):
 		m = self.match(reMain, re.MULTILINE)
-		print(m)
 		if m:
 			inlines.append(Block(t="Str", c=m))
 			return len(m)
@@ -512,7 +502,6 @@ class InlineParser(object):
 
 	def parseImage(self, inlines):
 		if (self.match("^!")):
-			print(self.pos)
 			n = self.parseLink(inlines)
 			if (n == 0):
 				inlines.append(Block(t="Str", c="!"))
@@ -1078,7 +1067,6 @@ class HTMLRenderer(object):
 			return inline.c
 		elif inline.t == "Link":
 			attrs = [['href', self.escape(inline.destination, True)]]
-			print(inline.title)
 			if inline.title:
 				attrs.append(['title', self.escape(inline.title, True)])
 			return self.inTags('a', attrs, self.renderInlines(inline.label))
