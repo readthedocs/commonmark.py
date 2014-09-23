@@ -10,7 +10,7 @@
 # print(renderer.render(parser.parse('Hello *world*')))
 
 
-import re
+import re, urllib, HTMLParser
 
 #debug#
 def dump(obj):
@@ -362,7 +362,6 @@ class InlineParser(object):
 			return unescape(res[1:len(res)-1])
 		else:
 			res2 = self.match(reLinkDestination)
-			print(":wewe")
 			if not res2 == None:
 				return unescape(res2)
 			else:
@@ -1059,6 +1058,17 @@ class HTMLRenderer(object):
 		for r in e:
 			s = re.sub(r[0], r[1], s)
 		return s
+
+	# WIP this needs to be... a lot better ._.
+	def URLescape(self, s):
+		match = re.match("(http://|https://)", s)
+		if match:
+			s[match.end():] = self.escape(s[match.end():], True)
+			s[match.end():] = HTMLParser.HTMLParser().unescape(s[match.end():])
+		else:
+			s = self.escape(s[match.end():], True)
+			s = HTMLParser.HTMLParser().unescape(s)
+		return urllib.quote(s)
 
 	def renderInline(self, inline):
 		attrs = None
