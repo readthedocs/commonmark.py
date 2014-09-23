@@ -154,11 +154,10 @@ class InlineParser(object):
 		self.refmap = {}
 
 	def match(self, regexString, reCompileFlags=0):
-		#regex = re.compile(regexString, flags=reCompileFlags)
 		match = re.search(regexString, self.subject[self.pos:], flags=reCompileFlags)
 		if match:
-			self.pos += match.end()
-			return match.group(0)
+			self.pos += match.end(0)
+			return match.group()
 		else:
 			return None
 
@@ -359,11 +358,12 @@ class InlineParser(object):
 
 	def parseLinkDestination(self):
 		res = self.match(reLinkDestinationBraces)
-		if res:
-			return unescape(res[1:-1])
+		if not res == None:
+			return unescape(res[1:len(res)-1])
 		else:
 			res2 = self.match(reLinkDestination)
-			if res2:
+			print(":wewe")
+			if not res2 == None:
 				return unescape(res2)
 			else:
 				return None
@@ -428,7 +428,7 @@ class InlineParser(object):
 			self.pos += 1
 			if self.spnl():
 				dest = self.parseLinkDestination()
-				if dest and self.spnl():
+				if not dest == None and self.spnl():
 					title = self.parseLinkTitle() or ''
 					if re.match(r"^\s", self.subject[self.pos-1]) and (not title == None) or True:
 						if (title or True) and self.spnl() and self.match(r"^\)"):
@@ -504,7 +504,8 @@ class InlineParser(object):
 				last.c = re.sub(r' *$', '', last.c)
 				inlines.append(Block(t="Hardbreak"))
 			else:
-				if last and last.t == "Str" and len(last.c) >= 2 and last.c[-2] == " ":
+				if last and last.t == "Str" and last.c[-1] == " ":
+					print(last.c[0:-1])
 					last.c = last.c[0:-1]
 				inlines.append(Block(t="Softbreak"))
 			return 1
