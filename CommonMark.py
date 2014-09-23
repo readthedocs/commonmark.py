@@ -202,7 +202,7 @@ class InlineParser(object):
 				self.pos += 2
 				return 2
 			elif (reEscapable.search(subj[pos:pos+1])):
-				inlines.append(Block(t="Str", c=subj[pos:pos+1]))
+				inlines.append(Block(t="Str", c=subj[pos+1:pos+2]))
 				self.pos += 2
 				return 2
 			else:
@@ -287,6 +287,8 @@ class InlineParser(object):
 
 		first_close_delims = 0
 
+		print("num delims 1: "+str(numdelims))
+
 		if (numdelims == 1):
 			while (True):
 				res = self.scanDelims(c)
@@ -318,9 +320,14 @@ class InlineParser(object):
 						break
 			return (self.pos - startpos)
 		elif (numdelims == 3):
+			print("num is 3")
 			while (True):
 				res = self.scanDelims(c)
-				if (res["numdelims"] >= 1 and res["numdelims"] >= 3 and res["can_close"] and res["numdelims"] != first_close_delims):
+				print("res:")
+				print(res)
+				print("subject: "+self.subject)
+				print("pos: "+str(self.pos))
+				if (res["numdelims"] >= 1 and res["numdelims"] <= 3 and res["can_close"] and not res["numdelims"] == first_close_delims):
 					if first_close_delims == 1 and numdelims > 2:
 						res["numdelims"] = 2
 					elif first_close_delims == 2:
@@ -330,8 +337,14 @@ class InlineParser(object):
 					self.pos += res['numdelims']
 
 					if first_close > 0:
-						inlines[delimpos].t = "Emph" if first_close_delims == 1 else "Strong"
-						inlines[delimpos].c = [Block(t="Emph" if first_close_delims == 1 else "Strong", c=inlines[delimpos+1, first_close]), inlines[first_close+1:]]
+						print("inlines len: "+str(len(inlines)))
+						print(inlines[delimpos])
+						inlines[delimpos].t = "Strong" if first_close_delims == 1 else "Emph"
+						print("inlines len: "+str(len(inlines)))
+						print("first_close+1: "+str(first_close+1))
+						print(inlines)
+						temp = "Emph" if first_close_delims == 1 else "Strong"
+						inlines[delimpos].c = [Block(t=temp, c=inlines[delimpos+1:first_close])]+inlines[first_close+1:] # error on 362?
 						if len(inlines) > 1:
 							for x in range(delimpos+1, len(inlines)):
 								inlines.pop(len(inlines)-1)
@@ -339,6 +352,8 @@ class InlineParser(object):
 					else:
 						inlines.append(Block(t="Str", c=self.subject[self.pos-res["numdelims"]:self.pos]))
 						first_close = len(inlines)-1
+						print("first closer, first_close: "+str(first_close))
+						print("first closer pos: "+str(self.pos))
 						first_close_delims = res["numdelims"]
 				else:
 					if self.parseInline(inlines) == 0:
@@ -346,6 +361,8 @@ class InlineParser(object):
 			return (self.pos-startpos)
 		else:
 			return res
+
+		return 0
 
 	def parseLinkTitle(self):
 		title = self.match(reLinkTitle)
@@ -430,7 +447,6 @@ class InlineParser(object):
 					if re.match(r"^\s", self.subject[self.pos-1]) and (not title == None) or True:
 						if (title or True) and self.spnl() and self.match(r"^\)"):
 							inlines.append(Block(t="Link", destination=dest, title=title, label=self.parseRawLabel(rawlabel)))
-							DocParser.dumpAST(DocParser(), inlines[len(inlines)-1])
 							return self.pos-startpos
 						else:
 							self.pos = startpos
@@ -1001,6 +1017,7 @@ class DocParser:
 
 
 	def processInlines(self, block):
+		#self.dumpAST(block)
 		if block.t == "ATXHeader" or block.t == "Paragraph" or block.t == "SetextHeader":
 			block.inline_content = self.inlineParser.parse(block.string_content.strip(), self.refmap)
 			block.string_content = ""
@@ -1053,6 +1070,7 @@ class HTMLRenderer(object):
 		pass
 
 	def escape(self, s, preserve_entities=None):
+		print(s)
 		if preserve_entities:
 			e = self.escape_pairs[1:]
 			s = re.sub("[&](?![#](x[a-f0-9]{1,8}|[0-9]{1,8});|[a-z][a-z0-9]{1,31};)", "&amp;", s, re.IGNORECASE)
