@@ -44,8 +44,7 @@ f = codecs.open("spec.txt", encoding="utf-8")
 datalist = []
 for line in f:
 	datalist.append(line)
-data = "\n".join(datalist)
-
+data = "".join(datalist)
 passed = 0
 failed = 0
 catStats = {}
@@ -55,15 +54,16 @@ current_section = ""
 tabChar = u'\u2192'
 spaceChar = u'\u2423'
 
-
 def showSpaces(t):
 	t = re.sub(u"\\t", tabChar, t)
 	t = re.sub(u" ", spaceChar, t)
 	return t
 
-t = re.sub(r"\r\n?", r"\n", data)
-tests = re.sub(r"^<!-- END TESTS -->(.|[\n])*", '', t, flags=re.M)
-testMatch = re.findall(re.compile(r"^\.\n([\s\S]*?)^\.\n([\s\S]*?)^\.$|^#{1,6} *(.*)$", re.M), tests)
+t = re.sub("\r\n", "\n", data)
+#print(t)
+#exit(0)
+tests = re.sub("^<!-- END TESTS -->(.|[\n])*", '', t, flags=re.M)
+testMatch = re.findall(re.compile("^\.\n([\s\S]*?)^\.\n([\s\S]*?)^\.$|^#{1,6} *(.*)$", re.M), tests)
 
 for match in testMatch:
 	if not match[2] == "":
@@ -119,19 +119,22 @@ for i, example in enumerate(examples): # [0,examples[0]]
 	else:
 		print("Test #"+str(i+1))
 	catStats[current_section][2] += 1
+	if args.d: print(colors.HEADER+"[Parsing]"+colors.ENDC)
 	ast = parser.parse(re.sub(tabChar, "\t", example['markdown']))
+	if args.d: print(colors.HEADER+"[Rendering]"+colors.ENDC)
 	actual = renderer.render(ast)
 	if actual == example['html']:
 		passed += 1
 		catStats[current_section][0] += 1
 		print(colors.OKGREEN+"tick"+colors.ENDC)
+		if args.d: parser.dumpAST(ast)
 		if args.p or args.d and not args.np:
 			print(colors.OKBLUE+"=== markdown ===============\n"+colors.ENDC+showSpaces(example['markdown'])+colors.OKBLUE+"\n=== expected ===============\n"+colors.ENDC+showSpaces(example['html'])+colors.OKBLUE+"\n=== got ====================\n"+colors.ENDC+showSpaces(actual))
 	else:
 		failed += 1
 		catStats[current_section][1] += 1
 		print(colors.FAIL+"cross"+colors.ENDC)
-		#parser.dumpAST(ast)
+		if args.d: parser.dumpAST(ast)
 		if not args.np or args.f:
 			print(colors.WARNING+"=== markdown ===============\n"+colors.ENDC+showSpaces(example['markdown'])+colors.WARNING+"\n=== expected ===============\n"+colors.ENDC+showSpaces(example['html'])+colors.WARNING+"\n=== got ====================\n"+colors.ENDC+showSpaces(actual))
 

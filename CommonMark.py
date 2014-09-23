@@ -197,7 +197,7 @@ class InlineParser(object):
 		subj = self.subject
 		pos = self.pos
 		if (subj[pos] == "\\"):
-			if (subj[pos+1] == "\n"):
+			if len(subj) > pos+1 and (subj[pos+1] == "\n"):
 				inlines.append(Block(t="Hardbreak"))
 				self.pos += 2
 				return 2
@@ -242,7 +242,7 @@ class InlineParser(object):
 		char_before = char_after = None
 		startpos = self.pos
 
-		char_before = "\n" if self.pos == 0 else self.subject[self.pos - 1]
+		char_before = '\n' if self.pos == 0 else self.subject[self.pos - 1]
 
 		while (self.peek() == c):
 			numdelims += 1
@@ -287,8 +287,6 @@ class InlineParser(object):
 
 		first_close_delims = 0
 
-		print("num delims 1: "+str(numdelims))
-
 		if (numdelims == 1):
 			while (True):
 				res = self.scanDelims(c)
@@ -320,13 +318,8 @@ class InlineParser(object):
 						break
 			return (self.pos - startpos)
 		elif (numdelims == 3):
-			print("num is 3")
 			while (True):
 				res = self.scanDelims(c)
-				print("res:")
-				print(res)
-				print("subject: "+self.subject)
-				print("pos: "+str(self.pos))
 				if (res["numdelims"] >= 1 and res["numdelims"] <= 3 and res["can_close"] and not res["numdelims"] == first_close_delims):
 					if first_close_delims == 1 and numdelims > 2:
 						res["numdelims"] = 2
@@ -337,12 +330,7 @@ class InlineParser(object):
 					self.pos += res['numdelims']
 
 					if first_close > 0:
-						print("inlines len: "+str(len(inlines)))
-						print(inlines[delimpos])
 						inlines[delimpos].t = "Strong" if first_close_delims == 1 else "Emph"
-						print("inlines len: "+str(len(inlines)))
-						print("first_close+1: "+str(first_close+1))
-						print(inlines)
 						temp = "Emph" if first_close_delims == 1 else "Strong"
 						inlines[delimpos].c = [Block(t=temp, c=inlines[delimpos+1:first_close])]+inlines[first_close+1:] # error on 362?
 						if len(inlines) > 1:
@@ -352,8 +340,6 @@ class InlineParser(object):
 					else:
 						inlines.append(Block(t="Str", c=self.subject[self.pos-res["numdelims"]:self.pos]))
 						first_close = len(inlines)-1
-						print("first closer, first_close: "+str(first_close))
-						print("first closer pos: "+str(self.pos))
 						first_close_delims = res["numdelims"]
 				else:
 					if self.parseInline(inlines) == 0:
@@ -511,14 +497,14 @@ class InlineParser(object):
 			return 0
 
 	def parseNewline(self, inlines):
-		if (self.peek() == r'\n'):
+		if (self.peek() == '\n'):
 			self.pos += 1
 			last = inlines[len(inlines)-1]
 			if last and last.t == "Str" and last.c[-2:] == "  ":
-				last.c = re.sub(' *$', '', last.c)
+				last.c = re.sub(r' *$', '', last.c)
 				inlines.append(Block(t="Hardbreak"))
 			else:
-				if last and last.t == "Str" and last.c[-2] == " ":
+				if last and last.t == "Str" and len(last.c) >= 2 and last.c[-2] == " ":
 					last.c = last.c[0:-1]
 				inlines.append(Block(t="Softbreak"))
 			return 1
@@ -586,7 +572,7 @@ class InlineParser(object):
 	def parseInline(self, inlines):
 		c = self.peek()
 		res = None
-		if (c == "\n"):
+		if (c == '\n'):
 			res = self.parseNewline(inlines)
 		elif (c == "\\"):
 			res = self.parseEscaped(inlines)
@@ -599,16 +585,10 @@ class InlineParser(object):
 		elif (c == "!"):
 			res = self.parseImage(inlines)
 		elif (c == "<"):
-			res = self.parseAutoLink(inlines)
-			if not res:
-				res = self.parseHtmlTag(inlines)
+			res = self.parseAutoLink(inlines) or self.parseHtmlTag(inlines)
 		elif (c == "&"):
 			res = self.parseEntity(inlines)
-		else:
-			pass
-		if not res:
-			res = self.parseString(inlines)
-		return res
+		return res or self.parseString(inlines)
 
 	def parseInlines(self, s, refmap = {}):
 		self.subject = s
@@ -1070,7 +1050,6 @@ class HTMLRenderer(object):
 		pass
 
 	def escape(self, s, preserve_entities=None):
-		print(s)
 		if preserve_entities:
 			e = self.escape_pairs[1:]
 			s = re.sub("[&](?![#](x[a-f0-9]{1,8}|[0-9]{1,8});|[a-z][a-z0-9]{1,31};)", "&amp;", s, re.IGNORECASE)
@@ -1130,7 +1109,7 @@ class HTMLRenderer(object):
 			if (in_tight_list):
 				return self.renderInlines(block.inline_content)
 			else:
-				return "\n"+self.inTags('p', [], self.renderInlines(block.inline_content))+"\n"
+				return self.inTags('p', [], self.renderInlines(block.inline_content))
 		elif (block.t == "BlockQuote"):
 			filling = self.renderBlocks(block.children)
 			if (filling == ""):
@@ -1139,19 +1118,19 @@ class HTMLRenderer(object):
 				a = self.innersep + self.renderBlocks(block.children) + self.innersep
 			return self.inTags('blockquote', [], a)
 		elif (block.t == "ListItem"):
-			return self.inTags("li", [], self.renderBlocks(block.children, in_tight_list).strip())+"\n"
+			return self.inTags("li", [], self.renderBlocks(block.children, in_tight_list).strip())
 		elif (block.t == "List"):
 			if (block.list_data['type'] == "Bullet"):
 				tag = "ul"
 			else:
 				tag = "ol"
 			attr = [] if (not block.list_data.get('start')) or block.list_data['start'] == 1 else [['start', str(block.list_data['start'])]]
-			return "\n"+self.inTags(tag, attr, "\n"+self.innersep+self.renderBlocks(block.children, block.tight)+self.innersep)
+			return self.inTags(tag, attr, self.innersep+self.renderBlocks(block.children, block.tight)+self.innersep)
 		elif ((block.t == "ATXHeader") or (block.t == "SetextHeader")):
 			tag = "h" + str(block.level)
-			return "\n"+self.inTags(tag, [], self.renderInlines(block.inline_content))+"\n"
+			return self.inTags(tag, [], self.renderInlines(block.inline_content))#+"\n"
 		elif (block.t == "IndentedCode"):
-			return '\n'+HTMLRenderer.inTags('pre', [], HTMLRenderer.inTags('code', [], self.escape(block.string_content)+'\n'))+'\n'
+			return HTMLRenderer.inTags('pre', [], HTMLRenderer.inTags('code', [], self.escape(block.string_content)))
 		elif (block.t == "FencedCode"):
 			info_words = []
 			if block.info:
@@ -1177,7 +1156,7 @@ class HTMLRenderer(object):
 		for i in range(len(blocks)):
 			if not blocks[i].t == "ReferenceDef":
 				result.append(self.renderBlock(blocks[i], in_tight_list))
-		return self.blocksep.join(result)
+		return "\n".join(result)
 
 	def render(self,  block, in_tight_list=None):
 		return self.renderBlock(block, in_tight_list)
