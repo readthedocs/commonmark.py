@@ -1114,7 +1114,7 @@ class HTMLRenderer(object):
 				tag = "ul"
 			else:
 				tag = "ol"
-			attr = [] if (not hasattr(block.list_data, 'start')) or block.list_data['start'] == 1 else [['start', str(block.list_data['start'])]]
+			attr = [] if (not block.list_data.get('start')) or block.list_data['start'] == 1 else [['start', str(block.list_data['start'])]]
 			return "\n"+self.inTags(tag, attr, "\n"+self.innersep+self.renderBlocks(block.children, block.tight)+self.innersep)
 		elif ((block.t == "ATXHeader") or (block.t == "SetextHeader")):
 			tag = "h" + str(block.level)
