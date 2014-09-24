@@ -777,7 +777,13 @@ class DocParser:
 						pass
 				else:
 					all_matched = False
-				break
+			elif container.t == "ListItem":
+				if (indent >= container.list_data['marker_offset']+container.list_data['padding']):
+					offset += container.list_data['marker_offset']+container.list_data['padding']
+				elif blank:
+					offset = first_nonspace
+				else:
+					all_matched = False
 			elif container.t == "IndentedCode":
 				if indent >= CODE_INDENT:
 					offset += CODE_INDENT
@@ -785,25 +791,20 @@ class DocParser:
 					offset = first_nonspace
 				else:
 					all_matched = False
-				break
 			elif container.t == "ATXHeader" or container.t == "SetextHeader" or container.t == "HorizontalRule":
 				all_matched = False
-				break
 			elif container.t == "FencedCode":
 				i = container.fence_offset
 				while i > 0 and len(ln) > offset and ln[offset] == " ":
 					offset += 1
 					i -= 1
-				break
 			elif container.t == "HtmlBlock":
 				if blank:
 					all_matched = False
-				break
 			elif container.t == "Paragraph":
 				if blank:
 					container.last_line_blank = True
 					all_matched = False
-				break
 			if not all_matched:
 				container = container.parent
 				break
