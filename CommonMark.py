@@ -826,7 +826,8 @@ class DocParser:
                 else:
                     all_matched = False
             elif container.t == "ListItem":
-                if (indent >= container.list_data['marker_offset'] + container.list_data['padding']):
+                if (indent >= container.list_data['marker_offset'] +
+                   container.list_data['padding']):
                     offset += container.list_data[
                         'marker_offset'] + container.list_data['padding']
                 elif blank:
@@ -930,8 +931,7 @@ class DocParser:
                 break
             elif container.t == "Paragraph" and len(container.strings) == 1 and PARmatch:
                 already_done, oldtip = closeUnmatchedBlocks(
-                    self, already_done, oldtip)  # this isn't doing what it should
-                # self.finalize(container, line_number)
+                    self, already_done, oldtip)
                 container.t = "SetextHeader"
                 container.level = 1 if PARmatch.group(0)[0] == '=' else 2
                 offset = len(ln)
@@ -947,7 +947,8 @@ class DocParser:
                     self, already_done, oldtip)
                 data['marker_offset'] = indent
                 offset = first_nonspace + data['padding']
-                if container.t == "List" or not self.listsMatch(container.list_data, data):
+                if container.t == "List" or not self.listsMatch(
+                   container.list_data, data):
                     container = self.addChild(
                         "List", line_number, first_nonspace)
                     container.list_data = data
@@ -994,7 +995,7 @@ class DocParser:
                     self.finalize(container, line_number)
                 else:
                     self.addLine(ln, offset)
-            elif container.t == "ATXHeader" or container.t == "SetextHeader" or container.t == "HorizontalRule":
+            elif container.t in ["ATXHeader", "SetextHeader", "HtmlBlock"]:
                 # nothing to do; we already added the contents.
                 pass
             else:
@@ -1002,12 +1003,13 @@ class DocParser:
                     self.addLine(ln, first_nonspace)
                 elif blank:
                     pass
-                elif not container == "HorizontalRule" and not container.t == "SetextHeader":
+                elif not container.t == "HorizontalRule"and not container.t == "SetextHeader":
                     container = self.addChild(
                         "Paragraph", line_number, first_nonspace)
                     self.addLine(ln, first_nonspace)
                 else:
-                    print("Line " + str(line_number) + " with container type " +
+                    print("Line " + str(line_number) +
+                          " with container type " +
                           container.t + " did not match any condition.")
 
     def finalize(self, block, line_number):
@@ -1060,7 +1062,8 @@ class DocParser:
                 while (j < numsubitems):
                     subitem = item.children[j]
                     last_subitem = j == (numsubitems - 1)
-                    if (self.endsWithBlankLine(subitem) and not (last_item and last_subitem)):
+                    if (self.endsWithBlankLine(subitem) and
+                       not (last_item and last_subitem)):
                         block.tight = False
                         break
                     j += 1
@@ -1072,7 +1075,7 @@ class DocParser:
 
     def processInlines(self, block):
         # self.dumpAST(block)
-        if block.t == "ATXHeader" or block.t == "Paragraph" or block.t == "SetextHeader":
+        if block.t in ["ATXHeader", "Paragraph", "SetextHeader"]:
             block.inline_content = self.inlineParser.parse(
                 block.string_content.strip(), self.refmap)
             block.string_content = ""
@@ -1129,7 +1132,8 @@ class HTMLRenderer(object):
         if preserve_entities:
             e = self.escape_pairs[1:]
             s = re.sub(
-                "[&](?![#](x[a-f0-9]{1,8}|[0-9]{1,8});|[a-z][a-z0-9]{1,31};)", "&amp;", s, re.IGNORECASE)
+                "[&](?![#](x[a-f0-9]{1,8}|[0-9]{1,8});|[a-z][a-z0-9]{1,31};)",
+                "&amp;", s, re.IGNORECASE)
         else:
             e = self.escape_pairs
         for r in e:
@@ -1187,7 +1191,8 @@ class HTMLRenderer(object):
             if (in_tight_list):
                 return self.renderInlines(block.inline_content)
             else:
-                return self.inTags('p', [], self.renderInlines(block.inline_content))
+                return self.inTags('p', [],
+                                   self.renderInlines(block.inline_content))
         elif (block.t == "BlockQuote"):
             filling = self.renderBlocks(block.children)
             if (filling == ""):
@@ -1197,7 +1202,9 @@ class HTMLRenderer(object):
                     self.renderBlocks(block.children) + self.innersep
             return self.inTags('blockquote', [], a)
         elif (block.t == "ListItem"):
-            return self.inTags("li", [], self.renderBlocks(block.children, in_tight_list).strip())
+            return self.inTags("li", [],
+                               self.renderBlocks(block.children,
+                                                 in_tight_list).strip())
         elif (block.t == "List"):
             if (block.list_data['type'] == "Bullet"):
                 tag = "ul"
@@ -1205,19 +1212,25 @@ class HTMLRenderer(object):
                 tag = "ol"
             attr = [] if (not block.list_data.get('start')) or block.list_data[
                 'start'] == 1 else [['start', str(block.list_data['start'])]]
-            return self.inTags(tag, attr, self.innersep + self.renderBlocks(block.children, block.tight) + self.innersep)
+            return self.inTags(tag, attr,
+                               self.innersep +
+                               self.renderBlocks(block.children, block.tight) +
+                               self.innersep)
         elif ((block.t == "ATXHeader") or (block.t == "SetextHeader")):
             tag = "h" + str(block.level)
-            return self.inTags(tag, [], self.renderInlines(block.inline_content))  # +"\n"
+            return self.inTags(tag, [],
+                               self.renderInlines(block.inline_content))
         elif (block.t == "IndentedCode"):
-            return HTMLRenderer.inTags('pre', [], HTMLRenderer.inTags('code', [], self.escape(block.string_content)))
+            return HTMLRenderer.inTags('pre', [], HTMLRenderer.inTags('code',
+                                       [], self.escape(block.string_content)))
         elif (block.t == "FencedCode"):
             info_words = []
             if block.info:
                 info_words = re.split(r" +", block.info)
             attr = [] if len(info_words) == 0 else [
                 ["class", "language-" + self.escape(info_words[0], True)]]
-            return self.inTags('pre', [], self.inTags('code', attr, self.escape(block.string_content)))
+            return self.inTags('pre', [], self.inTags('code',
+                               attr, self.escape(block.string_content)))
         elif (block.t == "HtmlBlock"):
             return block.string_content
         elif (block.t == "ReferenceDef"):
