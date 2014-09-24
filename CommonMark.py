@@ -122,16 +122,16 @@ class Block(object):
 		self.c = c
 		self.destination = destination
 		self.label = label
-		self.isOpen =  True
-		self.last_line_blank =  False
-		self.start_line =  start_line
-		self.start_column =  start_column
-		self.end_line =  start_line
-		self.children =  []
-		self.parent =  None
-		self.string_content =  ""
-		self.strings =  []
-		self.inline_content =  []
+		self.isOpen = True
+		self.last_line_blank = False
+		self.start_line = start_line
+		self.start_column = start_column
+		self.end_line = start_line
+		self.children = []
+		self.parent = None
+		self.string_content = ""
+		self.strings = []
+		self.inline_content = []
 		self.list_data = {}
 		self.title = title
 		self.info = ""
@@ -504,7 +504,6 @@ class InlineParser(object):
 				inlines.append(Block(t="Hardbreak"))
 			else:
 				if last and last.t == "Str" and last.c[-1] == " ":
-					print(last.c[0:-1])
 					last.c = last.c[0:-1]
 				inlines.append(Block(t="Softbreak"))
 			return 1
@@ -694,7 +693,7 @@ class DocParser:
 		while not (self.tip.t == "Document" or self.tip.t == "BlockQuote" or self.tip.t == "ListItem" or (self.tip.t == "List" and tag == "ListItem")):
 			self.finalize(self.tip, line_number)
 		column_number = offset+1
-		newBlock = Block.makeBlock(tag, line_number, offset)
+		newBlock = Block.makeBlock(tag, line_number, column_number)
 		self.tip.children.append(newBlock)
 		newBlock.parent = self.tip
 		self.tip = newBlock
@@ -742,18 +741,16 @@ class DocParser:
 		all_matched = True
 		offset = 0
 		CODE_INDENT = 4
-		blank = bool()
-		already_done = bool()
+		blank = None
+		already_done = False
 
 		container = self.doc
 		oldtip = self.tip
 
 		ln = detabLine(ln)
 
-		#self.dumpAST(container)
-
 		while len(container.children) > 0:
-			last_child = container.children[len(container.children)-1]
+			last_child = container.children[-1]
 			if not last_child.isOpen:
 				break
 			container = last_child
@@ -874,11 +871,13 @@ class DocParser:
 				already_done, oldtip = closeUnmatchedBlocks(self, already_done, oldtip)
 				container.t = "SetextHeader"
 				container.level = 1 if PARmatch.group(0)[0] == '=' else 2
+				#self.finalize(container, line_number)
 				offset = len(ln)
 			elif matchAt(reHrule, ln, first_nonspace):
 				already_done, oldtip = closeUnmatchedBlocks(self, already_done, oldtip)
 				container = self.addChild("HorizontalRule", line_number, first_nonspace)
 				offset = len(ln)-1
+				break
 			elif data:
 				already_done, oldtip = closeUnmatchedBlocks(self, already_done, oldtip)
 				data['marker_offset'] = indent
@@ -901,12 +900,13 @@ class DocParser:
 			first_nonspace = match
 			blank = False
 		indent = first_nonspace-offset
+
 		if not self.tip == last_matched_container and not blank and self.tip.t == "Paragraph" and len(self.tip.strings) > 0:
 			self.last_line_blank = False
 			self.addLine(ln, offset)
 		else:
 			already_done, oldtip = closeUnmatchedBlocks(self, already_done, oldtip)
-			container.last_line_blank = blank and (not container.t == "BlockQuote" or container.t == "FencedCode" or (container.t == "ListItem" and len(container.children) == 0 and container.start_line == line_number))
+			container.last_line_blank = blank and (not container.t == "BlockQuote" or not container.t == "FencedCode" or not (container.t == "ListItem" and len(container.children) == 0 and container.start_line == line_number))
 			cont = container
 			while cont.parent:
 				cont.parent.last_line_blank = False
