@@ -408,22 +408,17 @@ class InlineParser(object):
         while ((not c == "]") or (nest_level > 0)) and not c is None:  # and (c = self.peek()):
             if c == "`":
                 self.parseBackticks([])
-                break
             elif c == "<":
                 self.parseAutoLink([]) or self.parseHtmlTag(
                     []) or self.parseString([])
-                break
             elif c == "[":
                 nest_level += 1
                 self.pos += 1
-                break
             elif c == "]":
                 nest_level -= 1
                 self.pos += 1
-                break
             elif c == "\\":
                 self.parseEscaped([])
-                break
             else:
                 self.parseString([])
             c = self.peek()
