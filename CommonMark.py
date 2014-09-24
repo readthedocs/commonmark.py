@@ -195,7 +195,7 @@ class InlineParser(object):
         afterOpenTicks = self.pos
         foundCode = False
         match = self.match(r"`+", re.MULTILINE)
-        while (not foundCode) and (match != None):
+        while (not foundCode) and (not match is None):
             if (match == ticks):
                 c = self.subject[afterOpenTicks:(self.pos - len(ticks))]
                 c = re.sub(r"[ \n]+", ' ', c)
@@ -386,11 +386,11 @@ class InlineParser(object):
 
     def parseLinkDestination(self):
         res = self.match(reLinkDestinationBraces)
-        if not res == None:
+        if not res is None:
             return unescape(res[1:len(res) - 1])
         else:
             res2 = self.match(reLinkDestination)
-            if not res2 == None:
+            if not res2 is None:
                 return unescape(res2)
             else:
                 return None
@@ -405,7 +405,7 @@ class InlineParser(object):
             return 0
         self.pos += 1
         c = self.peek()
-        while ((not c == "]") or (nest_level > 0)) and not c == None:  # and (c = self.peek()):
+        while ((not c == "]") or (nest_level > 0)) and not c is None:  # and (c = self.peek()):
             if c == "`":
                 self.parseBackticks([])
                 break
@@ -432,7 +432,7 @@ class InlineParser(object):
             self.pos += 1
             return self.pos - startpos
         else:
-            if c == None:
+            if c is None:
                 self.label_nest_level = nest_level
             self.pos = startpos
             return 0
@@ -456,9 +456,9 @@ class InlineParser(object):
             self.pos += 1
             if self.spnl():
                 dest = self.parseLinkDestination()
-                if not dest == None and self.spnl():
+                if not dest is None and self.spnl():
                     title = self.parseLinkTitle() or ''
-                    if re.match(r"^\s", self.subject[self.pos - 1]) and (not title == None) or True:
+                    if re.match(r"^\s", self.subject[self.pos - 1]) and (not title is None) or True:
                         if (title or True) and self.spnl() and self.match(r"^\)"):
                             inlines.append(
                                 Block(t="Link", destination=dest, title=title, label=self.parseRawLabel(rawlabel)))
@@ -576,18 +576,18 @@ class InlineParser(object):
         self.spnl()
 
         dest = self.parseLinkDestination()
-        if (dest == None or len(dest) == 0):
+        if (dest is None or len(dest) == 0):
             self.pos = startpos
             return 0
 
         beforetitle = self.pos
         self.spnl()
         title = self.parseLinkTitle()
-        if (title == None):
+        if (title is None):
             title = ""
             self.pos = beforetitle
 
-        if (self.match(r"^ *(?:\n|$)") == None):
+        if (self.match(r"^ *(?:\n|$)") is None):
             self.pos = startpos
             return 0
 
@@ -809,7 +809,7 @@ class DocParser:
             container = last_child
 
             match = matchAt(r"[^ ]", ln, offset)
-            if match == None:
+            if match is None:
                 first_nonspace = len(ln)
                 blank = True
             else:
@@ -872,9 +872,9 @@ class DocParser:
 
         if blank and container.last_line_blank:
             self.breakOutOfLists(container, line_number)
-        while not container.t == "FencedCode" and not container.t == "IndentedCode" and not container.t == "HtmlBlock" and not matchAt(r"^[ #`~*+_=<>0-9-]", ln, offset) == None:
+        while not container.t == "FencedCode" and not container.t == "IndentedCode" and not container.t == "HtmlBlock" and not matchAt(r"^[ #`~*+_=<>0-9-]", ln, offset) is None:
             match = matchAt("[^ ]", ln, offset)
-            if match == None:
+            if match is None:
                 first_nonspace = len(ln)
                 blank = True
             else:
@@ -965,7 +965,7 @@ class DocParser:
                 break
 
         match = matchAt(r"[^ ]", ln, offset)
-        if match == None:
+        if match is None:
             first_nonspace = len(ln)
             blank = True
         else:
@@ -1115,7 +1115,7 @@ class HTMLRenderer(object):
         if (len(attribs) > 0):
             i = 0
             # attrib = attribs[i]
-            while (len(attribs) > i) and (not attribs[i] == None):
+            while (len(attribs) > i) and (not attribs[i] is None):
                 attrib = attribs[i]
                 result += (" " + attrib[0] + '="' + attrib[1] + '"')
                 i += 1
