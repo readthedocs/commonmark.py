@@ -868,10 +868,10 @@ class DocParser:
 				container = self.addChild('HtmlBlock', line_number, first_nonspace)
 				break
 			elif container.t == "Paragraph" and len(container.strings) == 1 and PARmatch:
-				already_done, oldtip = closeUnmatchedBlocks(self, already_done, oldtip)
+				already_done, oldtip = closeUnmatchedBlocks(self, already_done, oldtip) # this isn't doing what it should
+				#self.finalize(container, line_number)
 				container.t = "SetextHeader"
 				container.level = 1 if PARmatch.group(0)[0] == '=' else 2
-				#self.finalize(container, line_number)
 				offset = len(ln)
 			elif matchAt(reHrule, ln, first_nonspace):
 				already_done, oldtip = closeUnmatchedBlocks(self, already_done, oldtip)
