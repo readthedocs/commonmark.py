@@ -1220,11 +1220,6 @@ class HTMLRenderer(object):
             info_words = []
             if block.info:
                 info_words = re.split(r" +", block.info)
-            if ((len(info_words) == 0) or (len(info_words[0]) == 0)):
-                attr = []
-            else:
-                arg = [
-                    ['class', 'language-' + self.escape(info_words[0], True)]]
             attr = [] if len(info_words) == 0 else [
                 ["class", "language-" + self.escape(info_words[0], True)]]
             return self.inTags('pre', [], self.inTags('code', attr, self.escape(block.string_content)))
