@@ -200,7 +200,7 @@ class InlineParser(object):
 				inlines.append(Block(t="Hardbreak"))
 				self.pos += 2
 				return 2
-			elif (reEscapable.search(subj[pos:pos+1])):
+			elif (reEscapable.search(subj[pos+1:pos+2])):
 				inlines.append(Block(t="Str", c=subj[pos+1:pos+2]))
 				self.pos += 2
 				return 2
