@@ -913,8 +913,12 @@ class DocParser:
                 container = self.addChild(
                     "ATXHeader", line_number, first_nonspace)
                 container.level = len(ATXmatch.group(0).strip())
-                container.strings = [
-                    re.sub(r"(?:(\\#) *#*| *#+) *$", "", ln[offset:])]
+                if not re.search(r'\\#', ln[offset:]) is None:
+                    container.strings = [
+                        re.sub(r'(?:(\\#) *#*| *#+) *$', '\g<1>', ln[offset:])]
+                else:
+                    container.strings = [
+                        re.sub(r'(?:(\\#) *#*| *#+) *$', '', ln[offset:])]
                 break
             elif FENmatch:
                 fence_length = len(FENmatch.group(0))
@@ -1012,9 +1016,10 @@ class DocParser:
                         "Paragraph", line_number, first_nonspace)
                     self.addLine(ln, first_nonspace)
                 else:
-                    print("Line " + str(line_number) +
-                          " with container type " +
-                          container.t + " did not match any condition.")
+                    # print("Line " + str(line_number) +
+                    #       " with container type " +
+                    #       container.t + " did not match any condition.")
+                    pass
 
     def finalize(self, block, line_number):
         if (not block.isOpen):
@@ -1059,7 +1064,6 @@ class DocParser:
                 item = block.children[i]
                 last_item = (i == numitems-1)
                 if (self.endsWithBlankLine(item) and not last_item):
-                    print("here")
                     block.tight = False
                     break
                 numsubitems = len(item.children)
@@ -1073,7 +1077,6 @@ class DocParser:
                         break
                     j += 1
                 i += 1
-            print(block.tight)
         else:
             pass
 
@@ -1218,7 +1221,6 @@ class HTMLRenderer(object):
                 tag = "ol"
             attr = [] if (not block.list_data.get('start')) or block.list_data[
                 'start'] == 1 else [['start', str(block.list_data['start'])]]
-            print("wewewewe "+str(block.tight))
             return self.inTags(tag, attr,
                                self.innersep +
                                self.renderBlocks(block.children, block.tight) +
