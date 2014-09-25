@@ -10,15 +10,19 @@
 # print(renderer.render(parser.parse('Hello *world*')))
 
 
-import re
+import re, sys
 
-# debug#
-
-
-def dump(obj):
-    for attr in dir(obj):
-        print("obj.%s = %s" % (attr, getattr(obj, attr)))
-     # debug#
+# if python3 use html.parser, else use HTMLParser
+if sys.version_info >= (3, 0):
+    import html.parser, urllib.parse
+    HTMLescape = html.parser.HTMLParser().unescape
+    HTMLquote = urllib.parse.quote
+    HTMLunquote = urllib.parse.unquote
+else:
+    import HTMLParser, urllib
+    HTMLescape = HTMLParser.HTMLParser().unescape
+    HTMLquote = urllib.quote
+    HTMLunquote = urllib.unquote
 
 # Some of the regexps used in inline parser :<
 
@@ -1133,6 +1137,22 @@ class HTMLRenderer(object):
 
     def __init__(self):
         pass
+
+    @staticmethod
+    def URLescape(s):
+        # might have to do another if python 2/3 since in 2 we hae to .encode/.decode the string...?
+        # unquote url so we don't accidently encode a % we shouldn't
+        s = HTMLunquote(s)
+        if sys.version_info >= (3, 0):
+            # convert entities
+            s = HTMLescape(s)
+            # requote it now with all our stuff
+            s = HTMLquote(s)
+        else:
+            # convert entities
+            s = HTMLescape(s).encode("utf-8")
+            # requote it now with all our stuff
+            s = HTMLquote(s)
 
     def escape(self, s, preserve_entities=None):
         if preserve_entities:
