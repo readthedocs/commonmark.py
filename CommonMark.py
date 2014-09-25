@@ -748,8 +748,13 @@ class DocParser:
         return newBlock
 
     def listsMatch(self, list_data, item_data):
-        if "type" in list_data and "type" in item_data and "delimiter" in list_data and "delimiter" in item_data and "bullet_char" in list_data and "bullet_char" in item_data:
-            return list_data['type'] == item_data['type'] and list_data['delimiter'] == item_data['delimiter'] and list_data['bullet_char'] == item_data['bullet_char']
+        print(list_data)
+        print(item_data)
+        if "type" in list_data and "type" in item_data and "bullet_char" in list_data and "bullet_char" in item_data:
+            if "delimiter" in list_data and "delimiter" in item_data:
+                 return list_data['type'] == item_data['type'] and list_data['bullet_char'] == item_data['bullet_char'] and list_data['delimiter'] == item_data['delimiter']
+            else:
+                return list_data['type'] == item_data['type'] and list_data['bullet_char'] == item_data['bullet_char']
 
     def parseListMarker(self, ln, offset):
         rest = ln[offset:]
@@ -783,6 +788,7 @@ class DocParser:
                 data['padding'] = len(match.group(0))
             elif match2:
                 data['padding'] = len(match2.group(0))
+        print(data)
         return data
 
     def incorporateLine(self, ln, line_number):
@@ -947,8 +953,10 @@ class DocParser:
                     self, already_done, oldtip)
                 data['marker_offset'] = indent
                 offset = first_nonspace + data['padding']
-                if container.t == "List" or not self.listsMatch(
+                print("hur")
+                if not container.t == "List" or not self.listsMatch(
                    container.list_data, data):
+                    print("hur2")
                     container = self.addChild(
                         "List", line_number, first_nonspace)
                     container.list_data = data
