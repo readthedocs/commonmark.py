@@ -748,8 +748,6 @@ class DocParser:
         return newBlock
 
     def listsMatch(self, list_data, item_data):
-        print(list_data)
-        print(item_data)
         if "type" in list_data and "type" in item_data and "bullet_char" in list_data and "bullet_char" in item_data:
             if "delimiter" in list_data and "delimiter" in item_data:
                  return list_data['type'] == item_data['type'] and list_data['bullet_char'] == item_data['bullet_char'] and list_data['delimiter'] == item_data['delimiter']
@@ -788,7 +786,6 @@ class DocParser:
                 data['padding'] = len(match.group(0))
             elif match2:
                 data['padding'] = len(match2.group(0))
-        print(data)
         return data
 
     def incorporateLine(self, ln, line_number):
@@ -847,7 +844,7 @@ class DocParser:
                     offset = first_nonspace
                 else:
                     all_matched = False
-            elif container.t == "ATXHeader" or container.t == "SetextHeader" or container.t == "HorizontalRule":
+            elif container.t in ["ATXHeader", "SetextHeader", "HorizontalRule"]:
                 all_matched = False
             elif container.t == "FencedCode":
                 i = container.fence_offset
@@ -941,7 +938,7 @@ class DocParser:
                 container.t = "SetextHeader"
                 container.level = 1 if PARmatch.group(0)[0] == '=' else 2
                 offset = len(ln)
-            elif matchAt(reHrule, ln, first_nonspace):
+            elif not matchAt(reHrule, ln, first_nonspace) is None:
                 already_done, oldtip = closeUnmatchedBlocks(
                     self, already_done, oldtip)
                 container = self.addChild(
@@ -953,10 +950,8 @@ class DocParser:
                     self, already_done, oldtip)
                 data['marker_offset'] = indent
                 offset = first_nonspace + data['padding']
-                print("hur")
                 if not container.t == "List" or not self.listsMatch(
                    container.list_data, data):
-                    print("hur2")
                     container = self.addChild(
                         "List", line_number, first_nonspace)
                     container.list_data = data
