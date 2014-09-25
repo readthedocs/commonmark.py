@@ -926,7 +926,7 @@ class DocParser:
                 container.fence_offset = first_nonspace - offset
                 offset = first_nonspace + fence_length
                 break
-            elif matchAt(reHtmlBlockOpen, ln, first_nonspace):
+            elif not matchAt(reHtmlBlockOpen, ln, first_nonspace) is None:
                 already_done, oldtip = closeUnmatchedBlocks(
                     self, already_done, oldtip)
                 container = self.addChild(
@@ -1006,7 +1006,7 @@ class DocParser:
                     self.addLine(ln, first_nonspace)
                 elif blank:
                     pass
-                elif not container.t == "HorizontalRule"and not container.t == "SetextHeader":
+                elif not container.t == "HorizontalRule" and not container.t == "SetextHeader":
                     container = self.addChild(
                         "Paragraph", line_number, first_nonspace)
                     self.addLine(ln, first_nonspace)
@@ -1074,10 +1074,9 @@ class DocParser:
         else:
             pass
 
-        self.tip = block.parent  # or self.tip #or self.top
+        self.tip = block.parent
 
     def processInlines(self, block):
-        # self.dumpAST(block)
         if block.t in ["ATXHeader", "Paragraph", "SetextHeader"]:
             block.inline_content = self.inlineParser.parse(
                 block.string_content.strip(), self.refmap)
