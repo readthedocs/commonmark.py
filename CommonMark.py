@@ -149,6 +149,7 @@ class Block(object):
         self.list_data = {}
         self.title = title
         self.info = ""
+        self.tight = bool()
 
 
 class InlineParser(object):
@@ -978,7 +979,7 @@ class DocParser:
         else:
             already_done, oldtip = closeUnmatchedBlocks(
                 self, already_done, oldtip)
-            container.last_line_blank = blank and (not container.t == "BlockQuote" or not container.t == "FencedCode" or not (
+            container.last_line_blank = blank and not (container.t == "BlockQuote" or container.t == "FencedCode" or (
                 container.t == "ListItem" and len(container.children) == 0 and container.start_line == line_number))
             cont = container
             while cont.parent:
@@ -1056,8 +1057,9 @@ class DocParser:
             i = 0
             while (i < numitems):
                 item = block.children[i]
-                last_item = (i == numitems - 1)
+                last_item = (i == numitems-1)
                 if (self.endsWithBlankLine(item) and not last_item):
+                    print("here")
                     block.tight = False
                     break
                 numsubitems = len(item.children)
@@ -1071,6 +1073,7 @@ class DocParser:
                         break
                     j += 1
                 i += 1
+            print(block.tight)
         else:
             pass
 
@@ -1190,6 +1193,7 @@ class HTMLRenderer(object):
             else:
                 return (whole_doc + "\n")
         elif (block.t == "Paragraph"):
+
             if (in_tight_list):
                 return self.renderInlines(block.inline_content)
             else:
@@ -1214,6 +1218,7 @@ class HTMLRenderer(object):
                 tag = "ol"
             attr = [] if (not block.list_data.get('start')) or block.list_data[
                 'start'] == 1 else [['start', str(block.list_data['start'])]]
+            print("wewewewe "+str(block.tight))
             return self.inTags(tag, attr,
                                self.innersep +
                                self.renderBlocks(block.children, block.tight) +
