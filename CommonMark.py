@@ -749,11 +749,9 @@ class DocParser:
         return newBlock
 
     def listsMatch(self, list_data, item_data):
-        if "type" in list_data and "type" in item_data and "bullet_char" in list_data and "bullet_char" in item_data:
-            if "delimiter" in list_data and "delimiter" in item_data:
-                 return list_data['type'] == item_data['type'] and list_data['bullet_char'] == item_data['bullet_char'] and list_data['delimiter'] == item_data['delimiter']
-            else:
-                return list_data['type'] == item_data['type'] and list_data['bullet_char'] == item_data['bullet_char']
+        return (list_data.get("type", None) == item_data.get("type", None) and
+            list_data.get("delimiter", None) == item_data.get("delimiter", None) and
+            list_data.get("bullet_char", None) == item_data.get("bullet_char", None))
 
     def parseListMarker(self, ln, offset):
         rest = ln[offset:]
@@ -761,8 +759,8 @@ class DocParser:
         blank_item = bool()
         if re.match(reHrule, rest):
             return None
-        match = re.search(r"^[*+-]( +|$)", rest)
-        match2 = re.search(r"^(\d+)([.)])( +|$)", rest)
+        match = re.search(r'^[*+-]( +|$)', rest)
+        match2 = re.search(r'^(\d+)([.)])( +|$)', rest)
         if match:
             spaces_after_marker = len(match.group(1))
             data['type'] = 'Bullet'
