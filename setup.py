@@ -10,7 +10,7 @@ setup(
 	description = "Python parser for the CommonMark Markdown spec",
 	author = "Bibek Kafle <bkafle662@gmail.com>, Roland Shoemaker <rolandshoemaker@gmail.com>",
 	author_email = "rolandshoemaker@gmail.com",
-	url = "https://github.com/rolandshoemaker/cmark.py",
+	url = "https://github.com/rolandshoemaker/CommonMark-py",
 	download_url = "https://github.com/rolandshoemaker/CommonMark-py/tarball/v0.5.2",
 	keywords = ["markup", "markdown", "commonmark"],
 	classifiers = ["Programming Language :: Python",
