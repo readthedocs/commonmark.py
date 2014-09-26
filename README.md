@@ -12,7 +12,7 @@ We are currently at the same development stage (actually a bit ahead because we 
 Installation
 ------------
 
-    rolands@kamaji:~$ pip install commonmark-py
+    rolands@kamaji:~$ pip install commonmark
 
 Usage
 -----
