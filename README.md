@@ -3,9 +3,9 @@ CommonMark-py
 
 Pure Python port of [jgm](https://github.com/jgm)'s [stmd.js](https://github.com/jgm/stmd/blob/master/js/stmd.js), a Markdown parser and renderer for the [CommonMark](http://commonmark.org) specification, using only native modules. Once both this project and the CommonMark specification are stable we will release the first `1.0` version and attempt to keep up to date with changes in `stmd.js`.
 
-We are currently at the same development stage (actually a bit ahead because we have implemented HTML entity conversion and href URL escaping) as `stmd.js`. (Although 1 test fails on 3.3 and 2 on 2.7 due to HTML entity conversion, this should be fixed in 0.5.0)
+We are currently at the same development stage (actually a bit ahead because we have implemented HTML entity conversion and href URL escaping) as `stmd.js`. (Although 1 test fails on 3.3 and 2 on 2.7 due to HTML entity conversion)
 
-**Current version:** 0.4.9
+**Current version:** 0.5.0
 
 [![Build Status](https://travis-ci.org/rolandshoemaker/CommonMark-py.svg?branch=master)](https://travis-ci.org/rolandshoemaker/CommonMark-py)
 
