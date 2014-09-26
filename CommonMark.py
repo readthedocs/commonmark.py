@@ -533,7 +533,7 @@ class InlineParser(object):
                 last.c = re.sub(r' *$', '', last.c)
                 inlines.append(Block(t="Hardbreak"))
             else:
-                if last and last.t == "Str" and last.c[-1] == " ":
+                if last and last.t == "Str" and last.c[-1:] == " ":
                     last.c = last.c[0:-1]
                 inlines.append(Block(t="Softbreak"))
             return 1
@@ -1138,29 +1138,11 @@ class HTMLRenderer(object):
         pass
 
     def URLescape(self, s):
-        # might have to do another if python 2/3 since in 2 we hae to .encode/.decode the string...?
-        if re.search("^http", s) or re.search("^/", s):
-            # unquote url so we don't accidently encode a % we shouldn't
-            o = URLparse(s)
-            path = o.path
-            path = HTMLunquote(path)
+        if not re.search("mailto|MAILTO", s):
             if sys.version_info >= (3, 0):
-                # convert entities
-                path = HTMLescape(path)
-                # requote it now with all our stuff
-                path = HTMLquote(path)
+                return re.sub("[&](?![#](x[a-f0-9]{1,8}|[0-9]{1,8});|[a-z][a-z0-9]{1,31};)", "&amp;", HTMLquote(HTMLescape(s), ":/=*%?&)("), re.IGNORECASE)
             else:
-                # convert entities
-                path = HTMLescape(path).encode("utf-8")
-                # requote it now with all our stuff
-                path = HTMLquote(path)
-            url = ""
-            if not o.scheme == "":
-                url += o.scheme+"://"
-            url += o.netloc+path
-            if not o.query == "":
-                url += "?"+self.escape(o.query)
-            return url
+                return re.sub("[&](?![#](x[a-f0-9]{1,8}|[0-9]{1,8});|[a-z][a-z0-9]{1,31};)", "&amp;", HTMLquote(HTMLescape(s).encode("utf-8"), ":/=*%?&)("), re.IGNORECASE)
         else:
             return s
 
@@ -1169,7 +1151,7 @@ class HTMLRenderer(object):
             e = self.escape_pairs[1:]
             s = re.sub(
                 "[&](?![#](x[a-f0-9]{1,8}|[0-9]{1,8});|[a-z][a-z0-9]{1,31};)",
-                "&amp;", s, re.IGNORECASE)
+                "&amp;", HTMLescape(s), re.IGNORECASE)
         else:
             e = self.escape_pairs
         for r in e:
@@ -1193,7 +1175,7 @@ class HTMLRenderer(object):
         elif inline.t == "Entity":
             return inline.c
         elif inline.t == "Link":
-            attrs = [['href', self.escape(inline.destination, True)]]
+            attrs = [['href', self.URLescape(inline.destination)]]
             if inline.title:
                 attrs.append(['title', self.escape(inline.title, True)])
             return self.inTags('a', attrs, self.renderInlines(inline.label))
@@ -1283,7 +1265,7 @@ class HTMLRenderer(object):
         for i in range(len(blocks)):
             if not blocks[i].t == "ReferenceDef":
                 result.append(self.renderBlock(blocks[i], in_tight_list))
-        return "\n".join(result)
+        return self.blocksep.join(result)
 
     def render(self,  block, in_tight_list=None):
         return self.renderBlock(block, in_tight_list)
