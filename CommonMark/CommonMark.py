@@ -1206,9 +1206,9 @@ class HTMLRenderer(object):
         """ Escape href URLs."""
         if not re.search("mailto|MAILTO", s):
             if sys.version_info >= (3, 0):
-                return re.sub("[&](?![#](x[a-f0-9]{1,8}|[0-9]{1,8});|[a-z][a-z0-9]{1,31};)", "&amp;", HTMLquote(HTMLunescape(s), ":/=*%?&)("), re.IGNORECASE)
+                return re.sub("[&](?![#](x[a-f0-9]{1,8}|[0-9]{1,8});|[a-z][a-z0-9]{1,31};)", "&amp;", HTMLquote(HTMLunescape(s), ":/=*%?&)(#"), re.IGNORECASE)
             else:
-                return re.sub("[&](?![#](x[a-f0-9]{1,8}|[0-9]{1,8});|[a-z][a-z0-9]{1,31};)", "&amp;", HTMLquote(HTMLunescape(s).encode("utf-8"), ":/=*%?&)("), re.IGNORECASE)
+                return re.sub("[&](?![#](x[a-f0-9]{1,8}|[0-9]{1,8});|[a-z][a-z0-9]{1,31};)", "&amp;", HTMLquote(HTMLunescape(s).encode("utf-8"), ":/=*%?&)(#"), re.IGNORECASE)
         else:
             return s
 
