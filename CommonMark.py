@@ -12,17 +12,19 @@
 
 import re, sys
 
-# if python3 use html.parser, else use HTMLParser
+# if python3 use html.parser and urllib.parse, else use HTMLParser and urllib
 if sys.version_info >= (3, 0):
     import html.parser, urllib.parse
     HTMLescape = html.parser.HTMLParser().unescape
     HTMLquote = urllib.parse.quote
     HTMLunquote = urllib.parse.unquote
+    URLparse = urllib.parse.urlparse
 else:
-    import HTMLParser, urllib
+    import HTMLParser, urllib, urlparse
     HTMLescape = HTMLParser.HTMLParser().unescape
     HTMLquote = urllib.quote
     HTMLunquote = urllib.unquote
+    URLparse = urlparse.urlparse
 
 # Some of the regexps used in inline parser :<
 
@@ -385,7 +387,7 @@ class InlineParser(object):
     def parseLinkTitle(self):
         title = self.match(reLinkTitle)
         if title:
-            return unescape(title[1:-1])
+            return unescape(title[1:len(title)-1])
         else:
             return None
 
@@ -443,29 +445,26 @@ class InlineParser(object):
     def parseLink(self, inlines):
         startpos = self.pos
         n = self.parseLinkLabel()
-        if startpos > 0:
-            n += startpos
 
         if n == 0:
             return 0
 
         afterlabel = self.pos
-        rawlabel = self.subject[startpos:n]
+        rawlabel = self.subject[startpos:n+startpos]
 
         if self.peek() == "(":
             self.pos += 1
             if self.spnl():
                 dest = self.parseLinkDestination()
                 if not dest is None and self.spnl():
-                    title = self.parseLinkTitle() or ''
-                    if re.match(r"^\s", self.subject[self.pos - 1]) and (not title is None) or True:
-                        if (title or True) and self.spnl() and self.match(r"^\)"):
-                            inlines.append(
-                                Block(t="Link", destination=dest, title=title, label=self.parseRawLabel(rawlabel)))
-                            return self.pos - startpos
-                        else:
-                            self.pos = startpos
-                            return 0
+                    if re.match(r"^\s", self.subject[self.pos - 1]): # and (not title is None) or True:
+                        title = self.parseLinkTitle()
+                    else:
+                        title = ""
+                    if self.spnl() and self.match(r"^\)"):
+                        inlines.append(
+                            Block(t="Link", destination=dest, title=title, label=self.parseRawLabel(rawlabel)))
+                        return self.pos - startpos
                     else:
                         self.pos = startpos
                         return 0
@@ -1138,21 +1137,32 @@ class HTMLRenderer(object):
     def __init__(self):
         pass
 
-    @staticmethod
-    def URLescape(s):
+    def URLescape(self, s):
         # might have to do another if python 2/3 since in 2 we hae to .encode/.decode the string...?
-        # unquote url so we don't accidently encode a % we shouldn't
-        s = HTMLunquote(s)
-        if sys.version_info >= (3, 0):
-            # convert entities
-            s = HTMLescape(s)
-            # requote it now with all our stuff
-            s = HTMLquote(s)
+        if re.search("^http", s) or re.search("^/", s):
+            # unquote url so we don't accidently encode a % we shouldn't
+            o = URLparse(s)
+            path = o.path
+            path = HTMLunquote(path)
+            if sys.version_info >= (3, 0):
+                # convert entities
+                path = HTMLescape(path)
+                # requote it now with all our stuff
+                path = HTMLquote(path)
+            else:
+                # convert entities
+                path = HTMLescape(path).encode("utf-8")
+                # requote it now with all our stuff
+                path = HTMLquote(path)
+            url = ""
+            if not o.scheme == "":
+                url += o.scheme+"://"
+            url += o.netloc+path
+            if not o.query == "":
+                url += "?"+self.escape(o.query)
+            return url
         else:
-            # convert entities
-            s = HTMLescape(s).encode("utf-8")
-            # requote it now with all our stuff
-            s = HTMLquote(s)
+            return s
 
     def escape(self, s, preserve_entities=None):
         if preserve_entities:
