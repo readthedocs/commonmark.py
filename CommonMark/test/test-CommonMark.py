@@ -2,7 +2,7 @@
 from __future__ import division
 import re, time, codecs, argparse, sys
 import pprint
-import CommonMark
+from CommonMark import CommonMark
 
 class colors:
     HEADER = '\033[95m'

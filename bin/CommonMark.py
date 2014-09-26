@@ -1,5 +1,6 @@
 #!/usr/bin/env python
-import argparse, json, CommonMark
+import argparse, json
+from CommonMark import CommonMark
 parser = argparse.ArgumentParser(description="Process Markdown according to the CommonMark specification.")
 if sys.version_info < (3, 0):
     reload(sys)

@@ -17,7 +17,7 @@ Installation
 Usage
 -----
 
-	import CommonMark
+	from CommonMark import CommonMark
 	parser = CommonMark.DocParser()
 	renderer = CommonMark.HTMLRenderer()
 	print(renderer.render(parser.parse("Hello *World*")))
