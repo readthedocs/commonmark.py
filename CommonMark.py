@@ -1033,8 +1033,10 @@ class DocParser:
             block.end_line = line_number
 
         if (block.t == "Paragraph"):
-            block.string_content = re.sub(
-                r"^ *", "", "\n".join(block.strings), re.MULTILINE)
+            block.string_content = ""
+            for i, line in enumerate(block.strings):
+                block.strings[i] = re.sub(r'^  *', '', line, re.MULTILINE)
+            block.string_content = '\n'.join(block.strings)
 
             pos = self.inlineParser.parseReference(
                 block.string_content, self.refmap)
@@ -1209,7 +1211,6 @@ class HTMLRenderer(object):
             else:
                 return (whole_doc + "\n")
         elif (block.t == "Paragraph"):
-
             if (in_tight_list):
                 return self.renderInlines(block.inline_content)
             else:
