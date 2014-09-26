@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 import argparse, json
-from CommonMark import CommonMark
+import CommonMark
 parser = argparse.ArgumentParser(description="Process Markdown according to the CommonMark specification.")
 if sys.version_info < (3, 0):
     reload(sys)
@@ -27,16 +27,6 @@ if args.a:
     CommonMark.dumpAST(ast)
     exit()
 
-# output json
-def ASTtoJSON(block):
-    # this is destructive
-    if block.parent:
-        block.parent = None
-    if block.children:
-        for i, child in enumerate(block.children):
-            block.children[i] = ASTtoJSON(child)
-    return json.dumps(block, default=lambda o: o.__dict__, sort_keys=True) # indent=4)
-
 #o.write(ast.to_JSON())
-o.write(ASTtoJSON(ast))
+o.write(CommonMark.ASTtoJSON(ast))
 exit()
