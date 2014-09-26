@@ -9,7 +9,7 @@
 # renderer = CommonMark.HtmlRenderer()
 # print(renderer.render(parser.parse('Hello *world*')))
 
-import re, sys, argparse
+import re, sys, argparse, json
 
 # if python3 use html.parser and urllib.parse, else use HTMLParser and urllib
 if sys.version_info >= (3, 0):
@@ -80,12 +80,14 @@ reMain = r"^(?:[\n`\[\]\\!<&*_]|[^\n`\[\]\\!<&*_]+)"
 
 def ASTtoJSON(block):
     """ Output AST in JSON form."""
-    if block.parent:
-        block.parent = None
-    if block.children:
-        for i, child in enumerate(block.children):
-            block.children[i] = ASTtoJSON(child)
-    return json.dumps(block, default=lambda o: o.__dict__, sort_keys=True) # indent=4)
+    def prepare(block):
+        if block.parent:
+            block.parent = None
+        if block.children:
+            for i, child in enumerate(block.children):
+                block.children[i] = prepare(child)
+        return block
+    return json.dumps(prepare(block), default=lambda o: o.__dict__, sort_keys=True) # indent=4)
 
 def dumpAST(obj, ind=0):
     """ Print out a block/entire AST."""

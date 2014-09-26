@@ -37,9 +37,22 @@ Usage
 
     ----- or -----
 
-    rolands@kamaji:~$ CommonMark.py README.md -o README.html
-    rolands@kamaji:~$ CommonMark.py README.md -o README.json -aj # output AST as JSON
-    rolands@kamaji:~$ CommonMark.py README.md -a # pretty print generated AST
+    rolands@kamaji:~$ cmark.py README.md -o README.html
+    rolands@kamaji:~$ cmark.py README.md -o README.json -aj # output AST as JSON
+    rolands@kamaji:~$ cmark.py README.md -a # pretty print generated AST
+    rolands@kamaji:~$ cmark.py -h
+    usage: cmark.py [-h] [-o [O]] [-a] [-aj] [infile]
+
+    Process Markdown according to the CommonMark specification.
+
+    positional arguments:
+      infile      Input Markdown file to parse, defaults to stdin
+
+    optional arguments:
+      -h, --help  show this help message and exit
+      -o [O]      Output HTML/JSON file, defaults to stdout
+      -a          Print formatted AST
+      -aj         Output JSON AST
 
 Tests
 -----
