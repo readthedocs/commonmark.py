@@ -5,7 +5,7 @@ Pure Python port of [jgm](https://github.com/jgm)'s [stmd.js](https://github.com
 
 We are currently at the same development stage (actually a bit ahead because we have implemented HTML entity conversion and href URL escaping) as `stmd.js`. (Although 1 test fails on 3.3 and 2 on 2.7 due to HTML entity conversion)
 
-**Current version:** 0.5.1
+**Current version:** 0.5.2
 
 [![Build Status](https://travis-ci.org/rolandshoemaker/CommonMark-py.svg?branch=master)](https://travis-ci.org/rolandshoemaker/CommonMark-py)
 
