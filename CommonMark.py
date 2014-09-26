@@ -1173,7 +1173,10 @@ class HTMLRenderer(object):
         elif inline.t == "Html":
             return inline.c
         elif inline.t == "Entity":
-            return inline.c
+            if inline.c == "&nbsp;":
+                return " "
+            else:
+                return self.escape(inline.c, True)
         elif inline.t == "Link":
             attrs = [['href', self.URLescape(inline.destination)]]
             if inline.title:
