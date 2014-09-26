@@ -4,4 +4,4 @@ python:
   - "3.3"
   - "3.4"
 # test command
-script: python setup.py install && python CommonMark/test/test-CommonMark.py -np
+script: python setup.py install && python test/test-CommonMark.py -np
