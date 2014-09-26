@@ -53,15 +53,16 @@ example_number = 0
 current_section = ""
 tabChar = u'\u2192'
 spaceChar = u'\u2423'
+nbspChar = u'\u00A0'
 
 def showSpaces(t):
 	t = re.sub(u"\\t", tabChar, t)
 	t = re.sub(u" ", spaceChar, t)
+	t = re.sub(nbspChar, spaceChar, t)
 	return t
 
 t = re.sub("\r\n", "\n", data)
-#print(t)
-#exit(0)
+
 tests = re.sub("^<!-- END TESTS -->(.|[\n])*", '', t, flags=re.M)
 testMatch = re.findall(re.compile("^\.\n([\s\S]*?)^\.\n([\s\S]*?)^\.$|^#{1,6} *(.*)$", re.M), tests)
 
@@ -93,7 +94,7 @@ if args.i:
 		ast = parser.parse(s)
 		html = renderer.render(ast)
 		print(colors.WARNING+"="*10+"AST====="+colors.ENDC)
-		parser.dumpAST(ast)
+		CommonMark.dumpAST(ast)
 		print(colors.WARNING+"="*10+"HTML===="+colors.ENDC)
 		print(html)
 
@@ -114,10 +115,7 @@ for i, example in enumerate(examples): # [0,examples[0]]
 		current_section = example['section']
 		catStats.update({current_section:[0,0,0]})
 
-	if args.t:
-		print("Test #"+str(args.t.split(",")[i]))
-	else:
-		print("Test #"+str(i+1))
+	
 	catStats[current_section][2] += 1
 	if args.d: print(colors.HEADER+"[Parsing]"+colors.ENDC)
 	ast = parser.parse(re.sub(tabChar, "\t", example['markdown']))
@@ -126,15 +124,23 @@ for i, example in enumerate(examples): # [0,examples[0]]
 	if actual == example['html']:
 		passed += 1
 		catStats[current_section][0] += 1
-		print(colors.OKGREEN+"tick"+colors.ENDC)
-		if args.d: parser.dumpAST(ast)
+		if args.t:
+			if not args.f: print("Test #"+str(args.t.split(",")[i]))
+		else:
+			if not args.f: print("Test #"+str(i+1))
+		if not args.f: print(colors.OKGREEN+"tick"+colors.ENDC)
+		if args.d: CommonMark.dumpAST(ast)
 		if args.p or args.d and not args.np:
 			print(colors.OKBLUE+"=== markdown ===============\n"+colors.ENDC+showSpaces(example['markdown'])+colors.OKBLUE+"\n=== expected ===============\n"+colors.ENDC+showSpaces(example['html'])+colors.OKBLUE+"\n=== got ====================\n"+colors.ENDC+showSpaces(actual))
 	else:
 		failed += 1
 		catStats[current_section][1] += 1
+		if args.t:
+			print("Test #"+str(args.t.split(",")[i]))
+		else:
+			print("Test #"+str(i+1))
 		print(colors.FAIL+"cross"+colors.ENDC)
-		if args.d: parser.dumpAST(ast)
+		if args.d: CommonMark.dumpAST(ast)
 		if not args.np or args.f:
 			print(colors.WARNING+"=== markdown ===============\n"+colors.ENDC+showSpaces(example['markdown'])+colors.WARNING+"\n=== expected ===============\n"+colors.ENDC+showSpaces(example['html'])+colors.WARNING+"\n=== got ====================\n"+colors.ENDC+showSpaces(actual))
 

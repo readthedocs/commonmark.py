@@ -1,0 +1,4 @@
+include README.md
+include .gitignore
+include .travis.yml
+include spec.txt

@@ -1,27 +1,31 @@
 CommonMark-py
 =============
 
-Pure Python port of [jgm](https://github.com/jgm)'s [stmd.js](https://github.com/jgm/stmd/blob/master/js/stmd.js), a Markdown parser and renderer for the [CommonMark](http://commonmark.org) specification. Once both this project and the CommonMark specification are stable we will release the first `1.0` version and attempt to keep up to date with changes in `stmd.js`.
+Pure Python port of [jgm](https://github.com/jgm)'s [stmd.js](https://github.com/jgm/stmd/blob/master/js/stmd.js), a Markdown parser and renderer for the [CommonMark](http://commonmark.org) specification, using only native modules. Once both this project and the CommonMark specification are stable we will release the first `1.0` version and attempt to keep up to date with changes in `stmd.js`.
 
-When the project is semi-stable we will move to a Python package format (PyPi) and include both a module and cli tool to render HTML (also some format to represent the intermediate AST, and maybe other things like PDF, etc in the future) files from Markdown files.
+We are currently at the same development stage (actually a bit ahead because we have implemented HTML entity conversion and href URL escaping) as `stmd.js`. (Although 1 test fails on 3.3 and 2 on 2.7 due to HTML entity conversion, this should be fixed in 0.5.0)
 
-(**Note**: This is a work in progress! **443**/**443** tests currently passing, *sidenote: stmd.js currently only passes 429*)
+**Current version:** 0.4.9
 
 [![Build Status](https://travis-ci.org/rolandshoemaker/CommonMark-py.svg?branch=master)](https://travis-ci.org/rolandshoemaker/CommonMark-py)
 
+Installation
+------------
+
+    rolands@kamaji:~$ pip install commonmark-py
+
 Usage
 -----
-
-In Python
 
 	import CommonMark
 	parser = CommonMark.DocParser()
 	renderer = CommonMark.HTMLRenderer()
 	print(renderer.render(parser.parse("Hello *World*")))
-
-Using the CLI script
-
+    
+    ----- or -----
+    
 	rolands@kamaji:~$ CommonMark.py README.md -o README.html
+	rolands@kamaji:~$ CommonMark.py -h
 
 Tests
 -----
