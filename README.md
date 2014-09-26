@@ -5,7 +5,7 @@ Pure Python port of [jgm](https://github.com/jgm)'s [stmd.js](https://github.com
 
 We are currently at the same development stage (actually a bit ahead because we have implemented HTML entity conversion and href URL escaping) as `stmd.js`. (Although 1 test fails on 3.3 and 2 on 2.7 due to HTML entity conversion)
 
-**Current version:** 0.5.0
+**Current version:** 0.5.1
 
 [![Build Status](https://travis-ci.org/rolandshoemaker/CommonMark-py.svg?branch=master)](https://travis-ci.org/rolandshoemaker/CommonMark-py)
 
@@ -17,7 +17,7 @@ Installation
 Usage
 -----
 
-	from CommonMark import CommonMark
+	import CommonMark
 	parser = CommonMark.DocParser()
 	renderer = CommonMark.HTMLRenderer()
 	print(renderer.render(parser.parse("Hello *World*")))
@@ -25,7 +25,8 @@ Usage
     ----- or -----
     
 	rolands@kamaji:~$ CommonMark.py README.md -o README.html
-	rolands@kamaji:~$ CommonMark.py -h
+	rolands@kamaji:~$ CommonMark.py README.md -o README.json -aj # output AST as JSON
+	rolands@kamaji:~$ CommonMark.py README.md -a # pretty print generated AST
 
 Tests
 -----
