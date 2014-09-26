@@ -2,15 +2,16 @@
 from distutils.core import setup
 
 setup(
-	name = "CommonMark-py",
+	name = "CommonMark",
 	packages = ['CommonMark'],
 	scripts=['bin/CommonMark.py'],
-	version = "0.4.9",
+	version = "0.5.0",
+	license = "BSD License",
 	description = "Python parser for the CommonMark Markdown spec",
 	author = "Bibek Kafle <bkafle662@gmail.com>, Roland Shoemaker <rolandshoemaker@gmail.com>",
 	author_email = "rolandshoemaker@gmail.com",
 	url = "https://github.com/rolandshoemaker/CommonMark-py",
-	download_url = "https://github.com/rolandshoemaker/CommonMark-py/tarball/v0.5.0",
+	download_url = "https://github.com/rolandshoemaker/CommonMark-py/tarball/v0.4.9",
 	keywords = ["markup", "markdown", "commonmark"],
 	classifiers = ["Programming Language :: Python",
 	"Programming Language :: Python :: 2",
