@@ -8,19 +8,24 @@
 # parser = CommonMark.DocParser()
 # renderer = CommonMark.HtmlRenderer()
 # print(renderer.render(parser.parse('Hello *world*')))
-
 import re, sys, argparse, json
 
 # if python3 use html.parser and urllib.parse, else use HTMLParser and urllib
 if sys.version_info >= (3, 0):
-    import html.parser, urllib.parse
-    HTMLunescape = html.parser.HTMLParser().unescape
+    import urllib.parse
+    if sys.version_info >= (3, 4):
+        import html.parser
+        HTMLunescape = html.parser.HTMLParser().unescape
+    else:
+        from .entitytrans import _unescape
+        HTMLunescape = _unescape
     HTMLquote = urllib.parse.quote
     HTMLunquote = urllib.parse.unquote
     URLparse = urllib.parse.urlparse
 else:
-    import HTMLParser, urllib, urlparse
-    HTMLunescape = HTMLParser.HTMLParser().unescape
+    import urllib, urlparse
+    import entitytrans
+    HTMLunescape = entitytrans._unescape
     HTMLquote = urllib.quote
     HTMLunquote = urllib.unquote
     URLparse = urlparse.urlparse
