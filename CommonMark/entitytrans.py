@@ -2336,7 +2336,7 @@ _charref = _re.compile(r'&(#[0-9]+;?'
                        r'|#[xX][0-9a-fA-F]+;?'
                        r'|[^\t\n\f <&#;]{1,32};?)')
 
-def unescape(s):
+def _unescape(s):
     """
     Convert all named and numeric character references (e.g. &gt;, &#62;,
     &x3e;) in the string s to the corresponding unicode characters.

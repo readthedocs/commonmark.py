@@ -17,8 +17,8 @@ if sys.version_info >= (3, 0):
         import html.parser
         HTMLunescape = html.parser.HTMLParser().unescape
     else:
-        from .entitytrans import entitytrans
-        HTMLunescape = entitytrans.unescape
+        from .entitytrans import _unescape
+        HTMLunescape = unescape
     HTMLquote = urllib.parse.quote
     HTMLunquote = urllib.parse.unquote
     URLparse = urllib.parse.urlparse
@@ -26,7 +26,7 @@ else:
     import urllib, urlparse # HTMLParser, 
     #HTMLunescape = HTMLParser.HTMLParser().unescape
     import entitytrans
-    HTMLunescape = entitytrans.unescape
+    HTMLunescape = entitytrans._unescape
     HTMLquote = urllib.quote
     HTMLunquote = urllib.unquote
     URLparse = urlparse.urlparse
