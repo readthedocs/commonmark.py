@@ -2,6 +2,8 @@ include README.md
 include LICENSE
 include .gitignore
 include spec.txt
-include bin/CommonMark.py
+include CommonMark/CommonMark.py
+include CommonMark/entitytrans.py
 include CommonMark/test/test-CommonMark.py
 include docs/CommonMark.py.html
+include docs/entitytrans.py.html
