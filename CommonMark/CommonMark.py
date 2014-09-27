@@ -19,8 +19,10 @@ if sys.version_info >= (3, 0):
     HTMLunquote = urllib.parse.unquote
     URLparse = urllib.parse.urlparse
 else:
-    import HTMLParser, urllib, urlparse
-    HTMLunescape = HTMLParser.HTMLParser().unescape
+    #import HTMLParser, urllib, urlparse
+    #HTMLunescape = HTMLParser.HTMLParser().unescape
+    import entitytrans
+    HTMLunescape = entitytrans.unescape
     HTMLquote = urllib.quote
     HTMLunquote = urllib.unquote
     URLparse = urlparse.urlparse
