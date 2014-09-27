@@ -5,7 +5,7 @@ Python 3.4 HTML5 entity unescaping for all! Based on https://hg.python.org/cpyth
 import sys
 import re as _re
 
-__all__ = ['unescape']
+__all__ = ['_unescape']
 
 _html5 = {
     'Aacute': u'\xc1',
