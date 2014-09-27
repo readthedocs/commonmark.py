@@ -40,6 +40,11 @@ Usage
 	  -o [O]      Output HTML/JSON file, defaults to stdout
 	  -a          Print formatted AST
 	  -aj         Output JSON AST
+	 
+Contributing
+------------
+
+If you would like to offer suggestions/optimizations/bugfixes through pull requests please do! Also if you find an error in the parser/renderer that isn't caught by the current test suite please open a new issue and I would also suggest you send the [stmd.js](https://github.com/jgm/stmd/blob/master/js/stmd.js) project a pull request adding your test to the existing test suite.
 
 Tests
 -----
