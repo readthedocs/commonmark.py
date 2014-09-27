@@ -9,6 +9,7 @@
 # renderer = CommonMark.HtmlRenderer()
 # print(renderer.render(parser.parse('Hello *world*')))
 
+from __future__ import absolute_import
 import re, sys, argparse, json
 
 # if python3 use html.parser and urllib.parse, else use HTMLParser and urllib

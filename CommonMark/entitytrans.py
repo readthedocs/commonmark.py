@@ -2,7 +2,6 @@
 Python 3.4 HTML5 entity unescaping for all!
 """
 
-from __future__ import absolute_import
 import sys
 import re as _re
 
