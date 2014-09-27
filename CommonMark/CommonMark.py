@@ -12,14 +12,14 @@
 import re, sys, argparse, json
 
 # if python3 use html.parser and urllib.parse, else use HTMLParser and urllib
-if sys.version_info >= (3, 0):
+if sys.version_info >= (3, 4):
     import html.parser, urllib.parse
     HTMLunescape = html.parser.HTMLParser().unescape
     HTMLquote = urllib.parse.quote
     HTMLunquote = urllib.parse.unquote
     URLparse = urllib.parse.urlparse
 else:
-    #import HTMLParser, urllib, urlparse
+    import urllib, urlparse # HTMLParser, 
     #HTMLunescape = HTMLParser.HTMLParser().unescape
     import entitytrans
     HTMLunescape = entitytrans.unescape
