@@ -2316,7 +2316,7 @@ def _replace_charref(s):
             return u'\uFFFD'
         if num in _invalid_codepoints:
             return ''
-        if sys.version >= (3, 0):
+        if sys.version_info >= (3, 0):
         	return chr(num)
         else:
         	return unichr(num)
