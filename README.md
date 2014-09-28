@@ -20,13 +20,17 @@ Usage
 	import CommonMark
 	parser = CommonMark.DocParser()
 	renderer = CommonMark.HTMLRenderer()
-	print(renderer.render(parser.parse("Hello *World*")))
+	ast = parser.parse("Hello *World*")
+	html = renderer.render(ast)
+	json = CommonMark.ASTtoJSON(ast)
+	CommonMark.dumpAST(ast) # pretty print generated AST structure
+	print(html) # <p>Hello <em>World</em><p/>
     
     ----- or -----
     
 	rolands@kamaji:~$ cmark.py README.md -o README.html
 	rolands@kamaji:~$ cmark.py README.md -o README.json -aj # output AST as JSON
-	rolands@kamaji:~$ cmark.py README.md -a # pretty print generated AST
+	rolands@kamaji:~$ cmark.py README.md -a # pretty print generated AST structure
 	rolands@kamaji:~$ cmark.py -h
 	usage: cmark.py [-h] [-o [O]] [-a] [-aj] [infile]
 
