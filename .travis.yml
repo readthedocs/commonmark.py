@@ -6,4 +6,4 @@ python:
   - "pypy"
   - "pypy3"
 # test command
-script: python setup.py install && python CommonMark/test/test-CommonMark.py -np && cmark.py README.md
+script: python setup.py install && python CommonMark/test/test-CommonMark.py -np && cmark.py README.md && cmark.py README.md -a && cmark.py README.md -aj

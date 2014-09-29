@@ -91,6 +91,10 @@ def ASTtoJSON(block):
         if block.isOpen:
             block['open'] = block.isOpen
             del(block.isOpen)
+        # trim empty elements...
+        for k in block.keys():
+            if block[k] in ["", [], None]:
+                del(block[k])
         if block.children:
             for i, child in enumerate(block.children):
                 block.children[i] = prepare(child)
