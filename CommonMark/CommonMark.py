@@ -94,8 +94,8 @@ def ASTtoJSON(block):
         # trim empty elements...
         for attr in dir(block):
             if not callable(attr) and not attr.startswith("__"):
-                if block[attr] in ["", [], None]:
-                    del(block[attr])
+                if block.__dict__[attr] in ["", [], None]:
+                    del(block.__dict__[attr])
         if block.children:
             for i, child in enumerate(block.children):
                 block.children[i] = prepare(child)
