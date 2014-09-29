@@ -5,8 +5,8 @@ parser = argparse.ArgumentParser(description="Process Markdown according to the 
 if sys.version_info < (3, 0):
     reload(sys)
     sys.setdefaultencoding('utf-8')
-parser.add_argument('infile', nargs="?", type=argparse.FileType('r'), default=sys.stdin, help="Input Markdown file to parse, defaults to stdin")
-parser.add_argument('-o', nargs="?", type=argparse.FileType('w'), default=sys.stdout, help="Output HTML/JSON file, defaults to stdout")
+parser.add_argument('infile', nargs="?", type=argparse.FileType('r'), default=sys.stdin, help="Input Markdown file to parse, defaults to STDIN")
+parser.add_argument('-o', nargs="?", type=argparse.FileType('w'), default=sys.stdout, help="Output HTML/JSON file, defaults to STDOUT")
 parser.add_argument('-a', action="store_true", help="Print formatted AST")
 parser.add_argument('-aj', action="store_true", help="Output JSON AST")
 args = parser.parse_args()

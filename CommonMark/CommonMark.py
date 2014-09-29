@@ -207,7 +207,7 @@ class Block(object):
     def makeBlock(tag, start_line, start_column):
         return Block(t=tag, start_line=start_line, start_column=start_column)
 
-    def __init__(self, t="", c="", destination="", label=[], start_line="", start_column="", title=""):
+    def __init__(self, t="", c="", destination="", label="", start_line="", start_column="", title=""):
         self.t = t
         self.c = c
         self.destination = destination
