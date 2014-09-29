@@ -16,7 +16,7 @@ escaping) as ``stmd.js``. Since Python versions pre-3.4 use outdated
 implementation into a single file, ``entitytrans.py`` which so far seems
 to work (all tests pass on 2.7, 3.3, and 3.4).
 
-**Current version:** 0.5.3
+**Current version:** 0.5.4
 
 |Build Status|
 
@@ -35,13 +35,17 @@ Usage
     import CommonMark
     parser = CommonMark.DocParser()
     renderer = CommonMark.HTMLRenderer()
-    print(renderer.render(parser.parse("Hello *World*")))
+    ast = parser.parse("Hello *World*")
+    html = renderer.render(ast)
+    json = CommonMark.ASTtoJSON(ast)
+    CommonMark.dumpAST(ast) # pretty print generated AST structure
+    print(html) # <p>Hello <em>World</em><p/>
 
     ----- or -----
 
     rolands@kamaji:~$ cmark.py README.md -o README.html
     rolands@kamaji:~$ cmark.py README.md -o README.json -aj # output AST as JSON
-    rolands@kamaji:~$ cmark.py README.md -a # pretty print generated AST
+    rolands@kamaji:~$ cmark.py README.md -a # pretty print generated AST structure
     rolands@kamaji:~$ cmark.py -h
     usage: cmark.py [-h] [-o [O]] [-a] [-aj] [infile]
 
@@ -55,6 +59,17 @@ Usage
       -o [O]      Output HTML/JSON file, defaults to stdout
       -a          Print formatted AST
       -aj         Output JSON AST
+     
+
+Contributing
+------------
+
+If you would like to offer suggestions/optimizations/bugfixes through
+pull requests please do! Also if you find an error in the
+parser/renderer that isn't caught by the current test suite please open
+a new issue and I would also suggest you send the
+`stmd.js <https://github.com/jgm/stmd/blob/master/js/stmd.js>`__ project
+a pull request adding your test to the existing test suite.
 
 Tests
 -----
