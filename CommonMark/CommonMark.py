@@ -88,19 +88,28 @@ def ASTtoJSON(block):
     def prepare(block):
         if block.parent:
             block.parent = None
-        if block.isOpen:
-            block['open'] = block.isOpen
+        if not block.__dict__['isOpen'] is None:
+            block.__dict__['open'] = block.isOpen
             del(block.isOpen)
         # trim empty elements...
         for attr in dir(block):
             if not callable(attr) and not attr.startswith("__") and not attr == "makeBlock":
-                if block.__dict__[attr] in ["", [], None]:
+                if block.__dict__[attr] in ["", [], None, {}]:
                     del(block.__dict__[attr])
-        if 'children' in block.__dict__ and block.children:
+        if 'children' in block.__dict__ and len(block.children) > 0:
             for i, child in enumerate(block.children):
                 block.children[i] = prepare(child)
+        if 'inline_content' in block.__dict__ and len(block.inline_content) > 0:
+            for i, child in enumerate(block.inline_content):
+                block.inline_content[i] = prepare(child)
+        if 'label' in block.__dict__ and len(block.label) > 0:
+            for i, child in enumerate(block.label):
+                block.label[i] = prepare(child)
+        if 'c' in block.__dict__  and type(block.c) is list and len(block.c) > 0:
+            for i, child in enumerate(block.c):
+                block.c[i] = prepare(child)
         return block
-    return json.dumps(prepare(block), default=lambda o: o.__dict__, sort_keys=True) # indent=4)
+    return json.dumps(prepare(block), default=lambda o: o.__dict__) # sort_keys=True) # indent=4)
 
 def dumpAST(obj, ind=0):
     """ Print out a block/entire AST."""
