@@ -96,7 +96,7 @@ def ASTtoJSON(block):
             if not callable(attr) and not attr.startswith("__") and not attr == "makeBlock":
                 if block.__dict__[attr] in ["", [], None]:
                     del(block.__dict__[attr])
-        if block.__dict__['children'] and block.children:
+        if 'children' in block.__dict__ and block.children:
             for i, child in enumerate(block.children):
                 block.children[i] = prepare(child)
         return block
