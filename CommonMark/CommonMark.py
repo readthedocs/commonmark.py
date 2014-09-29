@@ -86,6 +86,7 @@ reMain = r"^(?:[\n`\[\]\\!<&*_]|[^\n`\[\]\\!<&*_]+)"
 def ASTtoJSON(block):
     """ Output AST in JSON form, this is destructive of block."""
     def prepare(block):
+        """ Strips circular 'parent' references and trims empty block elements."""
         if block.parent:
             block.parent = None
         if not block.__dict__['isOpen'] is None:
