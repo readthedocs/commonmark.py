@@ -84,7 +84,7 @@ reMain = r"^(?:[\n`\[\]\\!<&*_]|[^\n`\[\]\\!<&*_]+)"
 # Utility functions
 
 def ASTtoJSON(block):
-    """ Output AST in JSON form."""
+    """ Output AST in JSON form, this is destructive of block."""
     def prepare(block):
         if block.parent:
             block.parent = None
@@ -96,7 +96,7 @@ def ASTtoJSON(block):
             if not callable(attr) and not attr.startswith("__") and not attr == "makeBlock":
                 if block.__dict__[attr] in ["", [], None]:
                     del(block.__dict__[attr])
-        if block.children:
+        if block.__dict__['children'] and block.children:
             for i, child in enumerate(block.children):
                 block.children[i] = prepare(child)
         return block
