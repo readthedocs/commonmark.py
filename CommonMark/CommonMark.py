@@ -9,6 +9,7 @@
 # renderer = CommonMark.HtmlRenderer()
 # print(renderer.render(parser.parse('Hello *world*')))
 import re, sys, argparse, json
+from warnings import warn
 
 # if python3 use html.parser and urllib.parse, else use HTMLParser and urllib
 if sys.version_info >= (3, 0):
@@ -1293,7 +1294,7 @@ class HTMLRenderer(object):
         elif inline.t == "Code":
             return self.inTags('code', [], self.escape(inline.c))
         else:
-            print("Unknown inline type " + inline.t)
+            warn("Unknown inline type " + inline.t)
             return ""
 
     def renderInlines(self, inlines):
@@ -1363,7 +1364,7 @@ class HTMLRenderer(object):
         elif (block.t == "HorizontalRule"):
             return self.inTags("hr", [], "", True)
         else:
-            print("Unknown block type" + block.t)
+            warn("Unknown block type" + block.t)
             return ""
 
     def renderBlocks(self, blocks, in_tight_list=None):
