@@ -683,6 +683,8 @@ class InlineParser(object):
         """ Attempt to parse a link reference, modifying refmap."""
         self.subject = s
         self.pos = 0
+        self.label_nest_level = 0
+
         startpos = self.pos
 
         matchChars = self.parseLinkLabel()
