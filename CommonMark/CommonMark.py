@@ -176,6 +176,10 @@ def dumpAST(obj, ind=0):
         print("\t" + indChar + "Children:")
         for b in obj.children:
             dumpAST(b, ind + 2)
+    if len(obj.attributes):
+        print("\t" + indChar + "Attributes:")
+        for key,val in obj.attributes.iteritems():
+            print("\t\t" + indChar + "[{0}] = {1}".format(key, val))
 
 def unescape(s):
     """ Replace backslash escapes with literal characters."""
@@ -242,6 +246,7 @@ class Block(object):
         self.title = title
         self.info = ""
         self.tight = bool()
+        self.attributes = {}
 
 class InlineParser(object):
 
@@ -874,6 +879,20 @@ class DocParser:
                 data['padding'] = len(match2.group(0))
         return data
 
+    def parseIAL(self, ln):
+        values = []
+        css_class = re.findall(r"\.(\w+) *", ln)
+        if css_class:
+            values.append(("class", " ".join(css_class)))
+        css_id = re.findall(r"\#.(\w+) *", ln)
+        if css_id:
+            values.append(("id", css_id[0]))
+        keyed_values = re.findall(r"(\w+)(?:=(\w+))? *", ln)
+        if keyed_values:
+            values += keyed_values
+
+        return dict(values)
+
     def incorporateLine(self, ln, line_number):
         """ Analyze a line of text and update the document appropriately.
         We parse markdown text by calling this on each line of input,
@@ -965,10 +984,11 @@ class DocParser:
 
         if blank and container.last_line_blank:
             self.breakOutOfLists(container, line_number)
+
         while not container.t == "FencedCode" and   \
               not container.t == "IndentedCode" and \
               not container.t == "HtmlBlock" and    \
-              not matchAt(r"^[ #`~*+_=<>0-9-]", ln, offset) is None:
+              not matchAt(r"^[ #`~*+_=<>0-9-{]", ln, offset) is None:
             match = matchAt("[^ ]", ln, offset)
             if match is None:
                 first_nonspace = len(ln)
@@ -980,6 +1000,7 @@ class DocParser:
             FENmatch = re.search(
                 r"^`{3,}(?!.*`)|^~{3,}(?!.*~)", ln[first_nonspace:])
             PARmatch = re.search(r"^(?:=+|-+) *$", ln[first_nonspace:])
+            IALmatch = re.search(r"^{:((\}|[^}])*)} *$", ln[first_nonspace:])
             data = self.parseListMarker(ln, first_nonspace)
 
             indent = first_nonspace - offset
@@ -1002,6 +1023,13 @@ class DocParser:
                 already_done, oldtip = closeUnmatchedBlocks(
                     self, already_done, oldtip)
                 container = self.addChild("BlockQuote", line_number, offset)
+            elif IALmatch:
+                offset = first_nonspace + len(IALmatch.group(0))
+                if blank:
+                    attributes.update(self.parseIAL(IALmatch.group(1)))
+                else:
+                    self.tip.attributes = self.parseIAL(IALmatch.group(1))
+
             elif ATXmatch:
                 offset = first_nonspace + len(ATXmatch.group(0))
                 already_done, oldtip = closeUnmatchedBlocks(

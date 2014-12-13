@@ -1,7 +1,10 @@
 CommonMark-py
 =============
+{: test=me }
 
+{: test=me }
 Pure Python port of [jgm](https://github.com/jgm)'s [stmd.js](https://github.com/jgm/stmd/blob/master/js/stmd.js), a Markdown parser and renderer for the [CommonMark](http://commonmark.org) specification, using only native modules. Once both this project and the CommonMark specification are stable we will release the first `1.0` version and attempt to keep up to date with changes in `stmd.js`.
+{: test=now }
 
 We are currently at the same development stage (actually a bit ahead because we have implemented HTML entity conversion and href URL escaping) as `stmd.js`. Since Python versions pre-3.4 use outdated (i.e. not HTML5 spec) entity conversion, I've converted the 3.4 implementation into a single file, `entitytrans.py` which so far seems to work (all tests pass on 2.7, 3.3, 3.4, PyPy, and PyPy3).
 
@@ -25,9 +28,9 @@ Usage
 	json = CommonMark.ASTtoJSON(ast)
 	CommonMark.dumpAST(ast) # pretty print generated AST structure
 	print(html) # <p>Hello <em>World</em><p/>
-    
+
     ----- or -----
-    
+
 	rolands@kamaji:~$ cmark.py README.md -o README.html
 	rolands@kamaji:~$ cmark.py README.md -o README.json -aj # output AST as JSON
 	rolands@kamaji:~$ cmark.py README.md -a # pretty print generated AST structure
@@ -44,7 +47,7 @@ Usage
 	  -o [O]      Output HTML/JSON file, defaults to stdout
 	  -a          Print formatted AST
 	  -aj         Output JSON AST
-	 
+
 Contributing
 ------------
 
