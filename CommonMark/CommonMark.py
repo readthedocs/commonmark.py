@@ -965,7 +965,10 @@ class DocParser:
 
         if blank and container.last_line_blank:
             self.breakOutOfLists(container, line_number)
-        while not container.t == "FencedCode" and not container.t == "IndentedCode" and not container.t == "HtmlBlock" and not matchAt(r"^[ #`~*+_=<>0-9-]", ln, offset) is None:
+        while not container.t == "FencedCode" and   \
+              not container.t == "IndentedCode" and \
+              not container.t == "HtmlBlock" and    \
+              not matchAt(r"^[ #`~*+_=<>0-9-]", ln, offset) is None:
             match = matchAt("[^ ]", ln, offset)
             if match is None:
                 first_nonspace = len(ln)
