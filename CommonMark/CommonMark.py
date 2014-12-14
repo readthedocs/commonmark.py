@@ -985,9 +985,10 @@ class DocParser:
         if blank and container.last_line_blank:
             self.breakOutOfLists(container, line_number)
 
-        while not container.t == "FencedCode" and   \
-              not container.t == "IndentedCode" and \
-              not container.t == "HtmlBlock" and    \
+        while not container.t == "ExtensionBlock" and   \
+              not container.t == "FencedCode" and       \
+              not container.t == "IndentedCode" and     \
+              not container.t == "HtmlBlock" and        \
               not matchAt(r"^[ #`~*+_=<>0-9-{]", ln, offset) is None:
             match = matchAt("[^ ]", ln, offset)
             if match is None:
@@ -1001,6 +1002,7 @@ class DocParser:
                 r"^`{3,}(?!.*`)|^~{3,}(?!.*~)", ln[first_nonspace:])
             PARmatch = re.search(r"^(?:=+|-+) *$", ln[first_nonspace:])
             IALmatch = re.search(r"^{:((\}|[^}])*)} *$", ln[first_nonspace:])
+            EXTmatch = re.search(r"^{::((\\\}|[^\\}])*)/?} *$", ln[first_nonspace:])
             data = self.parseListMarker(ln, first_nonspace)
 
             indent = first_nonspace - offset
@@ -1023,13 +1025,35 @@ class DocParser:
                 already_done, oldtip = closeUnmatchedBlocks(
                     self, already_done, oldtip)
                 container = self.addChild("BlockQuote", line_number, offset)
+            elif EXTmatch:
+                args = EXTmatch.group(1)
+                keyed_values = re.findall(r"(\w+)(?:=(\w+))? *", args)
+                offset = first_nonspace + len(EXTmatch.group(0))
+                print "EXT {} {}".format(args, offset)
+                already_done, oldtip = closeUnmatchedBlocks(self,
+                                                            already_done,
+                                                            oldtip)
+                container = self.addChild("ExtensionBlock", line_number,
+                                          first_nonspace)
+                container.title = keyed_values.pop(0)[0]
+                container.attributes = dict(keyed_values)
+                print EXTmatch.group(0)
+                print args
+                if (EXTmatch.group(0)[-2] == '/'):
+                    self.finalize(container, line_number)
+
+                break
             elif IALmatch:
                 offset = first_nonspace + len(IALmatch.group(0))
+                print "Found {}".format(IALmatch.group(0))
+                print "blank {}".format(blank)
+                print "container {} {}".format(self.tip.t, container.last_line_blank)
                 if blank:
+                    # FIXME
                     attributes.update(self.parseIAL(IALmatch.group(1)))
                 else:
                     self.tip.attributes = self.parseIAL(IALmatch.group(1))
-
+                break
             elif ATXmatch:
                 offset = first_nonspace + len(ATXmatch.group(0))
                 already_done, oldtip = closeUnmatchedBlocks(
@@ -1107,14 +1131,20 @@ class DocParser:
         else:
             already_done, oldtip = closeUnmatchedBlocks(
                 self, already_done, oldtip)
-            container.last_line_blank = blank and not (container.t == "BlockQuote" or container.t == "FencedCode" or (
-                container.t == "ListItem" and len(container.children) == 0 and container.start_line == line_number))
+            container.last_line_blank = blank and not (container.t == "BlockQuote" or container.t == "FencedCode" or (container.t == "ListItem" and len(container.children) == 0 and container.start_line == line_number))
             cont = container
             while cont.parent:
                 cont.parent.last_line_blank = False
                 cont = cont.parent
             if container.t == "IndentedCode" or container.t == "HtmlBlock":
                 self.addLine(ln, offset)
+            if container.t == "ExtensionBlock":
+                EXTmatch = re.search(r"^{:/((\\\}|[^\\}])*)} *$",
+                                     ln[first_nonspace:])
+                if EXTmatch:
+                    self.finalize(container, line_number)
+                else:
+                    self.addLine(ln, offset)
             elif container.t == "FencedCode":
                 match = bool()
                 if len(ln) > 0:

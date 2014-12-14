@@ -2,6 +2,19 @@ CommonMark-py
 =============
 {: test=me }
 
+{::test me=me /}
+
+{::comment mine}
+This is a comment
+{:/}
+
+{::c:function main}
+    int main(int argc, char *argv[])
+
+
+{:/}
+
+
 {: test=me }
 Pure Python port of [jgm](https://github.com/jgm)'s [stmd.js](https://github.com/jgm/stmd/blob/master/js/stmd.js), a Markdown parser and renderer for the [CommonMark](http://commonmark.org) specification, using only native modules. Once both this project and the CommonMark specification are stable we will release the first `1.0` version and attempt to keep up to date with changes in `stmd.js`.
 {: test=now }
