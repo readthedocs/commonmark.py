@@ -248,6 +248,16 @@ class Block(object):
         self.tight = bool()
         self.attributes = {}
 
+    def __unicode__(self):
+        return "Block {t} [{start}:{end}]".format(
+            t=self.t,
+            start=self.start_line,
+            end=self.end_line,
+            )
+
+    __str__ = __unicode__
+    __repr__ = __str__
+
 class InlineParser(object):
 
     """  INLINE PARSER
