@@ -1017,7 +1017,20 @@ class DocParser:
             data = self.parseListMarker(ln, first_nonspace)
 
             indent = first_nonspace - offset
-            if indent >= CODE_INDENT:
+            if data:
+                already_done, oldtip = closeUnmatchedBlocks(
+                    self, already_done, oldtip)
+                data['marker_offset'] = indent
+                offset = first_nonspace + data['padding']
+                if not container.t == "List" or not self.listsMatch(
+                   container.list_data, data):
+                    container = self.addChild(
+                        "List", line_number, first_nonspace)
+                    container.list_data = data
+                container = self.addChild(
+                    "ListItem", line_number, first_nonspace)
+                container.list_data = data
+            elif indent >= CODE_INDENT:
                 if not self.tip.t == "Paragraph" and not blank:
                     offset += CODE_INDENT
                     already_done, oldtip = closeUnmatchedBlocks(
@@ -1109,19 +1122,6 @@ class DocParser:
                     "HorizontalRule", line_number, first_nonspace)
                 offset = len(ln) - 1
                 break
-            elif data:
-                already_done, oldtip = closeUnmatchedBlocks(
-                    self, already_done, oldtip)
-                data['marker_offset'] = indent
-                offset = first_nonspace + data['padding']
-                if not container.t == "List" or not self.listsMatch(
-                   container.list_data, data):
-                    container = self.addChild(
-                        "List", line_number, first_nonspace)
-                    container.list_data = data
-                container = self.addChild(
-                    "ListItem", line_number, first_nonspace)
-                container.list_data = data
             else:
                 break
             if self.acceptsLines(container.t):
