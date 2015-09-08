@@ -54,7 +54,7 @@ parser.add_argument('-s', action="store_true",
 args = parser.parse_args()
 
 if args.d:
-        sys.settrace(trace_calls)
+    sys.settrace(trace_calls)
 
 renderer = CommonMark.HTMLRenderer()
 parser = CommonMark.DocParser()
@@ -201,15 +201,18 @@ for i, example in enumerate(examples):  # [0,examples[0]]
                 "\n=== got ====================\n" +
                 colors.ENDC+showSpaces(actual))
 
-print(str(passed)+" tests passed, "+str(failed)+" failed")
+print(str(passed) + " tests passed, " + str(failed) + " failed")
 
 endTime = time.clock()
 runTime = endTime-startTime
 
 if args.s:
-        for i in catStats.keys():
-                per = catStats[i][0]/catStats[i][2]
-                print(colors.HEADER + "[" + i + "]" + colors.ENDC +
-                      "\t" + str(per*100) + "% Passed")
+    for i in catStats.keys():
+        per = catStats[i][0]/catStats[i][2]
+        print(colors.HEADER + "[" + i + "]" + colors.ENDC +
+              "\t" + str(per*100) + "% Passed")
 
 print("runtime: " + str(runTime) + "s")
+
+if (failed > 0):
+    sys.exit(1)
