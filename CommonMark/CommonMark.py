@@ -850,9 +850,12 @@ class DocParser:
         """ Returns true if the two list items are of the same type,
         with the same delimiter and bullet character.  This is used
         in agglomerating list items into lists."""
-        return (list_data.get("type", None) == item_data.get("type", None) and
-            list_data.get("delimiter", None) == item_data.get("delimiter", None) and
-            list_data.get("bullet_char", None) == item_data.get("bullet_char", None))
+        return (list_data.get("type", None) ==
+                item_data.get("type", None) and
+                list_data.get("delimiter", None) ==
+                item_data.get("delimiter", None) and
+                list_data.get("bullet_char", None) ==
+                item_data.get("bullet_char", None))
 
     def parseListMarker(self, ln, offset):
         """ Parse a list marker and return data on the marker (type,
@@ -996,11 +999,11 @@ class DocParser:
         if blank and container.last_line_blank:
             self.breakOutOfLists(container, line_number)
 
-        while not container.t == "ExtensionBlock" and   \
-              not container.t == "FencedCode" and       \
-              not container.t == "IndentedCode" and     \
-              not container.t == "HtmlBlock" and        \
-              not matchAt(r"^[ #`~*+_=<>0-9-{]", ln, offset) is None:
+        while container.t != "ExtensionBlock" and \
+                container.t != "FencedCode" and \
+                container.t != "IndentedCode" and \
+                container.t != "HtmlBlock" and \
+                matchAt(r"^[ #`~*+_=<>0-9-{]", ln, offset) is not None:
             match = matchAt("[^ ]", ln, offset)
             if match is None:
                 first_nonspace = len(ln)
@@ -1013,7 +1016,8 @@ class DocParser:
                 r"^`{3,}(?!.*`)|^~{3,}(?!.*~)", ln[first_nonspace:])
             PARmatch = re.search(r"^(?:=+|-+) *$", ln[first_nonspace:])
             IALmatch = re.search(r"^{:((\}|[^}])*)} *$", ln[first_nonspace:])
-            EXTmatch = re.search(r"^{::((\\\}|[^\\}])*)/?} *$", ln[first_nonspace:])
+            EXTmatch = re.search(r"^{::((\\\}|[^\\}])*)/?} *$",
+                                 ln[first_nonspace:])
             data = self.parseListMarker(ln, first_nonspace)
 
             indent = first_nonspace - offset
@@ -1071,7 +1075,9 @@ class DocParser:
                 offset = first_nonspace + len(IALmatch.group(0))
                 print "Found {}".format(IALmatch.group(0))
                 print "blank {}".format(blank)
-                print "container {} {}".format(self.tip.t, container.last_line_blank)
+                print "container {} {}".format(
+                    self.tip.t,
+                    container.last_line_blank)
                 if blank:
                     # FIXME
                     attributes.update(self.parseIAL(IALmatch.group(1)))
@@ -1109,7 +1115,8 @@ class DocParser:
                 container = self.addChild(
                     'HtmlBlock', line_number, first_nonspace)
                 break
-            elif container.t == "Paragraph" and len(container.strings) == 1 and PARmatch:
+            elif container.t == "Paragraph" and \
+                    len(container.strings) == 1 and PARmatch:
                 already_done, oldtip = closeUnmatchedBlocks(
                     self, already_done, oldtip)
                 container.t = "SetextHeader"
@@ -1136,13 +1143,21 @@ class DocParser:
             blank = False
         indent = first_nonspace - offset
 
-        if not self.tip == last_matched_container and not blank and self.tip.t == "Paragraph" and len(self.tip.strings) > 0:
+        if not self.tip == last_matched_container and \
+           not blank and self.tip.t == "Paragraph" and \
+           len(self.tip.strings) > 0:
             self.last_line_blank = False
             self.addLine(ln, offset)
         else:
             already_done, oldtip = closeUnmatchedBlocks(
                 self, already_done, oldtip)
-            container.last_line_blank = blank and not (container.t == "BlockQuote" or container.t == "FencedCode" or (container.t == "ListItem" and len(container.children) == 0 and container.start_line == line_number))
+            container.last_line_blank = \
+                blank and \
+                not (container.t == "BlockQuote" or
+                     container.t == "FencedCode" or
+                     (container.t == "ListItem" and
+                      len(container.children) == 0 and
+                      container.start_line == line_number))
             cont = container
             while cont.parent:
                 cont.parent.last_line_blank = False
@@ -1159,8 +1174,11 @@ class DocParser:
             elif container.t == "FencedCode":
                 match = bool()
                 if len(ln) > 0:
-                    match = len(ln) > first_nonspace and ln[first_nonspace] == container.fence_char and re.match(
-                        r"^(?:`{3,}|~{3,})(?= *$)", ln[first_nonspace:])
+                    match = len(ln) > first_nonspace and \
+                        ln[first_nonspace] == container.fence_char and \
+                        re.match(
+                            r"^(?:`{3,}|~{3,})(?= *$)",
+                            ln[first_nonspace:])
                 match = indent <= 3 and match
                 FENmatch = re.search(
                     r"^(?:`{3,}|~{3,})(?= *$)", ln[first_nonspace:])
@@ -1176,7 +1194,8 @@ class DocParser:
                     self.addLine(ln, first_nonspace)
                 elif blank:
                     pass
-                elif not container.t == "HorizontalRule" and not container.t == "SetextHeader":
+                elif container.t != "HorizontalRule" and \
+                        container.t != "SetextHeader":
                     container = self.addChild(
                         "Paragraph", line_number, first_nonspace)
                     self.addLine(ln, first_nonspace)
@@ -1315,9 +1334,23 @@ class HTMLRenderer(object):
         """ Escape href URLs."""
         if not re.search("mailto|MAILTO", s):
             if sys.version_info >= (3, 0):
-                return re.sub("[&](?![#](x[a-f0-9]{1,8}|[0-9]{1,8});|[a-z][a-z0-9]{1,31};)", "&amp;", HTMLquote(HTMLunescape(s), ":/=*%?&)(#"), re.IGNORECASE)
+                return re.sub(
+                    "[&](?![#](x[a-f0-9]{1,8}|[0-9]{1,8});" +
+                    "|[a-z][a-z0-9]{1,31};)",
+                    "&amp;",
+                    HTMLquote(
+                        HTMLunescape(s),
+                        ":/=*%?&)(#"),
+                    re.IGNORECASE)
             else:
-                return re.sub("[&](?![#](x[a-f0-9]{1,8}|[0-9]{1,8});|[a-z][a-z0-9]{1,31};)", "&amp;", HTMLquote(HTMLunescape(s).encode("utf-8"), ":/=*%?&)(#"), re.IGNORECASE)
+                return re.sub(
+                    "[&](?![#](x[a-f0-9]{1,8}|[0-9]{1,8});" +
+                    "|[a-z][a-z0-9]{1,31};)",
+                    "&amp;",
+                    HTMLquote(
+                        HTMLunescape(s).encode("utf-8"),
+                        ":/=*%?&)(#"),
+                    re.IGNORECASE)
         else:
             return s
 
