@@ -1,5 +1,23 @@
 # CommonMark.py - setup.py
-from setuptools import setup
+from setuptools import setup, Command
+
+class Test(Command):
+    user_options = []
+
+    def initialize_options(self):
+        pass
+
+    def finalize_options(self):
+        pass
+
+    def run(self):
+        import subprocess
+        import sys
+        errno = subprocess.call([
+            sys.executable,
+            'CommonMark/test/test-CommonMark.py'])
+        raise SystemExit(errno)
+
 
 setup(
 	name = "CommonMark",
@@ -13,6 +31,7 @@ setup(
 	url = "https://github.com/rolandshoemaker/CommonMark-py",
 	download_url = "https://github.com/rolandshoemaker/CommonMark-py/tarball/v0.5.4",
 	keywords = ["markup", "markdown", "commonmark"],
+	cmdclass = {'test': Test},
 	classifiers = ["Programming Language :: Python",
 	"Programming Language :: Python :: 2",
 	"Programming Language :: Python :: 3",
