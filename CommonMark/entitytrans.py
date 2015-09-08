@@ -1,5 +1,8 @@
 """
-Python 3.4 HTML5 entity unescaping for all! Based on https://hg.python.org/cpython/file/500d3d6f22ff/Lib/html/__init__.py
+Python 3.4 HTML5 entity unescaping for all!
+
+Based on
+https://hg.python.org/cpython/file/500d3d6f22ff/Lib/html/__init__.py
 """
 
 import sys
@@ -2317,9 +2320,9 @@ def _replace_charref(s):
         if num in _invalid_codepoints:
             return ''
         if sys.version_info >= (3, 0):
-        	return chr(num)
+            return chr(num)
         else:
-        	return unichr(num)
+            return unichr(num)
     else:
         # named charref
         if s in _html5:
@@ -2335,6 +2338,7 @@ def _replace_charref(s):
 _charref = _re.compile(r'&(#[0-9]+;?'
                        r'|#[xX][0-9a-fA-F]+;?'
                        r'|[^\t\n\f <&#;]{1,32};?)')
+
 
 def _unescape(s):
     """
