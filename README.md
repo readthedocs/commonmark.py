@@ -23,7 +23,7 @@ We are currently at the same development stage (actually a bit ahead because we 
 
 **Current version:** 0.5.4
 
-[![Build Status](https://travis-ci.org/rolandshoemaker/CommonMark-py.svg?branch=master)](https://travis-ci.org/rolandshoemaker/CommonMark-py)
+[![Build Status](https://travis-ci.org/lu-zero/CommonMark-py.svg?branch=master)](https://travis-ci.org/lu-zero/CommonMark-py)
 
 Installation
 ------------
