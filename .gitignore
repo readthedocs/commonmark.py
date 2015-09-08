@@ -3,3 +3,6 @@ stmd-test.js
 *.pyc
 dist/*
 MANIFEST
+build/
+ve/
+*.egg-info/
