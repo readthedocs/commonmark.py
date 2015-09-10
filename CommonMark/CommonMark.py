@@ -1136,7 +1136,7 @@ class DocParser:
                 args = EXTmatch.group(1)
                 keyed_values = re.findall(r"(\w+)(?:=(\w+))? *", args)
                 offset = first_nonspace + len(EXTmatch.group(0))
-                print "EXT {} {}".format(args, offset)
+                print("EXT {} {}".format(args, offset))
                 already_done, oldtip = closeUnmatchedBlocks(self,
                                                             already_done,
                                                             oldtip)
@@ -1144,19 +1144,19 @@ class DocParser:
                                           first_nonspace)
                 container.title = keyed_values.pop(0)[0]
                 container.attributes = dict(keyed_values)
-                print EXTmatch.group(0)
-                print args
+                print(EXTmatch.group(0))
+                print(args)
                 if (EXTmatch.group(0)[-2] == '/'):
                     self.finalize(container, line_number)
 
                 break
             elif IALmatch:
                 offset = first_nonspace + len(IALmatch.group(0))
-                print "Found {}".format(IALmatch.group(0))
-                print "blank {}".format(blank)
-                print "container {} {}".format(
+                print("Found {}".format(IALmatch.group(0)))
+                print("blank {}".format(blank))
+                print("container {} {}".format(
                     self.tip.t,
-                    container.last_line_blank)
+                    container.last_line_blank))
                 if blank:
                     # FIXME
                     # attributes.update(self.parseIAL(IALmatch.group(1)))
