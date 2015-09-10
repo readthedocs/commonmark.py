@@ -5,4 +5,5 @@ dist/*
 MANIFEST
 build/
 ve/
+venv/
 *.egg-info/
