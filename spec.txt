@@ -202,22 +202,6 @@ to a certain encoding.
 
 Tabs in lines are expanded to spaces, with a tab stop of 4 characters:
 
-.
-→foo→baz→→bim
-.
-<pre><code>foo baz     bim
-</code></pre>
-.
-
-.
-    a→a
-    ὐ→a
-.
-<pre><code>a   a
-ὐ   a
-</code></pre>
-.
-
 Line endings are replaced by newline characters (LF).
 
 A line containing no characters, or a line containing only spaces (after
@@ -325,13 +309,6 @@ One to three spaces indent are allowed:
 .
 
 Four spaces is too many:
-
-.
-    ***
-.
-<pre><code>***
-</code></pre>
-.
 
 .
 Foo
@@ -557,13 +534,6 @@ One to three spaces indentation are allowed:
 Four spaces are too much:
 
 .
-    # foo
-.
-<pre><code># foo
-</code></pre>
-.
-
-.
 foo
     # bar
 .
@@ -721,21 +691,6 @@ not line up with the underlining:
 
 Four spaces indent is too much:
 
-.
-    Foo
-    ---
-
-    Foo
----
-.
-<pre><code>Foo
----
-
-Foo
-</code></pre>
-<hr />
-.
-
 The setext header underline can be indented up to three spaces, and
 may have trailing spaces:
 
@@ -878,64 +833,12 @@ the literal contents of the lines, including trailing newlines,
 minus four spaces of indentation. An indented code block has no
 attributes.
 
-.
-    a simple
-      indented code block
-.
-<pre><code>a simple
-  indented code block
-</code></pre>
-.
-
 The contents are literal text, and do not get parsed as Markdown:
-
-.
-    <a/>
-    *hi*
-
-    - one
-.
-<pre><code>&lt;a/&gt;
-*hi*
-
-- one
-</code></pre>
-.
 
 Here we have three chunks separated by blank lines:
 
-.
-    chunk1
-
-    chunk2
-  
- 
- 
-    chunk3
-.
-<pre><code>chunk1
-
-chunk2
-
-
-
-chunk3
-</code></pre>
-.
-
 Any initial spaces beyond four will be included in the content, even
 in interior blank lines:
-
-.
-    chunk1
-      
-      chunk2
-.
-<pre><code>chunk1
-  
-  chunk2
-</code></pre>
-.
 
 An indented code block cannot interrupt a paragraph.  (This
 allows hanging indents and the like.)
@@ -953,69 +856,15 @@ However, any non-blank line with fewer than four leading spaces ends
 the code block immediately.  So a paragraph may occur immediately
 after indented code:
 
-.
-    foo
-bar
-.
-<pre><code>foo
-</code></pre>
-<p>bar</p>
-.
-
 And indented code can occur immediately before and after other kinds of
 blocks:
 
-.
-# Header
-    foo
-Header
-------
-    foo
-----
-.
-<h1>Header</h1>
-<pre><code>foo
-</code></pre>
-<h2>Header</h2>
-<pre><code>foo
-</code></pre>
-<hr />
-.
-
 The first line can be indented more than four spaces:
-
-.
-        foo
-    bar
-.
-<pre><code>    foo
-bar
-</code></pre>
-.
 
 Blank lines preceding or following an indented code block
 are not included in it:
 
-.
-
-    
-    foo
-    
-
-.
-<pre><code>foo
-</code></pre>
-.
-
 Trailing spaces are included in the code block's content:
-
-.
-    foo  
-.
-<pre><code>foo  
-</code></pre>
-.
-
 
 ## Fenced code blocks
 
@@ -1220,17 +1069,6 @@ aaa
 .
 
 Four spaces indentation produces an indented code block:
-
-.
-    ```
-    aaa
-    ```
-.
-<pre><code>```
-aaa
-```
-</code></pre>
-.
 
 Code fences (opening and closing) cannot contain internal spaces:
 
@@ -1488,16 +1326,6 @@ else
 .
 
 The opening tag can be indented 1-3 spaces, but not 4:
-
-.
-  <!-- foo -->
-
-    <!-- foo -->
-.
-  <!-- foo -->
-<pre><code>&lt;!-- foo --&gt;
-</code></pre>
-.
 
 An HTML block can interrupt a paragraph, and need not be preceded
 by a blank line.
@@ -1768,16 +1596,6 @@ non-space characters after the title:
 This is not a link reference definition, because it is indented
 four spaces:
 
-.
-    [foo]: /url "title"
-
-[foo]
-.
-<pre><code>[foo]: /url &quot;title&quot;
-</code></pre>
-<p>[foo]</p>
-.
-
 This is not a link reference definition, because it occurs inside
 a code block:
 
@@ -1936,15 +1754,6 @@ bbb
 bbb</p>
 .
 
-.
-    aaa
-bbb
-.
-<pre><code>aaa
-</code></pre>
-<p>bbb</p>
-.
-
 Final spaces are stripped before inline parsing, so a paragraph
 that ends with two or more spaces will not end with a hard line
 break:
@@ -2075,17 +1884,6 @@ baz</p>
 
 Four spaces gives us a code block:
 
-.
-    > # Foo
-    > bar
-    > baz
-.
-<pre><code>&gt; # Foo
-&gt; bar
-&gt; baz
-</code></pre>
-.
-
 The Laziness clause allows us to omit the `>` before a
 paragraph continuation line:
 
@@ -2142,18 +1940,6 @@ block structure cannot be lazy.
 <ul>
 <li>bar</li>
 </ul>
-.
-
-.
->     foo
-    bar
-.
-<blockquote>
-<pre><code>foo
-</code></pre>
-</blockquote>
-<pre><code>bar
-</code></pre>
 .
 
 .
@@ -2347,21 +2133,6 @@ remember that the [block quote marker](#block-quote-marker) includes
 both the `>` and a following space.  So *five spaces* are needed after
 the `>`:
 
-.
->     code
-
->    not code
-.
-<blockquote>
-<pre><code>code
-</code></pre>
-</blockquote>
-<blockquote>
-<p>not code</p>
-</blockquote>
-.
-
-
 ## List items
 
 A [list marker](#list-marker) <a id="list-marker"></a> is a
@@ -2390,45 +2161,9 @@ The following rules define [list items](#list-item):
 
 For example, let *Ls* be the lines
 
-.
-A paragraph
-with two lines.
-
-    indented code
-
-> A block quote.
-.
-<p>A paragraph
-with two lines.</p>
-<pre><code>indented code
-</code></pre>
-<blockquote>
-<p>A block quote.</p>
-</blockquote>
-.
-
 And let *M* be the marker `1.`, and *N* = 2.  Then rule #1 says
 that the following is an ordered list item with start number 1,
 and the same contents as *Ls*:
-
-.
-1.  A paragraph
-    with two lines.
-
-        indented code
-
-    > A block quote.
-.
-<ol>
-<li><p>A paragraph
-with two lines.</p>
-<pre><code>indented code
-</code></pre>
-<blockquote>
-<p>A block quote.</p>
-</blockquote></li>
-</ol>
-.
 
 The most important thing to notice is that the position of
 the text after the list marker determines how much indentation
@@ -2461,18 +2196,6 @@ put under the list item:
 <li><p>one</p>
 <p>two</p></li>
 </ul>
-.
-
-.
- -    one
-
-     two
-.
-<ul>
-<li>one</li>
-</ul>
-<pre><code> two
-</code></pre>
 .
 
 .
@@ -2609,84 +2332,14 @@ An indented code block will have to be indented four spaces beyond
 the edge of the region where text will be included in the list item.
 In the following case that is 6 spaces:
 
-.
-- foo
-
-      bar
-.
-<ul>
-<li><p>foo</p>
-<pre><code>bar
-</code></pre></li>
-</ul>
-.
-
 And in this case it is 11 spaces:
-
-.
-  10.  foo
-
-           bar
-.
-<ol start="10">
-<li><p>foo</p>
-<pre><code>bar
-</code></pre></li>
-</ol>
-.
 
 If the *first* block in the list item is an indented code block,
 then by rule #2, the contents must be indented *one* space after the
 list marker:
 
-.
-    indented code
-
-paragraph
-
-    more code
-.
-<pre><code>indented code
-</code></pre>
-<p>paragraph</p>
-<pre><code>more code
-</code></pre>
-.
-
-.
-1.     indented code
-
-   paragraph
-
-       more code
-.
-<ol>
-<li><pre><code>indented code
-</code></pre>
-<p>paragraph</p>
-<pre><code>more code
-</code></pre></li>
-</ol>
-.
-
 Note that an additional space indent is interpreted as space
 inside the code block:
-
-.
-1.      indented code
-
-   paragraph
-
-       more code
-.
-<ol>
-<li><pre><code> indented code
-</code></pre>
-<p>paragraph</p>
-<pre><code>more code
-</code></pre></li>
-</ol>
-.
 
 Note that rules #1 and #2 only apply to two cases:  (a) cases
 in which the lines to be included in a list item begin with a nonspace
@@ -2740,86 +2393,11 @@ the above case:
 
 Indented one space:
 
-.
- 1.  A paragraph
-     with two lines.
-
-         indented code
-
-     > A block quote.
-.
-<ol>
-<li><p>A paragraph
-with two lines.</p>
-<pre><code>indented code
-</code></pre>
-<blockquote>
-<p>A block quote.</p>
-</blockquote></li>
-</ol>
-.
-
 Indented two spaces:
-
-.
-  1.  A paragraph
-      with two lines.
-
-          indented code
-
-      > A block quote.
-.
-<ol>
-<li><p>A paragraph
-with two lines.</p>
-<pre><code>indented code
-</code></pre>
-<blockquote>
-<p>A block quote.</p>
-</blockquote></li>
-</ol>
-.
 
 Indented three spaces:
 
-.
-   1.  A paragraph
-       with two lines.
-
-           indented code
-
-       > A block quote.
-.
-<ol>
-<li><p>A paragraph
-with two lines.</p>
-<pre><code>indented code
-</code></pre>
-<blockquote>
-<p>A block quote.</p>
-</blockquote></li>
-</ol>
-.
-
 Four spaces indent gives a code block:
-
-.
-    1.  A paragraph
-        with two lines.
-
-            indented code
-
-        > A block quote.
-.
-<pre><code>1.  A paragraph
-    with two lines.
-
-        indented code
-
-    &gt; A block quote.
-</code></pre>
-.
-
 
 4.  **Laziness.**  If a string of lines *Ls* constitute a [list
     item](#list-item) with contents *Bs*, then the result of deleting
@@ -2829,25 +2407,6 @@ Four spaces indent gives a code block:
     list item with the same contents and attributes.
 
 Here is an example with lazy continuation lines:
-
-.
-  1.  A paragraph
-with two lines.
-
-          indented code
-
-      > A block quote.
-.
-<ol>
-<li><p>A paragraph
-with two lines.</p>
-<pre><code>indented code
-</code></pre>
-<blockquote>
-<p>A block quote.</p>
-</blockquote></li>
-</ol>
-.
 
 Indentation can be partially deleted:
 
@@ -3289,27 +2848,6 @@ list:
 
 Indeed, two blank lines will end *all* containing lists:
 
-.
-- foo
-  - bar
-    - baz
-
-
-      bim
-.
-<ul>
-<li>foo
-<ul>
-<li>bar
-<ul>
-<li>baz</li>
-</ul></li>
-</ul></li>
-</ul>
-<pre><code>  bim
-</code></pre>
-.
-
 Thus, two blank lines can be used to separate consecutive lists of
 the same type, or to separate a list from an indented code block
 that would otherwise be parsed as a subparagraph of the final list
@@ -3331,25 +2869,6 @@ item:
 <li>baz</li>
 <li>bim</li>
 </ul>
-.
-
-.
--   foo
-
-    notcode
-
--   foo
-
-
-    code
-.
-<ul>
-<li><p>foo</p>
-<p>notcode</p></li>
-<li><p>foo</p></li>
-</ul>
-<pre><code>code
-</code></pre>
 .
 
 List items need not be indented to the same level.  The following
@@ -3670,13 +3189,6 @@ raw HTML:
 .
 
 .
-    \[\]
-.
-<pre><code>\[\]
-</code></pre>
-.
-
-.
 ~~~
 \[\]
 ~~~
@@ -3834,13 +3346,6 @@ Entities are treated as literal text in code spans and code blocks:
 `f&ouml;&ouml;`
 .
 <p><code>f&amp;ouml;&amp;ouml;</code></p>
-.
-
-.
-    f&ouml;f&ouml;
-.
-<pre><code>f&amp;ouml;f&amp;ouml;
-</code></pre>
 .
 
 ## Code span
