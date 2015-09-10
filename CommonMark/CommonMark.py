@@ -108,7 +108,7 @@ def ASTtoJSON(block):
         # trim empty elements...
         for attr in dir(block):
             if not callable(attr) and not attr.startswith("__") and \
-               attr != "makeBlock":
+               attr != "makeBlock" and attr != "pretty":
                 if block.__dict__[attr] in ["", [], None, {}]:
                     del(block.__dict__[attr])
         if 'children' in block.__dict__ and len(block.children) > 0:
