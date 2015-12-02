@@ -26,7 +26,9 @@ OPENTAG = "<" + TAGNAME + ATTRIBUTE + "*" + "\\s*/?>"
 CLOSETAG = "</" + TAGNAME + "\\s*[>]"
 OPENBLOCKTAG = "<" + BLOCKTAGNAME + ATTRIBUTE + "*" + "\\s*/?>"
 CLOSEBLOCKTAG = "</" + BLOCKTAGNAME + "\\s*[>]"
-HTMLCOMMENT = "<!--([^-]+|[-][^-]+)*-->"
+# HTML comments are more complex than something between <!-- and -->
+# http://www.w3.org/TR/html5/syntax.html#comments
+HTMLCOMMENT = "<!--(?!>|->)(?:[^-]|-(?!-))*?-->"
 PROCESSINGINSTRUCTION = "[<][?].*?[?][>]"
 DECLARATION = "<![A-Z]+" + "\\s+[^>]*>"
 CDATA = "<!\\[CDATA\\[([^\\]]+|\\][^\\]]|\\]\\][^>])*\\]\\]>"

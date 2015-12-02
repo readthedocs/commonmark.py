@@ -5239,6 +5239,24 @@ Illegal attributes in closing tag:
 Comments:
 
 .
+empty comment <!---->
+.
+<p>empty comment <!----></p>
+.
+
+.
+text must not start with a single > <!-->-->
+.
+<p>text must not start with a single &gt; &lt;!--&gt;--&gt;</p>
+.
+
+.
+nor start with a -> <!--->-->
+.
+<p>nor start with a -&gt; &lt;!---&gt;--&gt;</p>
+.
+
+.
 foo <!-- this is a
 comment - with hyphen -->
 .
@@ -5251,6 +5269,7 @@ foo <!-- not a comment -- two hyphens -->
 .
 <p>foo &lt;!-- not a comment -- two hyphens --&gt;</p>
 .
+
 
 Processing instructions:
 
