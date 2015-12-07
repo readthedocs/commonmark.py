@@ -61,6 +61,27 @@ reMain = r"^(?:[\n`\[\]\\!<&*_]|[^\n`\[\]\\!<&*_]+)"
 # Utility functions
 
 
+def commonmark(text, format="html"):
+    """Render CommonMark into HTML, JSON or AST
+    Optional keyword arguments:
+    format:     'html' (default), 'json' or 'ast'
+
+    >>> commonmark("*hello!*")
+    '<p><em>hello</em></p>\\n'
+    """
+    parser = DocParser()
+    ast = parser.parse(text)
+    if format not in ["html", "json", "ast"]:
+        raise ValueError("format must be 'html', 'json' or 'ast'")
+    if format == "html":
+        renderer = HTMLRenderer()
+        return renderer.render(ast)
+    if format == "json":
+        return ASTtoJSON(ast)
+    if format == "ast":
+        return dumpAST(ast)
+
+
 def ASTtoJSON(block):
     """ Output AST in JSON form, this is destructive of block."""
     def prepare(block):
