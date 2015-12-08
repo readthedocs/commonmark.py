@@ -11,6 +11,7 @@ python:
 install:
  - python setup.py install
 script:
+ - python setup.py flake8
  - python setup.py test
  - cmark.py README.md
  - cmark.py README.md -a
