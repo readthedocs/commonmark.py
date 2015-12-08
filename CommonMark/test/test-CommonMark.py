@@ -127,7 +127,11 @@ if args.i:
     while True:
         s = ""
         while True:
-            inp = raw_input(colors.OKBLUE+"Markdown: "+colors.ENDC)
+            if sys.version_info >= (3, 0):
+                inp = input(colors.OKBLUE + 'Markdown: ' + colors.ENDC)
+            else:
+                inp = raw_input(colors.OKBLUE + 'Markdown: ' + colors.ENDC)  # noqa
+
             if not inp == "end" and inp != "quit":
                 s += inp + "\n"
             elif inp == "end":

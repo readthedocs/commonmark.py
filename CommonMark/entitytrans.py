@@ -2322,7 +2322,7 @@ def _replace_charref(s):
         if sys.version_info >= (3, 0):
             return chr(num)
         else:
-            return unichr(num)
+            return unichr(num)  # noqa
     else:
         # named charref
         if s in _html5:
