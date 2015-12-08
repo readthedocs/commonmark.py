@@ -1,5 +1,6 @@
 #!/usr/bin/env python
-from __future__ import division
+# coding: utf-8
+from __future__ import division, print_function
 import re
 import time
 import codecs
@@ -157,7 +158,8 @@ if args.t:
 for i, example in enumerate(examples):  # [0,examples[0]]
     if not example['section'] == "" and \
        not current_section == example['section']:
-        print(colors.HEADER+"["+example['section']+"]"+colors.ENDC)
+        print('\n' + colors.HEADER + '[' + example['section'] + ']' +
+              colors.ENDC + ' ', end='')
         current_section = example['section']
         catStats.update({current_section: [0, 0, 0]})
 
@@ -171,21 +173,15 @@ for i, example in enumerate(examples):  # [0,examples[0]]
     if actual == example['html']:
         passed += 1
         catStats[current_section][0] += 1
-        if args.t:
-            if not args.f:
-                print("Test #"+str(args.t.split(",")[i]))
-        else:
-            if not args.f:
-                print("Test #"+str(i+1))
         if not args.f:
-            print(colors.OKGREEN+"tick"+colors.ENDC)
+            print(colors.OKGREEN + '✓' + colors.ENDC, end='')
         if args.d:
             CommonMark.dumpAST(ast)
         if args.p or args.d and not args.np:
             print(
                 colors.OKBLUE +
                 "=== markdown ===============\n" +
-                colors.ENDC+showSpaces(example['markdown']) +
+                colors.ENDC + showSpaces(example['markdown']) +
                 colors.OKBLUE +
                 "\n=== expected ===============\n" +
                 colors.ENDC + showSpaces(example['html']) +
@@ -196,10 +192,10 @@ for i, example in enumerate(examples):  # [0,examples[0]]
         failed += 1
         catStats[current_section][1] += 1
         if args.t:
-            print("Test #"+str(args.t.split(",")[i]))
+            print("Test #" + str(args.t.split(",")[i]), end='')
         else:
-            print("Test #"+str(i+1))
-        print(colors.FAIL+"cross"+colors.ENDC)
+            print("Test #" + str(i+1), end='')
+        print(' ' + colors.FAIL + "✗" + colors.ENDC)
         if args.d:
             CommonMark.dumpAST(ast)
         if not args.np or args.f:
@@ -214,7 +210,7 @@ for i, example in enumerate(examples):  # [0,examples[0]]
                 "\n=== got ====================\n" +
                 colors.ENDC+showSpaces(actual))
 
-print(str(passed) + " tests passed, " + str(failed) + " failed")
+print('\n' + str(passed) + ' tests passed, ' + str(failed) + ' failed')
 
 endTime = time.clock()
 runTime = endTime-startTime
