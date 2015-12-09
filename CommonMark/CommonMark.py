@@ -36,7 +36,6 @@ else:
     HTMLunquote = urllib.unquote
     URLparse = urlparse.urlparse
 
-reHtmlTag = re.compile('^' + common.HTMLTAG, re.IGNORECASE)
 reHtmlBlockOpen = re.compile('^' + common.HTMLBLOCKOPEN, re.IGNORECASE)
 reLinkTitle = re.compile(
     '^(?:"(' + common.ESCAPED_CHAR + '|[^"\\x00])*"' + '|' + '\'(' +
@@ -54,6 +53,33 @@ reEscapedChar = re.compile('^\\\\(' + common.ESCAPABLE + ')')
 reAllTab = re.compile("\t")
 reHrule = re.compile(r"^(?:(?:\* *){3,}|(?:_ *){3,}|(?:- *){3,}) *$")
 reFinalSpace = re.compile(r' *$')
+reSpnl = re.compile(r'^ *(?:\n *)?')
+reTicks = re.compile(r'`+')
+reTicksHere = re.compile(r'^`+')
+reWhitespace = re.compile(r'\s+')
+reEmailAutolink = re.compile(
+    "^<([a-zA-Z0-9.!#$%&'*+\/=?^_`{|}~-]+@[a-zA-Z0-9]" +
+    "(?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?" +
+    "(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*)>")
+reAutolink = re.compile(
+    '^<(?:coap|doi|javascript|aaa|aaas|about|acap|cap|cid|crid|data|' +
+    'dav|dict|dns|file|ftp|geo|go|gopher|h323|http|https|iax|icap|im|' +
+    'imap|info|ipp|iris|iris.beep|iris.xpc|iris.xpcs|iris.lwz|ldap|' +
+    'mailto|mid|msrp|msrps|mtqp|mupdate|news|nfs|ni|nih|nntp|' +
+    'opaquelocktoken|pop|pres|rtsp|service|session|shttp|sieve|' +
+    'sip|sips|sms|snmp|soap.beep|soap.beeps|tag|tel|telnet|tftp|' +
+    'thismessage|tn3270|tip|tv|urn|vemmi|ws|wss|xcon|xcon-userid|' +
+    'xmlrpc.beep|xmlrpc.beeps|xmpp|z39.50r|z39.50s|adiumxtra|afp|afs|' +
+    'aim|apt|attachment|aw|beshare|bitcoin|bolo|callto|chrome|' +
+    'chrome-extension|com-eventbrite-attendee|content|cvs|dlna-playsingle|' +
+    'dlna-playcontainer|dtn|dvb|ed2k|facetime|feed|finger|fish|gg|git|' +
+    'gizmoproject|gtalk|hcp|icon|ipn|irc|irc6|ircs|itms|jar|jms|keyparc|' +
+    'lastfm|ldaps|magnet|maps|market|message|mms|ms-help|msnim|mumble|mvn|' +
+    'notes|oid|palm|paparazzi|platform|proxy|psyc|query|res|resource|rmi|' +
+    'rsync|rtmp|secondlife|sftp|sgn|skype|smb|soldat|spotify|ssh|steam|svn|' +
+    'teamspeak|things|udp|unreal|ut2004|ventrilo|view-source|webcal|wtai|' +
+    'wyciwyg|xfire|xri|ymsgr):[^<>\x00-\x20]*>',
+    re.IGNORECASE)
 
 # Matches a character with a special meaning in markdown,
 # or a string of non-special characters.
@@ -272,15 +298,12 @@ class Block(object):
 
 
 class InlineParser(object):
+    """INLINE PARSER
 
-    """  INLINE PARSER
-
-     These are methods of an InlineParser class, defined below.
-     An InlineParser keeps track of a subject (a string to be
-     parsed) and a position in that subject.
-
-     If re matches at current position in the subject, advance
-     position in subject and return the match; otherwise return null."""
+    These are methods of an InlineParser class, defined below.
+    An InlineParser keeps track of a subject (a string to be
+    parsed) and a position in that subject.
+    """
 
     def __init__(self):
         self.subject = ""
@@ -289,18 +312,20 @@ class InlineParser(object):
         self.refmap = {}
 
     def match(self, regexString, reCompileFlags=0):
-        """ If re matches at current position in the subject, advance
-        position in subject and return the match; otherwise return null."""
+        """
+        If regexString matches at current position in the subject, advance
+        position in subject and return the match; otherwise return None.
+        """
         match = re.search(
             regexString, self.subject[self.pos:], flags=reCompileFlags)
-        if match:
+        if match is None:
+            return None
+        else:
             self.pos += match.end(0)
             return match.group()
-        else:
-            return None
 
     def peek(self):
-        """ Returns the character at the current subject position, or null if
+        """ Returns the character at the current subject position, or None if
         there are no more characters."""
         try:
             return self.subject[self.pos]
@@ -310,7 +335,7 @@ class InlineParser(object):
     def spnl(self):
         """ Parse zero or more space characters, including at
         most one newline."""
-        self.match(r"^ *(?:\n *)?")
+        self.match(reSpnl)
         return 1
 
     # All of the parsers below try to match something at the current position
@@ -321,24 +346,23 @@ class InlineParser(object):
     def parseBackticks(self, inlines):
         """ Attempt to parse backticks, adding either a backtick code span or a
         literal sequence of backticks to the 'inlines' list."""
-        startpos = self.pos
-        ticks = self.match(r"^`+")
-        if not ticks:
+        ticks = self.match(reTicksHere)
+        if ticks is None:
             return 0
         afterOpenTicks = self.pos
-        foundCode = False
-        match = self.match(r"`+", re.MULTILINE)
-        while (not foundCode) and (match is not None):
-            if (match == ticks):
+        matched = self.match(reTicks)
+        while matched is not None:
+            if (matched == ticks):
                 c = self.subject[afterOpenTicks:(self.pos - len(ticks))]
-                c = re.sub(r"[ \n]+", ' ', c)
                 c = c.strip()
-                inlines.append(Block(t="Code", c=c))
-                return (self.pos - startpos)
-            match = self.match(r"`+", re.MULTILINE)
-        inlines.append(Block(t="Str", c=ticks))
+                c = re.subn(reWhitespace, ' ', c)[0]
+                inlines.append(Block(t='Code', c=c))
+                return True
+            matched = self.match(reTicks)
+        # If we got here, we didn't match a closing backtick sequence.
         self.pos = afterOpenTicks
-        return (self.pos - startpos)
+        inlines.append(Block(t='Str', c=ticks))
+        return True
 
     def parseEscaped(self, inlines):
         """ Parse a backslash-escaped special character, adding either the
@@ -364,53 +388,35 @@ class InlineParser(object):
 
     def parseAutoLink(self, inlines):
         """ Attempt to parse an autolink (URL or email in pointy brackets)."""
-        m = self.match(
-            "^<([a-zA-Z0-9.!#$%&'*+\/=?^_`{|}~-]+@[a-zA-Z0-9]" +
-            "(?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9]" +
-            "(?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*)>")
-        m2 = self.match(
-            "^<(?:coap|doi|javascript|aaa|aaas|about|acap|cap|cid|crid|" +
-            "data|dav|dict|dns|file|ftp|geo|go|gopher|h323|http|https|" +
-            "iax|icap|im|imap|info|ipp|iris|iris.beep|iris.xpc|" +
-            "iris.xpcs|iris.lwz|ldap|mailto|mid|msrp|msrps|mtqp|mupdate|" +
-            "news|nfs|ni|nih|nntp|opaquelocktoken|pop|pres|rtsp|service|" +
-            "session|shttp|sieve|sip|sips|sms|snmp|soap.beep|soap.beeps|" +
-            "tag|tel|telnet|tftp|thismessage|tn3270|tip|tv|urn|vemmi|ws|" +
-            "wss|xcon|xcon-userid|xmlrpc.beep|xmlrpc.beeps|xmpp|z39.50r|" +
-            "z39.50s|adiumxtra|afp|afs|aim|apt|attachment|aw|beshare|" +
-            "bitcoin|bolo|callto|chrome|chrome-extension|" +
-            "com-eventbrite-attendee|content|cvs|dlna-playsingle|" +
-            "dlna-playcontainer|dtn|dvb|ed2k|facetime|feed|finger|fish|" +
-            "gg|git|gizmoproject|gtalk|hcp|icon|ipn|irc|irc6|ircs|itms|" +
-            "jar|jms|keyparc|lastfm|ldaps|magnet|maps|market|message|" +
-            "mms|ms-help|msnim|mumble|mvn|notes|oid|palm|paparazzi|" +
-            "platform|proxy|psyc|query|res|resource|rmi|rsync|rtmp|" +
-            "secondlife|sftp|sgn|skype|smb|soldat|spotify|ssh|steam|" +
-            "svn|teamspeak|things|udp|unreal|ut2004|ventrilo|" +
-            "view-source|webcal|wtai|wyciwyg|xfire|" +
-            "xri|ymsgr):[^<>\x00-\x20]*>", re.IGNORECASE)
+        m = self.match(reEmailAutolink)
         if m:
             # email
             dest = m[1:-1]
             inlines.append(
-                Block(t="Link",
-                      label=[Block(t="Str", c=dest)],
-                      destination="mailto:" + dest))
+                Block(
+                    t='Link',
+                    title='',
+                    label=[Block(t='Str', c=dest)],
+                    destination='mailto:' + dest))
             return len(m)
-        elif m2:
+
+        m = self.match(reAutolink)
+        if m:
             # link
-            dest2 = m2[1:-1]
+            dest = m[1:-1]
             inlines.append(
-                Block(t="Link",
-                      label=[Block(t="Str", c=dest2)],
-                      destination=dest2))
-            return len(m2)
-        else:
-            return 0
+                Block(
+                    t='Link',
+                    title='',
+                    label=[Block(t='Str', c=dest)],
+                    destination=dest))
+            return len(m)
+
+        return 0
 
     def parseHtmlTag(self, inlines):
         """ Attempt to parse a raw HTML tag."""
-        m = self.match(reHtmlTag)
+        m = self.match(common.reHtmlTag)
         if (m):
             inlines.append(Block(t="Html", c=m))
             return len(m)
@@ -558,7 +564,7 @@ class InlineParser(object):
 
     def parseLinkTitle(self):
         """ Attempt to parse link title (sans quotes), returning the string
-        or null if no match."""
+        or None if no match."""
         title = self.match(reLinkTitle)
         if title:
             return unescape(title[1:len(title)-1])
@@ -567,7 +573,7 @@ class InlineParser(object):
 
     def parseLinkDestination(self):
         """ Attempt to parse link destination, returning the string or
-        null if no match."""
+        None if no match."""
         res = self.match(reLinkDestinationBraces)
         if res is not None:
             return unescape(res[1:len(res) - 1])
@@ -927,7 +933,7 @@ class DocParser:
 
     def parseListMarker(self, ln, offset):
         """ Parse a list marker and return data on the marker (type,
-        start, delimiter, bullet character, padding) or null."""
+        start, delimiter, bullet character, padding) or None."""
         rest = ln[offset:]
         data = {}
         blank_item = bool()
