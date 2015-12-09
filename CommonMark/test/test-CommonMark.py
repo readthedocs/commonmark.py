@@ -76,7 +76,7 @@ parser = CommonMark.DocParser()
 f = codecs.open("spec.txt", encoding="utf-8")
 datalist = []
 for line in f:
-        datalist.append(line)
+    datalist.append(line)
 data = "".join(datalist)
 passed = 0
 failed = 0

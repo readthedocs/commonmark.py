@@ -53,6 +53,7 @@ reAllEscapedChar = '\\\\(' + common.ESCAPABLE + ')'
 reEscapedChar = re.compile('^\\\\(' + common.ESCAPABLE + ')')
 reAllTab = re.compile("\t")
 reHrule = re.compile(r"^(?:(?:\* *){3,}|(?:_ *){3,}|(?:- *){3,}) *$")
+reFinalSpace = re.compile(r' *$')
 
 # Matches a character with a special meaning in markdown,
 # or a string of non-special characters.
@@ -722,17 +723,20 @@ class InlineParser(object):
         line break; otherwise a soft line break."""
         if (self.peek() == '\n'):
             self.pos += 1
-            last = inlines[len(inlines) - 1]
-            if last and last.t == "Str" and last.c[-2:] == "  ":
-                last.c = re.sub(r' *$', '', last.c)
-                inlines.append(Block(t="Hardbreak"))
+            last = inlines and inlines[-1]
+            if last and last.t == 'Str' and last.c[-1] == ' ':
+                hardbreak = last.c[-2] == ' '
+                last.c = re.sub(reFinalSpace, '', last.c)
+                if hardbreak:
+                    myblock = Block(t='Hardbreak')
+                else:
+                    myblock = Block(t='Softbreak')
+                inlines.append(myblock)
             else:
-                if last and last.t == "Str" and last.c[-1:] == " ":
-                    last.c = last.c[0:-1]
-                inlines.append(Block(t="Softbreak"))
-            return 1
+                inlines.append(Block(t='Softbreak'))
+            return True
         else:
-            return 0
+            return False
 
     def parseImage(self, inlines):
         """ Attempt to parse an image.  If the opening '!' is not followed
