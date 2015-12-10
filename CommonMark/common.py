@@ -41,3 +41,9 @@ reHtmlTag = re.compile('^' + HTMLTAG, re.IGNORECASE)
 HTMLBLOCKOPEN = "<(?:" + BLOCKTAGNAME + \
     "[\\s/>]" + "|" + "/" + \
     BLOCKTAGNAME + "[\\s>]" + "|" + "[?!])"
+reAllEscapedChar = '\\\\(' + ESCAPABLE + ')'
+
+
+def unescape(s):
+    """ Replace backslash escapes with literal characters."""
+    return re.sub(reAllEscapedChar, r"\g<1>", s)
