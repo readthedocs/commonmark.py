@@ -38,25 +38,26 @@ else:
 
 reHtmlBlockOpen = re.compile('^' + common.HTMLBLOCKOPEN, re.IGNORECASE)
 reLinkTitle = re.compile(
-    '^(?:"(' + common.ESCAPED_CHAR + '|[^"\\x00])*"' + '|' + '\'(' +
-    common.ESCAPED_CHAR + '|[^\'\\x00])*\'' + '|' + '\\((' +
-    common.ESCAPED_CHAR + '|[^)\\x00])*\\))')
+    '^(?:"(' + common.ESCAPED_CHAR + '|[^"\\x00])*"' +
+    '|' +
+    '\'(' + common.ESCAPED_CHAR + '|[^\'\\x00])*\'' +
+    '|' +
+    '\\((' + common.ESCAPED_CHAR + '|[^)\\x00])*\\))')
 reLinkDestinationBraces = re.compile(
     '^(?:[<](?:[^<>\\n\\\\\\x00]' + '|' + common.ESCAPED_CHAR + '|' +
     '\\\\)*[>])')
 reLinkDestination = re.compile(
-    '^(?:' + common.REG_CHAR + '+|' + common.ESCAPED_CHAR + '|' +
+    '^(?:' + common.REG_CHAR + '+|' + common.ESCAPED_CHAR + '|\\\\|' +
     common.IN_PARENS_NOSP + ')*')
-reEscapable = re.compile(common.ESCAPABLE)
+reEscapable = re.compile('^' + common.ESCAPABLE)
+reEntityHere = re.compile('^' + common.ENTITY, re.IGNORECASE)
 reAllEscapedChar = '\\\\(' + common.ESCAPABLE + ')'
 reEscapedChar = re.compile('^\\\\(' + common.ESCAPABLE + ')')
 reAllTab = re.compile("\t")
 reHrule = re.compile(r"^(?:(?:\* *){3,}|(?:_ *){3,}|(?:- *){3,}) *$")
 reFinalSpace = re.compile(r' *$')
-reSpnl = re.compile(r'^ *(?:\n *)?')
 reTicks = re.compile(r'`+')
 reTicksHere = re.compile(r'^`+')
-reWhitespace = re.compile(r'\s+')
 reEmailAutolink = re.compile(
     "^<([a-zA-Z0-9.!#$%&'*+\/=?^_`{|}~-]+@[a-zA-Z0-9]" +
     "(?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?" +
@@ -80,10 +81,14 @@ reAutolink = re.compile(
     'teamspeak|things|udp|unreal|ut2004|ventrilo|view-source|webcal|wtai|' +
     'wyciwyg|xfire|xri|ymsgr):[^<>\x00-\x20]*>',
     re.IGNORECASE)
+reSpnl = re.compile(r'^ *(?:\n *)?')
+reWhitespace = re.compile(r'\s+')
 
 # Matches a character with a special meaning in markdown,
 # or a string of non-special characters.
-reMain = r"^(?:[\n`\[\]\\!<&*_]|[^\n`\[\]\\!<&*_]+)"
+reMain = re.compile(r'^(?:[\n`\[\]\\!<&*_]|[^\n`\[\]\\!<&*_]+)', re.MULTILINE)
+# Matches a string of non-special characters.
+# reMain = re.compile(r'^[^\n`\[\]\\!<&*_\'"]+', re.MULTILINE);
 
 # Utility functions
 
@@ -705,9 +710,7 @@ class InlineParser(object):
 
     def parseEntity(self, inlines):
         """ Attempt to parse an entity, adding to inlines if successful."""
-        m = self.match(
-            r"^&(?:#x[a-f0-9]{1,8}|#[0-9]{1,8}|[a-z][a-z0-9]{1,31});",
-            re.IGNORECASE)
+        m = self.match(reEntityHere)
         if m:
             inlines.append(Block(t="Entity", c=m))
             return len(m)
@@ -715,9 +718,9 @@ class InlineParser(object):
             return 0
 
     def parseString(self, inlines):
-        """ Parse a run of ordinary characters, or a single character with
+        """Parse a run of ordinary characters, or a single character with
         a special meaning in markdown, as a plain string, adding to inlines."""
-        m = self.match(reMain, re.MULTILINE)
+        m = self.match(reMain)
         if m:
             inlines.append(Block(t="Str", c=m))
             return len(m)

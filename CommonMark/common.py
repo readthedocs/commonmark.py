@@ -2,6 +2,7 @@ import re
 
 # Some of the regexps used in inline parser :<
 
+ENTITY = '&(?:#x[a-f0-9]{1,8}|#[0-9]{1,8}|[a-z][a-z0-9]{1,31});'
 ESCAPABLE = '[!"#$%&\'()*+,./:;<=>?@[\\\\\\]^_`{|}~-]'
 ESCAPED_CHAR = '\\\\' + ESCAPABLE
 IN_DOUBLE_QUOTES = '"(' + ESCAPED_CHAR + '|[^"\\x00])*"'
