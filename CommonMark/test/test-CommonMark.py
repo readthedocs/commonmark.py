@@ -71,7 +71,7 @@ if args.d:
     sys.settrace(trace_calls)
 
 renderer = CommonMark.HTMLRenderer()
-parser = CommonMark.DocParser()
+parser = CommonMark.Parser()
 
 f = codecs.open("spec.txt", encoding="utf-8")
 datalist = []

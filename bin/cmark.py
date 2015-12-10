@@ -22,7 +22,7 @@ parser.add_argument(
 parser.add_argument('-a', action="store_true", help="Print formatted AST")
 parser.add_argument('-aj', action="store_true", help="Output JSON AST")
 args = parser.parse_args()
-parser = CommonMark.DocParser()
+parser = CommonMark.Parser()
 f = args.infile
 o = args.o
 lines = []
