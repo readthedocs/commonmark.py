@@ -30,7 +30,7 @@ setup(
     author="Bibek Kafle <bkafle662@gmail.com>, " +
     "Roland Shoemaker <rolandshoemaker@gmail.com>",
     author_email="rolandshoemaker@gmail.com",
-    url="https://github.com/rolandshoemaker/CommonMark-py",
+    url="https://github.com/rtfd/CommonMark-py",
     keywords=["markup", "markdown", "commonmark"],
     cmdclass={'test': Test},
     setup_requires=[
