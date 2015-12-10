@@ -5,7 +5,7 @@
 # Basic usage:
 #
 # import CommonMark
-# parser = CommonMark.DocParser()
+# parser = CommonMark.Parser()
 # renderer = CommonMark.HtmlRenderer()
 # print(renderer.render(parser.parse('Hello *world*')))
 from __future__ import absolute_import
@@ -96,7 +96,7 @@ def commonmark(text, format="html"):
     >>> commonmark("*hello!*")
     '<p><em>hello</em></p>\\n'
     """
-    parser = DocParser()
+    parser = Parser()
     ast = parser.parse(text)
     if format not in ["html", "json", "ast"]:
         raise ValueError("format must be 'html', 'json' or 'ast'")
@@ -846,7 +846,7 @@ class InlineParser(object):
         return self.parseInlines(s, refmap)
 
 
-class DocParser:
+class Parser:
 
     def __init__(self, subject=None, pos=0):
         self.doc = Block.makeBlock("Document", 1, 1)
