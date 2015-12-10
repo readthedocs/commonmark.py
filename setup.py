@@ -33,7 +33,7 @@ setup(
     url="https://github.com/rolandshoemaker/CommonMark-py",
     keywords=["markup", "markdown", "commonmark"],
     cmdclass={'test': Test},
-    setup_requires=[
+    tests_require=[
         'flake8',
     ],
     classifiers=[
