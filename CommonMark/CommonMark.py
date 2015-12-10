@@ -59,27 +59,27 @@ reFinalSpace = re.compile(r' *$')
 reTicks = re.compile(r'`+')
 reTicksHere = re.compile(r'^`+')
 reEmailAutolink = re.compile(
-    "^<([a-zA-Z0-9.!#$%&'*+\/=?^_`{|}~-]+@[a-zA-Z0-9]" +
-    "(?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?" +
-    "(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*)>")
+    r"^<([a-zA-Z0-9.!#$%&'*+\/=?^_`{|}~-]+@[a-zA-Z0-9]"
+    r"(?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?"
+    r"(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*)>")
 reAutolink = re.compile(
-    '^<(?:coap|doi|javascript|aaa|aaas|about|acap|cap|cid|crid|data|' +
-    'dav|dict|dns|file|ftp|geo|go|gopher|h323|http|https|iax|icap|im|' +
-    'imap|info|ipp|iris|iris.beep|iris.xpc|iris.xpcs|iris.lwz|ldap|' +
-    'mailto|mid|msrp|msrps|mtqp|mupdate|news|nfs|ni|nih|nntp|' +
-    'opaquelocktoken|pop|pres|rtsp|service|session|shttp|sieve|' +
-    'sip|sips|sms|snmp|soap.beep|soap.beeps|tag|tel|telnet|tftp|' +
-    'thismessage|tn3270|tip|tv|urn|vemmi|ws|wss|xcon|xcon-userid|' +
-    'xmlrpc.beep|xmlrpc.beeps|xmpp|z39.50r|z39.50s|adiumxtra|afp|afs|' +
-    'aim|apt|attachment|aw|beshare|bitcoin|bolo|callto|chrome|' +
-    'chrome-extension|com-eventbrite-attendee|content|cvs|dlna-playsingle|' +
-    'dlna-playcontainer|dtn|dvb|ed2k|facetime|feed|finger|fish|gg|git|' +
-    'gizmoproject|gtalk|hcp|icon|ipn|irc|irc6|ircs|itms|jar|jms|keyparc|' +
-    'lastfm|ldaps|magnet|maps|market|message|mms|ms-help|msnim|mumble|mvn|' +
-    'notes|oid|palm|paparazzi|platform|proxy|psyc|query|res|resource|rmi|' +
-    'rsync|rtmp|secondlife|sftp|sgn|skype|smb|soldat|spotify|ssh|steam|svn|' +
-    'teamspeak|things|udp|unreal|ut2004|ventrilo|view-source|webcal|wtai|' +
-    'wyciwyg|xfire|xri|ymsgr):[^<>\x00-\x20]*>',
+    r'^<(?:coap|doi|javascript|aaa|aaas|about|acap|cap|cid|crid|data|'
+    r'dav|dict|dns|file|ftp|geo|go|gopher|h323|http|https|iax|icap|im|'
+    r'imap|info|ipp|iris|iris.beep|iris.xpc|iris.xpcs|iris.lwz|ldap|'
+    r'mailto|mid|msrp|msrps|mtqp|mupdate|news|nfs|ni|nih|nntp|'
+    r'opaquelocktoken|pop|pres|rtsp|service|session|shttp|sieve|'
+    r'sip|sips|sms|snmp|soap.beep|soap.beeps|tag|tel|telnet|tftp|'
+    r'thismessage|tn3270|tip|tv|urn|vemmi|ws|wss|xcon|xcon-userid|'
+    r'xmlrpc.beep|xmlrpc.beeps|xmpp|z39.50r|z39.50s|adiumxtra|afp|afs|'
+    r'aim|apt|attachment|aw|beshare|bitcoin|bolo|callto|chrome|'
+    r'chrome-extension|com-eventbrite-attendee|content|cvs|dlna-playsingle|'
+    r'dlna-playcontainer|dtn|dvb|ed2k|facetime|feed|finger|fish|gg|git|'
+    r'gizmoproject|gtalk|hcp|icon|ipn|irc|irc6|ircs|itms|jar|jms|keyparc|'
+    r'lastfm|ldaps|magnet|maps|market|message|mms|ms-help|msnim|mumble|mvn|'
+    r'notes|oid|palm|paparazzi|platform|proxy|psyc|query|res|resource|rmi|'
+    r'rsync|rtmp|secondlife|sftp|sgn|skype|smb|soldat|spotify|ssh|steam|svn|'
+    r'teamspeak|things|udp|unreal|ut2004|ventrilo|view-source|webcal|wtai|'
+    r'wyciwyg|xfire|xri|ymsgr):[^<>\x00-\x20]*>',
     re.IGNORECASE)
 reSpnl = re.compile(r'^ *(?:\n *)?')
 reWhitespace = re.compile(r'\s+')
@@ -91,7 +91,6 @@ reMain = re.compile(r'^(?:[\n`\[\]\\!<&*_]|[^\n`\[\]\\!<&*_]+)', re.MULTILINE)
 # reMain = re.compile(r'^[^\n`\[\]\\!<&*_\'"]+', re.MULTILINE);
 
 # Utility functions
-
 
 def commonmark(text, format="html"):
     """Render CommonMark into HTML, JSON or AST
@@ -815,22 +814,25 @@ class InlineParser(object):
         and adding the result to 'inlines'."""
         c = self.peek()
         res = None
+        if c == -1:
+            return False
         if (c == '\n'):
             res = self.parseNewline(inlines)
-        elif (c == "\\"):
+        elif (c == '\\'):
             res = self.parseEscaped(inlines)
-        elif (c == "`"):
+        elif (c == '`'):
             res = self.parseBackticks(inlines)
-        elif ((c == "*") or (c == "_")):
+        elif ((c == '*') or (c == '_')):
             res = self.parseEmphasis(inlines)
-        elif (c == "["):
+        elif (c == '['):
             res = self.parseLink(inlines)
-        elif (c == "!"):
+        elif (c == '!'):
             res = self.parseImage(inlines)
-        elif (c == "<"):
+        elif (c == '<'):
             res = self.parseAutoLink(inlines) or self.parseHtmlTag(inlines)
-        elif (c == "&"):
+        elif (c == '&'):
             res = self.parseEntity(inlines)
+
         return res or self.parseString(inlines)
 
     def parseInlines(self, s, refmap={}):
@@ -870,7 +872,7 @@ class Parser:
         descending if needed into lists and sublists."""
         if block.last_line_blank:
             return True
-        if (block.t == "List" or block.t == "ListItem") and \
+        if (block.t == "List" or block.t == "Item") and \
            len(block.children) > 0:
             return self.endsWithBlankLine(
                 block.children[len(block.children) - 1])
@@ -913,8 +915,8 @@ class Parser:
         and so on til we find a block that can accept children."""
         while not (self.tip.t == "Document" or
                    self.tip.t == "BlockQuote" or
-                   self.tip.t == "ListItem" or
-                   (self.tip.t == "List" and tag == "ListItem")):
+                   self.tip.t == "Item" or
+                   (self.tip.t == "List" and tag == "Item")):
             self.finalize(self.tip, line_number)
         column_number = offset + 1
         newBlock = Block.makeBlock(tag, line_number, column_number)
@@ -1027,7 +1029,7 @@ class Parser:
                         pass
                 else:
                     all_matched = False
-            elif container.t == "ListItem":
+            elif container.t == "Item":
                 if (indent >= container.list_data['marker_offset'] +
                    container.list_data['padding']):
                     offset += container.list_data[
@@ -1111,7 +1113,7 @@ class Parser:
                         "List", line_number, first_nonspace)
                     container.list_data = data
                 container = self.addChild(
-                    "ListItem", line_number, first_nonspace)
+                    "Item", line_number, first_nonspace)
                 container.list_data = data
             elif indent >= CODE_INDENT:
                 if not self.tip.t == "Paragraph" and not blank:
@@ -1235,7 +1237,7 @@ class Parser:
                 blank and \
                 not (container.t == "BlockQuote" or
                      container.t == "FencedCode" or
-                     (container.t == "ListItem" and
+                     (container.t == "Item" and
                       len(container.children) == 0 and
                       container.start_line == line_number))
             cont = container
@@ -1514,7 +1516,7 @@ class HTMLRenderer(object):
                 a = self.innersep + \
                     self.renderBlocks(block.children) + self.innersep
             return self.inTags('blockquote', [], a)
-        elif (block.t == "ListItem"):
+        elif (block.t == "Item"):
             return self.inTags("li", [],
                                self.renderBlocks(block.children,
                                                  in_tight_list).strip())
