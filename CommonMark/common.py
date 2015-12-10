@@ -1,3 +1,5 @@
+import re
+
 # Some of the regexps used in inline parser :<
 
 ESCAPABLE = '[!"#$%&\'()*+,./:;<=>?@[\\\\\\]^_`{|}~-]'
@@ -28,12 +30,13 @@ OPENBLOCKTAG = "<" + BLOCKTAGNAME + ATTRIBUTE + "*" + "\\s*/?>"
 CLOSEBLOCKTAG = "</" + BLOCKTAGNAME + "\\s*[>]"
 # HTML comments are more complex than something between <!-- and -->
 # http://www.w3.org/TR/html5/syntax.html#comments
-HTMLCOMMENT = "<!--(?!>|->)(?:[^-]|-(?!-))*?-->"
+HTMLCOMMENT = '<!---->|<!--(?:-?[^>-])(?:-?[^-])*-->'
 PROCESSINGINSTRUCTION = "[<][?].*?[?][>]"
 DECLARATION = "<![A-Z]+" + "\\s+[^>]*>"
-CDATA = "<!\\[CDATA\\[([^\\]]+|\\][^\\]]|\\]\\][^>])*\\]\\]>"
+CDATA = '<!\\[CDATA\\[[\\s\\S]*?\\]\\]>'
 HTMLTAG = "(?:" + OPENTAG + "|" + CLOSETAG + "|" + HTMLCOMMENT + \
     "|" + PROCESSINGINSTRUCTION + "|" + DECLARATION + "|" + CDATA + ")"
+reHtmlTag = re.compile('^' + HTMLTAG, re.IGNORECASE)
 HTMLBLOCKOPEN = "<(?:" + BLOCKTAGNAME + \
     "[\\s/>]" + "|" + "/" + \
     BLOCKTAGNAME + "[\\s>]" + "|" + "[?!])"
