@@ -10,21 +10,26 @@ class Node:
         self.c = c
         self.destination = destination
         self.label = label
-        self.isOpen = True
+        self.is_open = True
         self.last_line_blank = False
         self.start_line = start_line
         self.start_column = start_column
         self.end_line = start_line
         self.children = []
         self.parent = None
-        self.string_content = ""
+        self.string_content = ''
+        self.literal = None
         self.strings = []
         self.inline_content = []
         self.list_data = {}
         self.title = title
-        self.info = ""
+        self.info = ''
         self.tight = bool()
         self.attributes = {}
+        self.is_fenced = False
+        self.fence_length = 0
+        self.fence_char = None
+        self.fence_offset = None
 
     def __repr__(self):
         return "Node {t} [{start}:{end}]".format(

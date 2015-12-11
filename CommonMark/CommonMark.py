@@ -51,9 +51,9 @@ def ASTtoJSON(block):
         block elements."""
         if block.parent:
             block.parent = None
-        if not block.__dict__['isOpen'] is None:
-            block.__dict__['open'] = block.isOpen
-            del(block.isOpen)
+        if not block.__dict__['is_open'] is None:
+            block.__dict__['open'] = block.is_open
+            del(block.is_open)
         # trim empty elements...
         for attr in dir(block):
             if not callable(attr) and not attr.startswith("__") and \
@@ -89,8 +89,8 @@ def dumpAST(obj, ind=0):
         print("\t" + indChar + "Info: " + obj.info)
     if not obj.destination == "":
         print("\t" + indChar + "Destination: " + obj.destination)
-    if obj.isOpen:
-        print("\t" + indChar + "Open: " + str(obj.isOpen))
+    if obj.is_open:
+        print("\t" + indChar + "Open: " + str(obj.is_open))
     if obj.last_line_blank:
         print(
             "\t" + indChar + "Last line blank: " + str(obj.last_line_blank))
