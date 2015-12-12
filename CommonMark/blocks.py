@@ -7,8 +7,15 @@ from CommonMark.inlines import InlineParser
 from CommonMark.node import Node
 
 
-reHtmlBlockOpen = re.compile('^' + common.HTMLBLOCKOPEN, re.IGNORECASE)
-reHrule = re.compile(r"^(?:(?:\* *){3,}|(?:_ *){3,}|(?:- *){3,}) *$")
+reATXHeaderMarker = re.compile(r'^#{1,6}(?: +|$)')
+reBulletListMarker = re.compile(r'^[*+-]( +|$)')
+reOrderedListMarker = re.compile(r'^(\d+)([.)])( +|$)')
+reHtmlBlockOpen = re.compile(r'^' + common.HTMLBLOCKOPEN, re.IGNORECASE)
+reHrule = re.compile(r'^(?:(?:\* *){3,}|(?:_ *){3,}|(?:- *){3,}) *$')
+reCodeFence = re.compile(r'^`{3,}(?!.*`)|^~{3,}(?!.*~)')
+reClosingCodeFence = re.compile(r'^(?:`{3,}|~{3,})(?= *$)')
+reLineEnding = re.compile(r'\r\n|\n|\r')
+reSetextHeaderLine = re.compile(r'^(?:=+|-+) *$')
 
 
 def detabLine(text):
@@ -52,9 +59,10 @@ class Parser:
 
     def acceptsLines(self, block_type):
         """ Returns true if block type can accept lines of text."""
-        return block_type == "Paragraph" or \
-            block_type == "IndentedCode" or \
-            block_type == "FencedCode"
+        return block_type == 'Paragraph' or \
+            block_type == 'IndentedCode' or \
+            block_type == 'FencedCode' or \
+            block_type == 'HtmlBlock'
 
     def endsWithBlankLine(self, block):
         """ Returns true if block ends with a blank line,
@@ -63,8 +71,7 @@ class Parser:
             return True
         if (block.t == "List" or block.t == "Item") and \
            len(block.children) > 0:
-            return self.endsWithBlankLine(
-                block.children[len(block.children) - 1])
+            return self.endsWithBlankLine(block.children[-1])
         else:
             return False
 
@@ -72,7 +79,7 @@ class Parser:
         """ Break out of all containing lists, resetting the tip of the
         document to the parent of the highest list, and finalizing
         all the lists.  (This is used to implement the "two blank lines
-        break of of all lists" feature.)"""
+        break out of all lists" feature.)"""
         b = block
         last_list = None
         while True:
@@ -83,7 +90,7 @@ class Parser:
                 break
 
         if (last_list):
-            while (not block == last_list):
+            while block != last_list:
                 self.finalize(block, line_number)
                 block = block.parent
             self.finalize(last_list, line_number)
@@ -93,7 +100,7 @@ class Parser:
         """ Add a line to the block at the tip.  We assume the tip
         can accept lines -- that check should be done before calling this."""
         s = ln[offset:]
-        if not self.tip.isOpen:
+        if not self.tip.is_open:
             raise Exception(
                 "Attempted to add line (" + ln + ") to closed container.")
         self.tip.strings.append(s)
@@ -106,7 +113,7 @@ class Parser:
                    self.tip.t == "BlockQuote" or
                    self.tip.t == "Item" or
                    (self.tip.t == "List" and tag == "Item")):
-            self.finalize(self.tip, line_number)
+            self.finalize(self.tip, line_number - 1)
         column_number = offset + 1
         newNode = Node.makeNode(tag, line_number, column_number)
         self.tip.children.append(newNode)
@@ -133,8 +140,8 @@ class Parser:
         blank_item = bool()
         if re.match(reHrule, rest):
             return None
-        match = re.search(r'^[*+-]( +|$)', rest)
-        match2 = re.search(r'^(\d+)([.)])( +|$)', rest)
+        match = re.search(reBulletListMarker, rest)
+        match2 = re.search(reOrderedListMarker, rest)
         if match:
             spaces_after_marker = len(match.group(1))
             data['type'] = 'Bullet'
@@ -192,7 +199,7 @@ class Parser:
 
         while len(container.children) > 0:
             last_child = container.children[-1]
-            if not last_child.isOpen:
+            if not last_child.is_open:
                 break
             container = last_child
 
@@ -281,10 +288,9 @@ class Parser:
             else:
                 first_nonspace = match
                 blank = False
-            ATXmatch = re.search(r"^#{1,6}(?: +|$)", ln[first_nonspace:])
-            FENmatch = re.search(
-                r"^`{3,}(?!.*`)|^~{3,}(?!.*~)", ln[first_nonspace:])
-            PARmatch = re.search(r"^(?:=+|-+) *$", ln[first_nonspace:])
+            ATXmatch = re.search(reATXHeaderMarker, ln[first_nonspace:])
+            FENmatch = re.search(reCodeFence, ln[first_nonspace:])
+            PARmatch = re.search(reSetextHeaderLine, ln[first_nonspace:])
             IALmatch = re.search(r"^{:((\}|[^}])*)} *$", ln[first_nonspace:])
             EXTmatch = re.search(r"^{::((\\\}|[^\\}])*)/?} *$",
                                  ln[first_nonspace:])
@@ -482,10 +488,10 @@ class Parser:
         or 'loose' status of a list, and parsing the beginnings
         of paragraphs for reference definitions.  Reset the tip to the
         parent of the closed block."""
-        if (not block.isOpen):
+        if (not block.is_open):
             return 0
 
-        block.isOpen = False
+        block.is_open = False
         if (line_number > block.start_line):
             block.end_line = line_number - 1
         else:
@@ -556,16 +562,16 @@ class Parser:
             for i in block.children:
                 self.processInlines(i)
 
-    def parse(self, input):
+    def parse(self, my_input):
         """ The main parsing function.  Returns a parsed document AST."""
         self.doc = Node.makeNode("Document", 1, 1)
         self.tip = self.doc
         self.refmap = {}
-        lines = re.split(r"\r\n|\n|\r", re.sub(r"\n$", '', input))
+        lines = re.split(reLineEnding, re.sub(r'\n$', '', my_input))
         length = len(lines)
         for i in range(length):
             self.incorporateLine(lines[i], i + 1)
         while (self.tip):
-            self.finalize(self.tip, length - 1)
+            self.finalize(self.tip, length)
         self.processInlines(self.doc)
         return self.doc
