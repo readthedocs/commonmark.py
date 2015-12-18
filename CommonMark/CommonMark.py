@@ -14,6 +14,7 @@ import json
 from CommonMark import common
 from CommonMark.blocks import Parser
 from CommonMark.html import HTMLRenderer
+from CommonMark.node import NodeWalker
 
 
 reEscapedChar = re.compile('^\\\\(' + common.ESCAPABLE + ')')
@@ -142,10 +143,13 @@ def dumpAST(obj, ind=0):
         print("\t" + indChar + "Inline content:")
         for b in obj.inline_content:
             dumpAST(b, ind + 2)
-    if len(obj.children) > 0:
+    if obj.nxt:
         print("\t" + indChar + "Children:")
-        for b in obj.children:
-            dumpAST(b, ind + 2)
+        walker = NodeWalker(obj)
+        nxt = walker.nxt()
+        while nxt is not None:
+            dumpAST(nxt['node'], ind + 2)
+            nxt = walker.nxt()
     if len(obj.attributes):
         print("\t" + indChar + "Attributes:")
         for key, val in obj.attributes.iteritems():

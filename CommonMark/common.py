@@ -1,4 +1,18 @@
+from __future__ import absolute_import
+
 import re
+import sys
+
+if sys.version_info >= (3, 0):
+    if sys.version_info >= (3, 4):
+        import html.parser
+        HTMLunescape = html.parser.HTMLParser().unescape
+    else:
+        from .entitytrans import _unescape
+        HTMLunescape = _unescape
+else:
+    from CommonMark import entitytrans
+    HTMLunescape = entitytrans._unescape
 
 # Some of the regexps used in inline parser :<
 
@@ -43,7 +57,63 @@ HTMLBLOCKOPEN = "<(?:" + BLOCKTAGNAME + \
     BLOCKTAGNAME + "[\\s>]" + "|" + "[?!])"
 reAllEscapedChar = '\\\\(' + ESCAPABLE + ')'
 
+XMLSPECIAL = '[&<>"]'
+reXmlSpecial = re.compile(XMLSPECIAL)
+reXmlSpecialOrEntity = re.compile(
+    '{}|{}'.format(ENTITY, XMLSPECIAL), re.IGNORECASE)
+reBackslashOrAmp = re.compile(r'[\\&]')
+reEntityOrEscapedChar = re.compile(
+    '\\\\' + ESCAPABLE + '|' + ENTITY, re.IGNORECASE)
+
 
 def unescape(s):
     """ Replace backslash escapes with literal characters."""
     return re.sub(reAllEscapedChar, r"\g<1>", s)
+
+
+def unescape_char(s):
+    if s[0] == '\\':
+        return s[1]
+    else:
+        HTMLunescape(s)
+
+
+def unescape_string(s):
+    """Replace entities and backslash escapes with literal characters."""
+    if re.match(reBackslashOrAmp, s):
+        return re.sub(
+            reEntityOrEscapedChar,
+            lambda m: unescape_char(m))
+    else:
+        return s
+
+
+def replace_unsafe_char(s):
+    if s == '&':
+        return '&amp;'
+    elif s == '<':
+        return '&lt;'
+    elif s == '>':
+        return '&gt;'
+    elif s == '"':
+        return '&quot;'
+    else:
+        return s
+
+
+def escape_xml(s, preserve_entities):
+    if s is None:
+        return ''
+    if re.match(reXmlSpecial, s):
+        if preserve_entities:
+            return re.sub(
+                reXmlSpecialOrEntity,
+                lambda m: replace_unsafe_char(m.group()),
+                s)
+        else:
+            return re.sub(
+                reXmlSpecial,
+                lambda m: replace_unsafe_char(m.group()),
+                s)
+    else:
+        return s
