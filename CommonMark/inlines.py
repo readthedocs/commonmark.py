@@ -1,9 +1,9 @@
-from __future__ import absolute_import
+from __future__ import absolute_import, unicode_literals
 
 import re
 import sys
 from CommonMark import common
-from CommonMark.common import unescape
+from CommonMark.common import normalize_uri, unescape_string
 from CommonMark.node import Node
 
 if sys.version_info >= (3, 0):
@@ -17,29 +17,35 @@ else:
     from CommonMark import entitytrans
     HTMLunescape = entitytrans._unescape
 
+# Some regexps used in inline parser:
+
+ESCAPED_CHAR = '\\\\' + common.ESCAPABLE
+REG_CHAR = '[^\\\\()\\x00-\\x20]'
+IN_PARENS_NOSP = '\\((' + REG_CHAR + '|' + ESCAPED_CHAR + '|\\\\)*\\)'
+
 rePunctuation = re.compile(
     r'^[\u2000-\u206F\u2E00-\u2E7F\\\'!"#\$%&\(\)'
     r'\*\+,\-\.\/:;<=>\?@\[\]\^_`\{\|\}~]')
 
 reLinkTitle = re.compile(
-    '^(?:"(' + common.ESCAPED_CHAR + '|[^"\\x00])*"' +
+    '^(?:"(' + ESCAPED_CHAR + '|[^"\\x00])*"' +
     '|' +
-    '\'(' + common.ESCAPED_CHAR + '|[^\'\\x00])*\'' +
+    '\'(' + ESCAPED_CHAR + '|[^\'\\x00])*\'' +
     '|' +
-    '\\((' + common.ESCAPED_CHAR + '|[^)\\x00])*\\))')
+    '\\((' + ESCAPED_CHAR + '|[^)\\x00])*\\))')
 reLinkDestinationBraces = re.compile(
-    '^(?:[<](?:[^<>\\n\\\\\\x00]' + '|' + common.ESCAPED_CHAR + '|' +
+    '^(?:[<](?:[^<>\\n\\\\\\x00]' + '|' + ESCAPED_CHAR + '|' +
     '\\\\)*[>])')
 reLinkDestination = re.compile(
-    '^(?:' + common.REG_CHAR + '+|' + common.ESCAPED_CHAR + '|\\\\|' +
-    common.IN_PARENS_NOSP + ')*')
-reLinkLabel = re.compile(
-    '^\\[(?:[^\\\\\\[\\]]|' + common.ESCAPED_CHAR + '|\\\\){0,1000}\\]')
+    '^(?:' + REG_CHAR + '+|' + ESCAPED_CHAR + '|\\\\|' +
+    IN_PARENS_NOSP + ')*')
 
 reEscapable = re.compile('^' + common.ESCAPABLE)
 reEntityHere = re.compile('^' + common.ENTITY, re.IGNORECASE)
 reTicks = re.compile(r'`+')
 reTicksHere = re.compile(r'^`+')
+reEllipses = re.compile(r'\.\.\.')
+reDash = re.compile(r'--+')
 reEmailAutolink = re.compile(
     r"^<([a-zA-Z0-9.!#$%&'*+\/=?^_`{|}~-]+@[a-zA-Z0-9]"
     r"(?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?"
@@ -68,13 +74,11 @@ reWhitespaceChar = re.compile(r'^\s')
 reWhitespace = re.compile(r'\s+')
 reFinalSpace = re.compile(r' *$')
 reInitialSpace = re.compile(r'^ *')
-reSpaceAtLineEnd = re.compile(r'^ *(?:\n|$)')
-
-# Matches a character with a special meaning in markdown,
-# or a string of non-special characters.
-reMain = re.compile(r'^(?:[\n`\[\]\\!<&*_]|[^\n`\[\]\\!<&*_]+)', re.MULTILINE)
+reSpaceAtEndOfLine = re.compile(r'^ *(?:\n|$)')
+reLinkLabel = re.compile(
+    '^\\[(?:[^\\\\\\[\\]]|' + ESCAPED_CHAR + '|\\\\){0,1000}\\]')
 # Matches a string of non-special characters.
-# reMain = re.compile(r'^[^\n`\[\]\\!<&*_\'"]+', re.MULTILINE);
+reMain = re.compile(r'^[^\n`\[\]\\!<&*_\'"]+', re.MULTILINE)
 
 
 def normalizeReference(s):
@@ -92,6 +96,27 @@ def text(s):
     return node
 
 
+def smart_dashes(chars):
+    en_count = 0
+    em_count = 0
+    if len(chars) % 3 == 0:
+        # If divisible by 3, use all em dashes
+        em_count = len(chars) / 3
+    elif len(chars) % 2 == 0:
+        # If divisble by 2, use all en dashes
+        en_count = len(chars) / 2
+    elif len(chars) % 3 == 2:
+        # if 2 extra dashes, use en dashfor last 2;
+        # em dashes for rest
+        en_count = 1
+        em_count = (len(chars) - 2) / 3
+    else:
+        # Use en dashes for last 4 hyphens; em dashes for rest
+        en_count = 2
+        em_count = (len(chars) - 4) / 3
+    return ('\u2014' * em_count) + ('\u2013' * en_count)
+
+
 class InlineParser:
     """INLINE PARSER
 
@@ -106,17 +131,16 @@ class InlineParser:
         self.refmap = {}
         self.options = options
 
-    def match(self, regexString, reCompileFlags=0):
+    def match(self, regexString):
         """
         If regexString matches at current position in the subject, advance
         position in subject and return the match; otherwise return None.
         """
-        match = re.search(
-            regexString, self.subject[self.pos:], flags=reCompileFlags)
+        match = re.search(regexString, self.subject[self.pos:])
         if match is None:
             return None
         else:
-            self.pos += match.end(0)
+            self.pos += match.end()
             return match.group()
 
     def peek(self):
@@ -143,20 +167,20 @@ class InlineParser:
         ticks = self.match(reTicksHere)
         if ticks is None:
             return False
-        afterOpenTicks = self.pos
+        after_open_ticks = self.pos
         matched = self.match(reTicks)
         while matched is not None:
             if (matched == ticks):
-                c = self.subject[afterOpenTicks:self.pos - len(ticks)]
-                c = c.strip()
-                c = re.subn(reWhitespace, ' ', c)[0]
                 node = Node('Code', None)
+                c = self.subject[after_open_ticks:self.pos - len(ticks)]
+                c = c.strip()
+                c = re.sub(reWhitespace, ' ', c)
                 node.literal = c
                 block.append_child(node)
                 return True
             matched = self.match(reTicks)
         # If we got here, we didn't match a closing backtick sequence.
-        self.pos = afterOpenTicks
+        self.pos = after_open_ticks
         block.append_child(text(ticks))
         return True
 
@@ -173,13 +197,13 @@ class InlineParser:
         try:
             subjchar = subj[self.pos]
         except IndexError:
-            subjchar = ''
+            subjchar = None
 
         if self.peek() == '\n':
             self.pos += 1
             node = Node('Hardbreak', None)
             block.append_child(node)
-        elif re.match(reEscapable, subjchar):
+        elif subjchar and re.match(reEscapable, subjchar):
             block.append_child(text(subjchar))
             self.pos += 1
         else:
@@ -189,28 +213,30 @@ class InlineParser:
 
     def parseAutolink(self, block):
         """Attempt to parse an autolink (URL or email in pointy brackets)."""
-        m1 = self.match(reEmailAutolink)
-        m2 = self.match(reAutolink)
-        if m1:
+        m = self.match(reEmailAutolink)
+
+        if m:
             # email
-            dest = m1[1:-1]
+            dest = m[1:-1]
             node = Node('Link', None)
-            node.destination = 'mailto:' + dest
-            node.title = ''
-            node.append_child(text(dest))
-            block.append_child(node)
-            return True
-        elif m2:
-            # link
-            dest = m2[1:-1]
-            node = Node('Link', None)
-            node.destination = dest
+            node.destination = normalize_uri('mailto:' + dest)
             node.title = ''
             node.append_child(text(dest))
             block.append_child(node)
             return True
         else:
-            return False
+            m = self.match(reAutolink)
+            if m:
+                # link
+                dest = m[1:-1]
+                node = Node('Link', None)
+                node.destination = normalize_uri(dest)
+                node.title = ''
+                node.append_child(text(dest))
+                block.append_child(node)
+                return True
+
+        return False
 
     def parseHtmlTag(self, block):
         """Attempt to parse a raw HTML tag."""
@@ -276,11 +302,10 @@ class InlineParser:
             can_close = right_flanking
 
         self.pos = startpos
-
         return {
-            "numdelims": numdelims,
-            "can_open": can_open,
-            "can_close": can_close,
+            'numdelims': numdelims,
+            'can_open': can_open,
+            'can_close': can_close,
         }
 
     def handleDelim(self, cc, block):
@@ -288,14 +313,14 @@ class InlineParser:
         res = self.scanDelims(cc)
         if not res:
             return False
-        numdelims = res['numdelims']
+        numdelims = res.get('numdelims')
         startpos = self.pos
 
         self.pos += numdelims
         if cc == "'":
-            contents = u'\u2019'
+            contents = '\u2019'
         elif cc == '"':
-            contents = u'\u201C'
+            contents = '\u201C'
         else:
             contents = self.subject[startpos:self.pos]
         node = text(contents)
@@ -308,8 +333,8 @@ class InlineParser:
             'node': node,
             'previous': self.delimiters,
             'next': None,
-            'can_open': res['can_open'],
-            'can_close': res['can_close'],
+            'can_open': res.get('can_open'),
+            'can_close': res.get('can_close'),
             'active': True,
         }
         if self.delimiters['previous'] is not None:
@@ -317,17 +342,17 @@ class InlineParser:
         return True
 
     def removeDelimiter(self, delim):
-        if delim['previous'] is not None:
-            delim['previous']['next'] = delim['next']
-        if delim['next'] is None:
+        if delim.get('previous') is not None:
+            delim['previous']['next'] = delim.get('next')
+        if delim.get('next') is None:
             # Top of stack
-            self.delimiters = delim['previous']
+            self.delimiters = delim.get('previous')
         else:
-            delim['next']['previous'] = delim['previous']
+            delim['next']['previous'] = delim.get('previous')
 
     @staticmethod
     def removeDelimitersBetween(bottom, top):
-        if bottom['next'] != top:
+        if bottom.get('next') != top:
             bottom['next'] = top
             top['previous'] = bottom
 
@@ -342,34 +367,34 @@ class InlineParser:
 
         # Find first closer above stack_bottom
         closer = self.delimiters
-        while closer is not None and closer['previous'] != stack_bottom:
-            closer = closer['previous']
+        while closer is not None and closer.get('previous') != stack_bottom:
+            closer = closer.get('previous')
 
         # Move forward, looking for closers, and handling each
         while closer is not None:
-            closercc = closer['cc']
-            if not (closer['can_close'] and
+            closercc = closer.get('cc')
+            if not (closer.get('can_close') and
                     (closercc == '_' or
                      closercc == '*' or
                      closercc == "'" or
                      closercc == '"')):
-                closer = closer['next']
+                closer = closer.get('next')
             else:
                 # found emphasis closer. now look back for first
                 # matching opener:
-                opener = closer['previous']
+                opener = closer.get('previous')
                 opener_found = False
                 while (opener is not None and opener != stack_bottom and
                        opener != openers_bottom[closercc]):
-                    if opener['cc'] == closercc and opener['can_open']:
+                    if opener.get('cc') == closercc and opener.get('can_open'):
                         opener_found = True
                         break
-                    opener = opener['previous']
+                    opener = opener.get('previous')
                 old_closer = closer
 
                 if closercc == '*' or closercc == '_':
                     if not opener_found:
-                        closer = closer['next']
+                        closer = closer.get('next')
                     else:
                         # Calculate actual number of delimiters used from
                         # closer
@@ -384,8 +409,8 @@ class InlineParser:
                             else:
                                 use_delims = 1
 
-                        opener_inl = opener['node']
-                        closer_inl = closer['node']
+                        opener_inl = opener.get('node')
+                        closer_inl = closer.get('node')
 
                         # Remove used delimiters from stack elts and inlines
                         opener['numdelims'] -= use_delims
@@ -426,15 +451,15 @@ class InlineParser:
                             closer = tempstack
 
                 elif closercc == "'":
-                    closer['node'].literal = u'\u2019'
+                    closer['node'].literal = '\u2019'
                     if opener_found:
-                        opener['node'].literal = u'\u2018'
+                        opener['node'].literal = '\u2018'
                     closer = closer['next']
 
                 elif closercc == '"':
-                    closer['node'].literal = u'\u201D'
+                    closer['node'].literal = '\u201D'
                     if opener_found:
-                        opener['node'].literal = u'\u201C'
+                        opener['node'].literal = '\u201C'
                     closer = closer['next']
 
                 if not opener_found:
@@ -459,7 +484,7 @@ class InlineParser:
             return None
         else:
             # chop off quotes from title and unescape:
-            return unescape(title[1:-1])
+            return unescape_string(title[1:-1])
 
     def parseLinkDestination(self):
         """
@@ -468,14 +493,14 @@ class InlineParser:
         """
         res = self.match(reLinkDestinationBraces)
         if res is None:
-            res2 = self.match(reLinkDestination)
-            if res2 is None:
+            res = self.match(reLinkDestination)
+            if res is None:
                 return None
             else:
-                return unescape(res2)
+                return normalize_uri(unescape_string(res))
         else:
             # chop off surrounding <..>:
-            return unescape(res[1:-1])
+            return normalize_uri(unescape_string(res[1:-1]))
 
     def parseLinkLabel(self):
         """
@@ -511,7 +536,7 @@ class InlineParser:
             'index': startpos,
             'active': True,
         }
-        if self.delimiters['previous'] is not None:
+        if self.delimiters.get('previous') is not None:
             self.delimiters['previous']['next'] = self.delimiters
 
         return True
@@ -565,16 +590,16 @@ class InlineParser:
         opener = self.delimiters
 
         while opener is not None:
-            if opener['cc'] == '[' or opener['cc'] == '!':
+            if opener.get('cc') == '[' or opener.get('cc') == '!':
                 break
-            opener = opener['previous']
+            opener = opener.get('previous')
 
         if opener is None:
             # no matched opener, just return a literal
             block.append_child(text(']'))
             return True
 
-        if not opener['active']:
+        if not opener.get('active'):
             # no matched opener, just return a literal
             block.append_child(text(']'))
             # take opener off emphasis stack
@@ -582,21 +607,23 @@ class InlineParser:
             return True
 
         # If we got here, opener is a potential opener
-        is_image = opener['cc'] == '!'
+        is_image = opener.get('cc') == '!'
 
         # Check to see if we have a link/image
 
         # Inline link?
         if self.peek() == '(':
             self.pos += 1
-            if self.spnl():
-                dest = self.parseLinkDestination()
-                if dest and self.spnl() and \
-                   re.match(reWhitespaceChar, self.subject[self.pos-1]):
+            self.spnl()
+            dest = self.parseLinkDestination()
+            if dest is not None and \
+               self.spnl():
+                # make sure there's a space before the title
+                if re.match(reWhitespaceChar, self.subject[self.pos-1]):
                     title = self.parseLinkTitle()
-                    if self.spnl() and self.peek() == ')':
-                        self.pos += 1
-                        matched = True
+                if self.spnl() and self.peek() == ')':
+                    self.pos += 1
+                    matched = True
         else:
             # Next, see if there's a link label
             savepos = self.pos
@@ -612,26 +639,27 @@ class InlineParser:
                 self.pos = savepos
 
             # lookup rawlabel in refmap
-            link = self.refmap.get(normalizeReference(reflabel), None)
+            link = self.refmap.get(normalizeReference(reflabel))
             if link:
                 dest = link['destination']
                 title = link['title']
                 matched = True
 
         if matched:
-            node = Node('Image', None) if is_image else Node('Link', None)
+            node = Node('Image' if is_image else 'Link', None)
 
             node.destination = dest
             node.title = title or ''
-            tmp = opener['node'].nxt
+            tmp = opener.get('node').nxt
             while tmp:
                 nxt = tmp.nxt
                 tmp.unlink()
                 node.append_child(tmp)
                 tmp = nxt
             block.append_child(node)
-            self.processEmphasis(opener['previous'])
-            opener['node'].unlink()
+            self.processEmphasis(opener.get('previous'))
+
+            opener.get('node').unlink()
 
             # processEmphasis will remove this and later delimiters.
             # Now, for a link, we also deactivate earlier link openers.
@@ -639,10 +667,10 @@ class InlineParser:
             if not is_image:
                 opener = self.delimiters
                 while opener is not None:
-                    if opener['cc'] == '[':
+                    if opener.get('cc') == '[':
                         # deactivate this opener
                         opener['active'] = False
-                    opener = opener['previous']
+                    opener = opener.get('previous')
 
             return True
         else:
@@ -669,7 +697,12 @@ class InlineParser:
         """
         m = self.match(reMain)
         if m:
-            block.append_child(text(m))
+            if self.options.get('smart'):
+                s = re.sub(reEllipses, '\u2026', m)
+                s = re.sub(reDash, lambda x: smart_dashes(x.group()), s)
+                block.append_child(text(s))
+            else:
+                block.append_child(text(m))
             return True
         else:
             return False
@@ -682,8 +715,7 @@ class InlineParser:
         # assume we're at a \n
         self.pos += 1
         lastc = block.last_child
-        if lastc and lastc.t == 'Text' and \
-           lastc.literal[-1] == ' ':
+        if lastc and lastc.t == 'Text' and lastc.literal[-1] == ' ':
             hardbreak = len(lastc.literal) >= 2 and lastc.literal[-2] == ' '
             lastc.literal = re.sub(reFinalSpace, '', lastc.literal)
             if hardbreak:
@@ -702,16 +734,14 @@ class InlineParser:
         """Attempt to parse a link reference, modifying refmap."""
         self.subject = s
         self.pos = 0
-        self.label_nest_level = 0
-
         startpos = self.pos
 
         # label:
-        matchChars = self.parseLinkLabel()
-        if (matchChars == 0):
+        match_chars = self.parseLinkLabel()
+        if (match_chars == 0):
             return 0
         else:
-            rawlabel = self.subject[:matchChars]
+            rawlabel = self.subject[:match_chars]
 
         # colon:
         if (self.peek() == ':'):
@@ -731,14 +761,14 @@ class InlineParser:
         beforetitle = self.pos
         self.spnl()
         title = self.parseLinkTitle()
-        if (title is None):
+        if title is None:
             title = ''
             # rewind before spaces
             self.pos = beforetitle
 
         # make sure we're at line end:
         at_line_end = True
-        if self.match(reSpaceAtLineEnd) is None:
+        if self.match(reSpaceAtEndOfLine) is None:
             if title == '':
                 at_line_end = False
             else:
@@ -749,14 +779,19 @@ class InlineParser:
                 # rewind before spaces
                 self.pos = beforetitle
                 # and instead check if the link URL is at the line end
-                at_line_end = self.match(reSpaceAtLineEnd) is not None
+                at_line_end = self.match(reSpaceAtEndOfLine) is not None
 
         if not at_line_end:
             self.pos = startpos
             return 0
 
         normlabel = normalizeReference(rawlabel)
-        if (not refmap.get(normlabel, None)):
+        if refmap.get(normlabel) == '':
+            # label must contain non-whitespace characters
+            self.pos = startpos
+            return 0
+
+        if refmap.get(normlabel) is None:
             refmap[normlabel] = {
                 'destination': dest,
                 'title': title
@@ -781,8 +816,10 @@ class InlineParser:
             res = self.parseBackslash(block)
         elif c == '`':
             res = self.parseBackticks(block)
-        elif (c == '*') or (c == '_'):
+        elif c == '*' or c == '_':
             res = self.handleDelim(c, block)
+        elif c == "'" or c == '"':
+            res = self.options.get('smart') and self.handleDelim(c, block)
         elif c == '[':
             res = self.parseOpenBracket(block)
         elif c == '!':

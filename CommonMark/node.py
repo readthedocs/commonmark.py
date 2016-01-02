@@ -1,9 +1,12 @@
+from __future__ import unicode_literals
+
 import re
 
 
 reContainer = re.compile(
     r'(Document|BlockQuote|List|Item|Paragraph|'
-    r'Header|Emph|Strong|Link|Image)')
+    r'Heading|Emph|Strong|Link|Image|'
+    r'CustomInline|CustomBlock)')
 
 
 def is_container(node):
@@ -53,10 +56,6 @@ class NodeWalker:
 
 
 class Node:
-    @staticmethod
-    def makeNode(node_type, sourcepos):
-        return Node(node_type, sourcepos)
-
     def __init__(self, node_type, sourcepos):
         self.t = node_type
         self.parent = None
@@ -87,6 +86,9 @@ class Node:
     def pretty(self):
         from pprint import pprint
         pprint(self.__dict__)
+
+    def is_container(self):
+        return is_container(self)
 
     def append_child(self, child):
         child.unlink()
@@ -146,9 +148,6 @@ class Node:
         sibling.parent = self.parent
         if not sibling.prv:
             sibling.parent.first_child = sibling
-
-    def is_container(self):
-        return is_container(self)
 
     def walker(self):
         return NodeWalker(self)

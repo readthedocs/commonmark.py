@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+from __future__ import unicode_literals
 import argparse
 import sys
 import CommonMark
@@ -31,7 +32,7 @@ for line in f:
 data = "".join(lines)
 ast = parser.parse(data)
 if not args.a and not args.aj:
-    renderer = CommonMark.HTMLRenderer()
+    renderer = CommonMark.HtmlRenderer()
     o.write(renderer.render(ast))
     exit()
 if args.a:

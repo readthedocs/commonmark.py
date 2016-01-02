@@ -1,4 +1,4 @@
-from __future__ import absolute_import
+from __future__ import absolute_import, unicode_literals
 
 import re
 import sys
@@ -36,29 +36,29 @@ reSafeDataProtocol = re.compile(
 
 def tag(name, attrs=[], selfclosing=False):
     """Helper function to produce an HTML tag."""
-    result = u'<' + name
+    result = '<' + name
     for attr in attrs:
-        result += u' {}="{}"'.format(attr[0], attr[1])
+        result += ' {}="{}"'.format(attr[0], attr[1])
     if selfclosing:
-        result += u' /'
+        result += ' /'
 
-    result += u'>'
+    result += '>'
     return result
 
 
 def potentially_unsafe(url):
-    return re.match(reUnsafeProtocol, url) and not \
-        re.match(reSafeDataProtocol, url)
+    return re.search(reUnsafeProtocol, url) and not \
+        re.search(reSafeDataProtocol, url)
 
 
-class HTMLRenderer(object):
-    blocksep = "\n"
-    innersep = "\n"
-    softbreak = "\n"
-    escape_pairs = (("[&]", '&amp;'),
-                    ("[<]", '&lt;'),
-                    ("[>]", '&gt;'),
-                    ('["]', '&quot;'))
+class HtmlRenderer:
+
+    def __init__(self, options={}):
+        # by default, soft breaks are rendered as newlines in HTML.
+        # set to "<br />" to make them hard breaks
+        # set to " " if you want to ignore line wrapping in source
+        self.softbreak = '\n'
+        self.options = options
 
     @staticmethod
     def inTags(tag, attribs, contents, selfclosing=None):
@@ -77,9 +77,6 @@ class HTMLRenderer(object):
         else:
             result += ('></' + tag + '>')
         return result
-
-    def __init__(self):
-        pass
 
     @staticmethod
     def URLescape(s):
@@ -133,10 +130,19 @@ class HTMLRenderer(object):
 
         event = walker.nxt()
         while event is not None:
-            attrs = []
             entering = event['entering']
             node = event['node']
-            if node.t == 'Text' or node.t == 'Str':
+
+            attrs = []
+            if self.options.get('sourcepos'):
+                pos = node.sourcepos
+                if pos:
+                    attrs.push([
+                        'data-sourcepos',
+                        pos[0][0] + ':' + pos[0][1] + '-' +
+                        pos[1][0] + ':' + pos[1][1]])
+
+            if node.t == 'Text':
                 self.out(escape_xml(node.literal, False))
             elif node.t == 'Softbreak':
                 self.out(self.softbreak)
@@ -148,26 +154,38 @@ class HTMLRenderer(object):
             elif node.t == 'Strong':
                 self.out(tag('strong' if entering else '/strong'))
             elif node.t == 'HtmlInline':
-                self.out(node.literal)
+                if self.options.get('safe'):
+                    self.out('<!-- raw HTML omitted -->')
+                else:
+                    self.out(node.literal)
+            elif node.t == 'CustomInline':
+                if entering and node.on_enter:
+                    self.out(node.on_enter)
+                elif not entering and node.on_exit:
+                    self.out(node.on_exit)
             elif node.t == 'Link':
                 if entering:
-                    if not potentially_unsafe(node.destination):
-                        attrs.insert(
-                            0,
-                            ['href', escape_xml(node.destination, True)])
+                    if not (self.options.get('safe') and
+                            potentially_unsafe(node.destination)):
+                        attrs.append([
+                            'href',
+                            escape_xml(node.destination, True)
+                        ])
                     if node.title:
-                        attrs.insert(
-                            0,
-                            ['title', escape_xml(node.title, True)])
+                        attrs.append(['title', escape_xml(node.title, True)])
                     self.out(tag('a', attrs))
                 else:
                     self.out(tag('/a'))
             elif node.t == 'Image':
                 if entering:
                     if self.disable_tags == 0:
-                        self.out(
-                            '<img src="{}" alt="'.format(
-                                escape_xml(node.destination, True)))
+                        if self.options.get('safe') and \
+                           potentially_unsafe(node.destination):
+                            self.out('<img src="" alt="')
+                        else:
+                            self.out(
+                                '<img src="{}" alt="'.format(
+                                    escape_xml(node.destination, True)))
                     self.disable_tags += 1
                 else:
                     self.disable_tags -= 1
@@ -203,7 +221,7 @@ class HTMLRenderer(object):
                     self.cr()
                 else:
                     self.cr()
-                    self.out(tag('/blockquote', attrs))
+                    self.out(tag('/blockquote'))
                     self.cr()
             elif node.t == 'Item':
                 if entering:
@@ -212,10 +230,7 @@ class HTMLRenderer(object):
                     self.out(tag('/li'))
                     self.cr()
             elif node.t == 'List':
-                if node.list_data['type'] == 'Bullet':
-                    tagname = 'ul'
-                else:
-                    tagname = 'ol'
+                tagname = 'ul' if node.list_data['type'] == 'Bullet' else 'ol'
                 if entering:
                     try:
                         start = node.list_data['start']
@@ -230,8 +245,7 @@ class HTMLRenderer(object):
                     self.cr()
                     self.out(tag('/' + tagname))
                     self.cr()
-            elif (node.t == 'Heading' or node.t == 'ATXHeader' or
-                  node.t == 'SetextHeader'):
+            elif node.t == 'Heading':
                 tagname = 'h' + str(node.level)
                 if entering:
                     self.cr()
@@ -239,11 +253,8 @@ class HTMLRenderer(object):
                 else:
                     self.out(tag('/' + tagname))
                     self.cr()
-            elif node.t == 'CodeBlock' or node.t == 'FencedCode':
-                if node.info:
-                    info_words = re.split(r'\s+', node.info)
-                else:
-                    info_words = []
+            elif node.t == 'CodeBlock':
+                info_words = re.split(r'\s+', node.info) if node.info else []
                 if len(info_words) > 0 and len(info_words[0]) > 0:
                     attrs.append([
                         'class',
@@ -255,7 +266,18 @@ class HTMLRenderer(object):
                 self.out(tag('/code') + tag('/pre'))
                 self.cr()
             elif node.t == 'HtmlBlock':
-                self.out(str(node.literal))
+                if self.options.get('safe'):
+                    self.out('<!-- raw HTML omitted -->')
+                else:
+                    self.out(str(node.literal))
+                self.cr()
+            elif node.t == 'CustomBlock':
+                self.cr()
+                if entering and node.on_enter:
+                    self.out(node.on_enter)
+                elif not entering and node.on_exit:
+                    self.out(node.on_exit)
+                self.cr()
             elif node.t == 'ThematicBreak':
                 self.cr()
                 self.out(tag('hr', attrs, True))

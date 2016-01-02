@@ -1,8 +1,6 @@
-from __future__ import absolute_import
+from __future__ import absolute_import, unicode_literals
 
-import abc
 import re
-from six import with_metaclass
 from importlib import import_module
 from CommonMark import common
 from CommonMark.common import unescape_string
@@ -10,23 +8,7 @@ from CommonMark.inlines import InlineParser
 from CommonMark.node import Node
 
 
-class abstractstatic(staticmethod):
-    """A decorator for abstract static methods.
-
-    http://stackoverflow.com/a/4474495/173630
-    """
-    __slots__ = ()
-
-    def __init__(self, function):
-        super(abstractstatic, self).__init__(function)
-        function.__isabstractmethod__ = True
-        __isabstractmethod__ = True  # noqa
-
-
 CODE_INDENT = 4
-reATXHeadingMarker = re.compile(r'^#{1,6}(?: +|$)')
-reBulletListMarker = re.compile(r'^[*+-]( +|$)')
-reOrderedListMarker = re.compile(r'^(\d+)([.)])( +|$)')
 reHtmlBlockOpen = [
     re.compile(r'.'),  # dummy for 0
     re.compile(r'^<(?:script|pre|style)(?:\s|>|$)', re.IGNORECASE),
@@ -47,11 +29,6 @@ reHtmlBlockOpen = [
         r'^(?:' + common.OPENTAG + '|' + common.CLOSETAG + ')\s*$',
         re.IGNORECASE),
 ]
-reHrule = re.compile(r'^(?:(?:\* *){3,}|(?:_ *){3,}|(?:- *){3,}) *$')
-reCodeFence = re.compile(r'^`{3,}(?!.*`)|^~{3,}(?!.*~)')
-reClosingCodeFence = re.compile(r'^(?:`{3,}|~{3,})(?= *$)')
-reLineEnding = re.compile(r'\r\n|\n|\r')
-reSetextHeadingLine = re.compile(r'^(?:=+|-+) *$')
 reHtmlBlockClose = [
     re.compile(r'.'),  # dummy for 0
     re.compile(r'<\/(?:script|pre|style)>', re.IGNORECASE),
@@ -63,11 +40,18 @@ reHtmlBlockClose = [
 reThematicBreak = re.compile(r'^(?:(?:\* *){3,}|(?:_ *){3,}|(?:- *){3,}) *$')
 reMaybeSpecial = re.compile(r'^[#`~*+_=<>0-9-]')
 reNonSpace = re.compile(r'[^ \t\f\v\r\n]')
+reBulletListMarker = re.compile(r'^[*+-]')
+reOrderedListMarker = re.compile(r'^(\d{1,9})([.)])')
+reATXHeadingMarker = re.compile(r'^#{1,6}(?: +|$)')
+reCodeFence = re.compile(r'^`{3,}(?!.*`)|^~{3,}(?!.*~)')
+reClosingCodeFence = re.compile(r'^(?:`{3,}|~{3,})(?= *$)')
+reSetextHeadingLine = re.compile(r'^(?:=+|-+) *$')
+reLineEnding = re.compile(r'\r\n|\n|\r')
 
 
-def isBlank(s):
-    """ Returns True if string contains only space characters."""
-    return bool(re.compile("^\s*$").match(s))
+def is_blank(s):
+    """Returns True if string contains only space characters."""
+    return re.search(reNonSpace, s) is None
 
 
 def peek(ln, pos):
@@ -77,17 +61,7 @@ def peek(ln, pos):
         return None
 
 
-def matchAt(pattern, s, offset):
-    """ Attempt to match a regex in string s at offset offset.
-    Return index of match or None."""
-    matched = re.search(pattern, s[offset:])
-    if matched:
-        return offset + s[offset:].index(matched.group(0))
-    else:
-        return None
-
-
-def endsWithBlankLine(block):
+def ends_with_blank_line(block):
     """ Returns true if block ends with a blank line,
     descending if needed into lists and sublists."""
     while block:
@@ -99,11 +73,6 @@ def endsWithBlankLine(block):
             break
 
     return False
-
-
-def is_blank(s):
-    """Return True if string contains only space characters."""
-    return re.match(reNonSpace, s) is not None
 
 
 def parse_list_marker(parser):
@@ -134,7 +103,7 @@ def parse_list_marker(parser):
 
     # make sure we have spaces after
     nextc = peek(parser.current_line, parser.next_nonspace + len(m.group()))
-    if not (nextc is None or next == '\t' or nextc == ' '):
+    if not (nextc is None or nextc == '\t' or nextc == ' '):
         return None
 
     # we've got a match! advance offset and calculate padding
@@ -172,26 +141,23 @@ def lists_match(list_data, item_data):
     with the same delimiter and bullet character.  This is used
     in agglomerating list items into lists.
     """
-    return (list_data.get('type', None) ==
-            item_data.get('type', None) and
-            list_data.get('delimiter', None) ==
-            item_data.get('delimiter', None) and
-            list_data.get('bullet_char', None) ==
-            item_data.get('bullet_char', None))
+    return list_data.get('type') == item_data.get('type') and \
+        list_data.get('delimiter') == item_data.get('delimiter') and \
+        list_data.get('bullet_char') == item_data.get('bullet_char')
 
 
-class Block(with_metaclass(abc.ABCMeta)):
+class Block:
     accepts_lines = None
 
-    @abstractstatic
+    @staticmethod
     def continue_(parser=None, container=None):
         return
 
-    @abstractstatic
+    @staticmethod
     def finalize(parser=None, block=None):
         return
 
-    @abstractstatic
+    @staticmethod
     def can_contain(t):
         return
 
@@ -224,14 +190,14 @@ class List(Block):
         item = block.first_child
         while item:
             # check for non-final list item ending with blank line:
-            if endsWithBlankLine(item) and item.nxt:
+            if ends_with_blank_line(item) and item.nxt:
                 block.list_data['tight'] = False
                 break
             # recurse into children of list item, to see if there are
             # spaces between any of them:
             subitem = item.first_child
             while subitem:
-                if endsWithBlankLine(subitem) and \
+                if ends_with_blank_line(subitem) and \
                    (item.nxt or subitem.nxt):
                     block.list_data['tight'] = False
                     break
@@ -368,6 +334,11 @@ class CodeBlock(Block):
             rest = content[newline_pos + 1:]
             block.info = unescape_string(first_line.strip())
             block.literal = rest
+        else:
+            # indented
+            block.literal = re.sub(r'(\n *)+$', '\n', block.string_content)
+
+        block.string_content = None
 
     @staticmethod
     def can_contain(t):
@@ -401,10 +372,7 @@ class Paragraph(Block):
 
     @staticmethod
     def continue_(parser=None, container=None):
-        if parser.blank:
-            return 1
-        else:
-            return 0
+        return 1 if parser.blank else 0
 
     @staticmethod
     def finalize(parser=None, block=None):
@@ -587,8 +555,9 @@ class BlockStarts:
 
 
 class Parser:
-    def __init__(self, subject=None, pos=0, options={}):
-        self.doc = Node.makeNode("Document", [[1, 1], [0, 0]])
+    def __init__(self, options={}):
+        self.doc = Node('Document', [[1, 1], [0, 0]])
+        self.block_starts = BlockStarts()
         self.tip = self.doc
         self.oldtip = self.doc
         self.current_line = ''
@@ -605,7 +574,6 @@ class Parser:
         self.refmap = {}
         self.last_line_length = 0
         self.inline_parser = InlineParser(options)
-        self.block_starts = BlockStarts()
         self.options = options
 
     def break_out_of_lists(self, block):
@@ -647,8 +615,7 @@ class Parser:
                 import_module('CommonMark.blocks'), self.tip.t)
 
         column_number = offset + 1
-        new_block = Node.makeNode(
-            tag, [[self.line_number, column_number], [0, 0]])
+        new_block = Node(tag, [[self.line_number, column_number], [0, 0]])
         new_block.string_content = ''
         self.tip.append_child(new_block)
         self.tip = new_block
@@ -745,7 +712,6 @@ class Parser:
         # Bail out on failure: container will point to the last matching block.
         # Set all_matched to false if not all containers match.
         last_child = container.last_child
-        startcontainer = container
         while last_child and last_child.is_open:
             container = last_child
 
@@ -755,11 +721,10 @@ class Parser:
             rv = block_class.continue_(self, container)
             if rv == 0:
                 # we've matched, keep going
-                break
+                pass
             elif rv == 1:
                 # we've failed to match a block
                 all_matched = False
-                break
             elif rv == 2:
                 # we've hit end of line for fenced code close and can return
                 self.last_line_length = len(ln)
@@ -772,7 +737,7 @@ class Parser:
                 container = container.parent
                 break
 
-            last_child = startcontainer.last_child
+            last_child = container.last_child
 
         self.all_closed = (container == self.oldtip)
         self.last_matched_container = container
@@ -833,7 +798,7 @@ class Parser:
             # Block quote lines are never blank as they start with >
             # and we don't count blanks in fenced code for purposes of
             # tight/loose lists or breaking out of lists.  We also
-            # don't set _lastLineBlank on an empty list item, or if we
+            # don't set last_line_blank on an empty list item, or if we
             # just closed a fenced block.
             last_line_blank = self.blank and \
                 not (t == 'BlockQuote' or
@@ -887,9 +852,9 @@ class Parser:
         into inline content where appropriate.
         """
         walker = block.walker()
-        event = walker.nxt()
         self.inline_parser.refmap = self.refmap
         self.inline_parser.options = self.options
+        event = walker.nxt()
         while event is not None:
             node = event['node']
             t = node.t
@@ -899,7 +864,7 @@ class Parser:
 
     def parse(self, my_input):
         """ The main parsing function.  Returns a parsed document AST."""
-        self.doc = Node.makeNode('Document', [[1, 1], [0, 0]])
+        self.doc = Node('Document', [[1, 1], [0, 0]])
         self.tip = self.doc
         self.refmap = {}
         self.line_number = 0
