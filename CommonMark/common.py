@@ -76,8 +76,21 @@ def normalize_uri(uri):
         except UnicodeDecodeError:
             # Python 2 also throws a UnicodeDecodeError, complaining about
             # the width of the "safe" string. Removing this parameter
-            # solves the issue, but yields inaccurate quoting.
-            return quote(uri.encode('utf-8'))
+            # solves the issue, but yields overly aggressive quoting, but we
+            # can correct those errors manually.
+            s = quote(uri.encode('utf-8'))
+            s = re.sub(r'%40', '@', s)
+            s = re.sub(r'%3A', ':', s)
+            s = re.sub(r'%2B', '+', s)
+            s = re.sub(r'%3F', '?', s)
+            s = re.sub(r'%3D', '=', s)
+            s = re.sub(r'%26', '&', s)
+            s = re.sub(r'%28', '(', s)
+            s = re.sub(r'%29', ')', s)
+            s = re.sub(r'%25', '%', s)
+            s = re.sub(r'%23', '#', s)
+            s = re.sub(r'%2A', '*', s)
+            return s
 
 
 def replace_unsafe_char(s):
