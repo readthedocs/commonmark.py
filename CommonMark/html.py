@@ -60,56 +60,6 @@ class HtmlRenderer:
         self.softbreak = '\n'
         self.options = options
 
-    @staticmethod
-    def inTags(tag, attribs, contents, selfclosing=None):
-        """ Helper function to produce content in a pair of HTML tags."""
-        result = "<" + tag
-        if (len(attribs) > 0):
-            i = 0
-            while (len(attribs) > i) and (not attribs[i] is None):
-                attrib = attribs[i]
-                result += (" " + attrib[0] + '="' + attrib[1] + '"')
-                i += 1
-        if (len(contents) > 0):
-            result += ('>' + contents + '</' + tag + '>')
-        elif (selfclosing):
-            result += " />"
-        else:
-            result += ('></' + tag + '>')
-        return result
-
-    @staticmethod
-    def URLescape(s):
-        """ Escape href URLs."""
-        if not re.search("mailto|MAILTO", s):
-            if sys.version_info >= (3, 0):
-                return re.sub(
-                    "[&](?![#](x[a-f0-9]{1,8}|[0-9]{1,8});" +
-                    "|[a-z][a-z0-9]{1,31};)",
-                    "&amp;",
-                    HTMLquote(
-                        HTMLunescape(s),
-                        ":/=*%?&)(#"),
-                    re.IGNORECASE)
-            else:
-                return re.sub(
-                    "[&](?![#](x[a-f0-9]{1,8}|[0-9]{1,8});" +
-                    "|[a-z][a-z0-9]{1,31};)",
-                    "&amp;",
-                    HTMLquote(
-                        HTMLunescape(s).encode("utf-8"),
-                        ":/=*%?&)(#"),
-                    re.IGNORECASE)
-        else:
-            return s
-
-    def renderInlines(self, inlines):
-        """ Render a list of inlines."""
-        result = ''
-        for i in range(len(inlines)):
-            result += self.renderInline(inlines[i])
-        return result
-
     def out(self, s):
         if self.disable_tags > 0:
             self.buf += re.sub(reHtmlTag, '', s)
