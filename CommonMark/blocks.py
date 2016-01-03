@@ -441,7 +441,7 @@ class Parser:
                 cont = cont.parent
             if container.t == "IndentedCode" or container.t == "HtmlBlock":
                 self.addLine(ln, offset)
-            if container.t == "ExtensionBlock":
+            elif container.t == "ExtensionBlock":
                 EXTmatch = re.search(r"^{:/((\\\}|[^\\}])*)} *$",
                                      ln[first_nonspace:])
                 if EXTmatch:
