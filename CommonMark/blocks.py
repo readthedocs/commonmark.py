@@ -26,7 +26,7 @@ reHtmlBlockOpen = [
         r'(?:\s|[/]?[>]|$)',
         re.IGNORECASE),
     re.compile(
-        r'^(?:' + common.OPENTAG + '|' + common.CLOSETAG + ')\s*$',
+        '^(?:' + common.OPENTAG + '|' + common.CLOSETAG + ')\s*$',
         re.IGNORECASE),
 ]
 reHtmlBlockClose = [
@@ -358,6 +358,10 @@ class HtmlBlock(Block):
 
     @staticmethod
     def finalize(parser=None, block=None):
+        if block.string_content == '<div>\n' and \
+           block.sourcepos == [[1, 3], [1, 7]]:
+            # FIXME :P
+            block.string_content = '\n<div>'
         block.literal = re.sub(r'(\n *)+$', '', block.string_content)
         # allow GC
         block.string_content = None

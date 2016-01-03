@@ -1,30 +1,8 @@
 from __future__ import absolute_import, unicode_literals
 
 import re
-import sys
 
 from CommonMark.common import escape_xml
-
-# if python3 use html.parser and urllib.parse, else use HTMLParser and urllib
-if sys.version_info >= (3, 0):
-    import urllib.parse
-    if sys.version_info >= (3, 4):
-        import html.parser
-        HTMLunescape = html.parser.HTMLParser().unescape
-    else:
-        from .entitytrans import _unescape
-        HTMLunescape = _unescape
-    HTMLquote = urllib.parse.quote
-    HTMLunquote = urllib.parse.unquote
-    URLparse = urllib.parse.urlparse
-else:
-    import urllib
-    import urlparse
-    from CommonMark import entitytrans
-    HTMLunescape = entitytrans._unescape
-    HTMLquote = urllib.quote
-    HTMLunquote = urllib.unquote
-    URLparse = urlparse.urlparse
 
 
 reHtmlTag = re.compile(r'\<[^>]*\>')

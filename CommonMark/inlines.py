@@ -24,7 +24,7 @@ REG_CHAR = '[^\\\\()\\x00-\\x20]'
 IN_PARENS_NOSP = '\\((' + REG_CHAR + '|' + ESCAPED_CHAR + '|\\\\)*\\)'
 
 rePunctuation = re.compile(
-    r'^[\u2000-\u206F\u2E00-\u2E7F\\\'!"#\$%&\(\)'
+    r'^[\u2000-\u206F\u2E00-\u2E7F\\' + "'" + '!"#\$%&\(\)'
     r'\*\+,\-\.\/:;<=>\?@\[\]\^_`\{\|\}~]')
 
 reLinkTitle = re.compile(
@@ -75,8 +75,8 @@ reWhitespace = re.compile(r'\s+')
 reFinalSpace = re.compile(r' *$')
 reInitialSpace = re.compile(r'^ *')
 reSpaceAtEndOfLine = re.compile(r'^ *(?:\n|$)')
-reLinkLabel = re.compile(
-    '^\\[(?:[^\\\\\\[\\]]|' + ESCAPED_CHAR + '|\\\\){0,1000}\\]')
+reLinkLabel = re.compile('^\\[(?:[^\\\\\\[\\]]|' + ESCAPED_CHAR +
+                         '|\\\\){0,1000}\\]')
 # Matches a string of non-special characters.
 reMain = re.compile(r'^[^\n`\[\]\\!<&*_\'"]+', re.MULTILINE)
 
@@ -276,9 +276,12 @@ class InlineParser:
         if c_after is None:
             c_after = '\n'
 
-        after_is_whitespace = re.match(reWhitespaceChar, c_after)
+        # Python 2 doesn't recognize '\xa0' as whitespace
+        after_is_whitespace = re.match(reWhitespaceChar, c_after) or \
+            c_after == '\xa0'
         after_is_punctuation = re.match(rePunctuation, c_after)
-        before_is_whitespace = re.match(reWhitespaceChar, c_before)
+        before_is_whitespace = re.match(reWhitespaceChar, c_before) or \
+            c_before == '\xa0'
         before_is_punctuation = re.match(rePunctuation, c_before)
 
         left_flanking = not after_is_whitespace and \
@@ -508,7 +511,7 @@ class InlineParser:
         characters parsed.
         """
         m = self.match(reLinkLabel)
-        if m is None or len(m) > 1001:
+        if m is None or len(m) > 1001 or re.match(r'\[\s+\]', m):
             return 0
         else:
             return len(m)
@@ -738,7 +741,7 @@ class InlineParser:
 
         # label:
         match_chars = self.parseLinkLabel()
-        if (match_chars == 0):
+        if match_chars == 0 or match_chars == 2:
             return 0
         else:
             rawlabel = self.subject[:match_chars]

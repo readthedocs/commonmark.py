@@ -81,7 +81,7 @@ class Node:
         self.on_exit = None
 
     def __repr__(self):
-        return "Node {} [{}]".format(self.t, self.string_content)
+        return "Node {} [{}]".format(self.t, self.literal)
 
     def pretty(self):
         from pprint import pprint

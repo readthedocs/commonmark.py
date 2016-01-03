@@ -21,7 +21,7 @@ else:
 
 ENTITY = '&(?:#x[a-f0-9]{1,8}|#[0-9]{1,8}|[a-z][a-z0-9]{1,31});'
 
-TAGNAME = '[A-Za-z][A-Za-z0-9]*'
+TAGNAME = '[A-Za-z][A-Za-z0-9-]*'
 ATTRIBUTENAME = '[a-zA-Z_:][a-zA-Z0-9:._-]*'
 UNQUOTEDVALUE = "[^\"'=<>`\\x00-\\x20]+"
 SINGLEQUOTEDVALUE = "'[^']*'"

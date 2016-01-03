@@ -34,7 +34,7 @@ Usage
 
     import CommonMark
     parser = CommonMark.DocParser()
-    renderer = CommonMark.HTMLRenderer()
+    renderer = CommonMark.HtmlRenderer()
     ast = parser.parse("Hello *World*")
     html = renderer.render(ast)
     json = CommonMark.ASTtoJSON(ast)
