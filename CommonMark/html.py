@@ -157,8 +157,7 @@ class HTMLRenderer(object):
             if (filling == ""):
                 a = self.innersep
             else:
-                a = self.innersep + \
-                    self.renderBlocks(block.children) + self.innersep
+                a = self.innersep + filling + self.innersep
             return self.inTags('blockquote', [], a)
         elif (block.t == "Item"):
             return self.inTags("li", [],
