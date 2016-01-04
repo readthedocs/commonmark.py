@@ -7,3 +7,4 @@ build/
 ve/
 venv/
 *.egg-info/
+docs/_build/
