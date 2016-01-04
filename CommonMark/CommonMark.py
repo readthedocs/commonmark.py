@@ -106,7 +106,7 @@ def dumpAST(obj, ind=0):
         print("\t" + indChar + "Info: " + obj.info)
     if len(obj.strings) > 0:
         print("\t" + indChar + "Strings: ['" + "', '".join(obj.strings) +
-              "'']")
+              "']")
     if obj.c:
         if type(obj.c) is list:
             print("\t" + indChar + "c:")
