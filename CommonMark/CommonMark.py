@@ -8,16 +8,10 @@
 # parser = CommonMark.Parser()
 # renderer = CommonMark.HtmlRenderer()
 # print(renderer.render(parser.parse('Hello *world*')))
-from __future__ import absolute_import
-import re
+from __future__ import absolute_import, unicode_literals
 import json
-from CommonMark import common
 from CommonMark.blocks import Parser
-from CommonMark.html import HTMLRenderer
-
-
-reEscapedChar = re.compile('^\\\\(' + common.ESCAPABLE + ')')
-reAllTab = re.compile("\t")
+from CommonMark.html import HtmlRenderer
 
 
 # Utility functions
@@ -36,7 +30,7 @@ def commonmark(text, format="html"):
     if format not in ["html", "json", "ast"]:
         raise ValueError("format must be 'html', 'json' or 'ast'")
     if format == "html":
-        renderer = HTMLRenderer()
+        renderer = HtmlRenderer()
         return renderer.render(ast)
     if format == "json":
         return ASTtoJSON(ast)
@@ -44,109 +38,82 @@ def commonmark(text, format="html"):
         return dumpAST(ast)
 
 
+def prepare(block):
+    """ Strips circular 'parent' references and trims empty
+    block elements."""
+    to_remove = [
+        'parent', 'nxt', 'prv', 'first_child', 'last_child',
+    ]
+    for r in to_remove:
+        block.__dict__[r] = None
+    if block.is_open is not None:
+        block.__dict__['open'] = block.is_open
+        del(block.is_open)
+    # trim empty elements...
+    for attr in dir(block):
+        if not callable(attr) and not attr.startswith("__") and \
+           attr not in ['pretty', 'is_container',
+                        'append_child', 'prepend_child', 'unlink',
+                        'insert_after', 'insert_before', 'walker']:
+            if block.__dict__[attr] in ["", [], None, {}]:
+                del(block.__dict__[attr])
+    return block
+
+
 def ASTtoJSON(block):
     """ Output AST in JSON form, this is destructive of block."""
-    def prepare(block):
-        """ Strips circular 'parent' references and trims empty
-        block elements."""
-        if block.parent:
-            block.parent = None
-        if not block.__dict__['is_open'] is None:
-            block.__dict__['open'] = block.is_open
-            del(block.is_open)
-        # trim empty elements...
-        for attr in dir(block):
-            if not callable(attr) and not attr.startswith("__") and \
-               attr != "makeNode" and attr != "pretty":
-                if block.__dict__[attr] in ["", [], None, {}]:
-                    del(block.__dict__[attr])
-        if 'children' in block.__dict__ and len(block.children) > 0:
-            for i, child in enumerate(block.children):
-                block.children[i] = prepare(child)
-        if 'inline_content' in block.__dict__ and \
-           len(block.inline_content) > 0:
-            for i, child in enumerate(block.inline_content):
-                block.inline_content[i] = prepare(child)
-        if 'label' in block.__dict__ and len(block.label) > 0:
-            for i, child in enumerate(block.label):
-                block.label[i] = prepare(child)
-        if 'c' in block.__dict__ and type(block.c) is list and \
-           len(block.c) > 0:
-            for i, child in enumerate(block.c):
-                block.c[i] = prepare(child)
-        return block
     # sort_keys=True) # indent=4)
     return json.dumps(prepare(block), default=lambda o: o.__dict__)
 
 
-def dumpAST(obj, ind=0):
+def dumpAST(obj, ind=0, topnode=False):
     """ Print out a block/entire AST."""
     indChar = ("\t" * ind) + "-> " if ind else ""
     print(indChar + "[" + obj.t + "]")
     if not obj.title == "":
-        print("\t" + indChar + "Title: " + obj.title)
+        print("\t" + indChar + "Title: " + (obj.title or ''))
     if not obj.info == "":
-        print("\t" + indChar + "Info: " + obj.info)
+        print("\t" + indChar + "Info: " + (obj.info or ''))
     if not obj.destination == "":
-        print("\t" + indChar + "Destination: " + obj.destination)
+        print("\t" + indChar + "Destination: " + (obj.destination or ''))
     if obj.is_open:
         print("\t" + indChar + "Open: " + str(obj.is_open))
     if obj.last_line_blank:
         print(
             "\t" + indChar + "Last line blank: " + str(obj.last_line_blank))
-    if obj.start_line:
-        print("\t" + indChar + "Start line: " + str(obj.start_line))
-    if obj.start_column:
-        print("\t" + indChar + "Start Column: " + str(obj.start_column))
-    if obj.end_line:
-        print("\t" + indChar + "End line: " + str(obj.end_line))
+    if obj.sourcepos:
+        print("\t" + indChar + "Sourcepos: " + str(obj.sourcepos))
     if not obj.string_content == "":
-        print("\t" + indChar + "String content: " + obj.string_content)
+        print("\t" + indChar + "String content: " + (obj.string_content or ''))
     if not obj.info == "":
-        print("\t" + indChar + "Info: " + obj.info)
-    if len(obj.strings) > 0:
-        print("\t" + indChar + "Strings: ['" + "', '".join(obj.strings) +
-              "']")
-    if obj.c:
-        if type(obj.c) is list:
-            print("\t" + indChar + "c:")
-            for b in obj.c:
-                dumpAST(b, ind + 2)
-        else:
-            print("\t" + indChar + "c: "+obj.c)
-    if obj.label:
-        print("\t" + indChar + "Label:")
-        for b in obj.label:
-            dumpAST(b, ind + 2)
-    if hasattr(obj.list_data, "type"):
+        print("\t" + indChar + "Info: " + (obj.info or ''))
+    if not obj.literal == "":
+        print("\t" + indChar + "Literal: " + (obj.literal or ''))
+    if obj.list_data.get('type'):
         print("\t" + indChar + "List Data: ")
-        print("\t\t" + indChar + "[type] = " + obj.list_data['type'])
-        if hasattr(obj.list_data, "bullet_char"):
+        print("\t\t" + indChar + "[type] = " + obj.list_data.get('type'))
+        if obj.list_data.get('bullet_char'):
             print(
                 "\t\t" + indChar + "[bullet_char] = " +
                 obj.list_data['bullet_char'])
-        if hasattr(obj.list_data, "start"):
-            print("\t\t" + indChar + "[start] = " + obj.list_data['start'])
-        if hasattr(obj.list_data, "delimiter"):
+        if obj.list_data.get('start'):
+            print("\t\t" + indChar + "[start] = " + obj.list_data.get('start'))
+        if obj.list_data.get('delimiter'):
             print(
                 "\t\t" + indChar + "[delimiter] = " +
-                obj.list_data['delimiter'])
-        if hasattr(obj.list_data, "padding"):
+                obj.list_data.get('delimiter'))
+        if obj.list_data.get('padding'):
             print(
-                "\t\t" + indChar + "[padding] = " + obj.list_data['padding'])
-        if hasattr(obj.list_data, "marker_offset"):
+                "\t\t" + indChar + "[padding] = " +
+                str(obj.list_data.get('padding')))
+        if obj.list_data.get('marker_offset'):
             print(
                 "\t\t" + indChar + "[marker_offset] = " +
-                obj.list_data['marker_offset'])
-    if len(obj.inline_content) > 0:
-        print("\t" + indChar + "Inline content:")
-        for b in obj.inline_content:
-            dumpAST(b, ind + 2)
-    if len(obj.children) > 0:
+                str(obj.list_data.get('marker_offset')))
+    if obj.walker:
         print("\t" + indChar + "Children:")
-        for b in obj.children:
-            dumpAST(b, ind + 2)
-    if len(obj.attributes):
-        print("\t" + indChar + "Attributes:")
-        for key, val in obj.attributes.iteritems():
-            print("\t\t" + indChar + "[{0}] = {1}".format(key, val))
+        walker = obj.walker()
+        nxt = walker.nxt()
+        while nxt is not None and topnode is False:
+            dumpAST(nxt['node'], ind + 2, topnode=True)
+            nxt = walker.nxt()

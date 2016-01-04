@@ -5,8 +5,6 @@ python:
   - "3.3"
   - "3.4"
   - "3.5"
-  - "pypy"
-  - "pypy3"
 # test command
 install:
  - python setup.py install

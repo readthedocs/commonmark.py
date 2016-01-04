@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # coding: utf-8
-from __future__ import division, print_function
+from __future__ import division, print_function, unicode_literals
 import re
 import time
 import codecs
@@ -29,7 +29,7 @@ def trace_calls(frame, event, arg):
        re.search("CommonMark.py", filename) \
        and func_name != "dumpAST":
         print("-> " + frame.f_back.f_code.co_name +
-              " at "+str(frame.f_back.f_lineno) +
+              " at " + str(frame.f_back.f_lineno) +
               " called " + func_name + " at " + str(line_no) +
               " in " + filename)
         return trace_calls
@@ -70,7 +70,7 @@ args = parser.parse_args()
 if args.d:
     sys.settrace(trace_calls)
 
-renderer = CommonMark.HTMLRenderer()
+renderer = CommonMark.HtmlRenderer()
 parser = CommonMark.Parser()
 
 f = codecs.open("spec.txt", encoding="utf-8")
@@ -84,14 +84,14 @@ catStats = {}
 examples = []
 example_number = 0
 current_section = ""
-tabChar = u'\u2192'
-spaceChar = u'\u2423'
-nbspChar = u'\u00A0'
+tabChar = '\u2192'
+spaceChar = '\u2423'
+nbspChar = '\u00A0'
 
 
 def showSpaces(t):
-        t = re.sub(u"\\t", tabChar, t)
-        t = re.sub(u" ", spaceChar, t)
+        t = re.sub("\\t", tabChar, t)
+        t = re.sub(" ", spaceChar, t)
         t = re.sub(nbspChar, spaceChar, t)
         return t
 
@@ -174,7 +174,7 @@ for i, example in enumerate(examples):  # [0,examples[0]]
     if args.d:
         print(colors.HEADER+"[Rendering]"+colors.ENDC)
     actual = renderer.render(ast)
-    if actual == example['html']:
+    if re.sub('\t', tabChar, actual) == example['html']:
         passed += 1
         catStats[current_section][0] += 1
         if not args.f:
@@ -206,13 +206,13 @@ for i, example in enumerate(examples):  # [0,examples[0]]
             print(
                 colors.WARNING +
                 "=== markdown ===============\n" +
-                colors.ENDC+showSpaces(example['markdown']) +
+                colors.ENDC + showSpaces(example['markdown']) +
                 colors.WARNING +
                 "\n=== expected ===============\n" +
                 colors.ENDC + showSpaces(example['html']) +
                 colors.WARNING +
                 "\n=== got ====================\n" +
-                colors.ENDC+showSpaces(actual))
+                colors.ENDC + showSpaces(actual))
 
 print('\n' + str(passed) + ' tests passed, ' + str(failed) + ' failed')
 
