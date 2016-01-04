@@ -879,7 +879,7 @@ class Parser:
         self.current_line = ''
         lines = re.split(reLineEnding, my_input)
         length = len(lines)
-        if my_input[-1] == '\n':
+        if len(my_input) > 0 and my_input[-1] == '\n':
             # ignore last blank line created by final newline
             length -= 1
         for i in range(length):
