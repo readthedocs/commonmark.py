@@ -6,6 +6,7 @@
 - Added a compatibility fix for Python 2.6, but this version
   of Python still isn't really supported.
 - `HTMLRenderer` has been renamed to `HtmlRenderer`.
+- `DocParser` has been renamed to `Parser`.
 
 ## 0.5.5 (2015-12-18)
 - Random bug fixes

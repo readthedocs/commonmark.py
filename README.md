@@ -17,7 +17,7 @@ Usage
 -----
 
 	import CommonMark
-	parser = CommonMark.DocParser()
+	parser = CommonMark.Parser()
 	renderer = CommonMark.HtmlRenderer()
 	ast = parser.parse("Hello *World*")
 	html = renderer.render(ast)
