@@ -52,7 +52,7 @@ If you would like to offer suggestions/optimizations/bugfixes through pull reque
 Tests
 -----
 
-The tests script, `CommonMark-tests.py`, is pretty much a devtool. As well as running all the tests embeded in `spec.txt` it also allows you to run specific tests using the `-t` argument, provide information about passed tests with `-p`, percentage passed by category of test with `-s`, and enter markdown interactively with `-i` (In interactive mode end a block by inputing a line with just `end`, to quit do the same but with `quit`). `-d` can be used to print call tracing.
+The tests script, `CommonMark-tests.py`, is pretty much a devtool. As well as running all the tests embedded in `spec.txt` it also allows you to run specific tests using the `-t` argument, provide information about passed tests with `-p`, percentage passed by category of test with `-s`, and enter markdown interactively with `-i` (In interactive mode end a block by inputting a line with just `end`, to quit do the same but with `quit`). `-d` can be used to print call tracing.
 
 	rolands@kamaji:~/utils/CommonMark-py$ python CommonMark-tests.py -h
 	usage: CommonMark-tests.py [-h] [-t T] [-p] [-f] [-i] [-d] [-np] [-s]
@@ -62,7 +62,7 @@ The tests script, `CommonMark-tests.py`, is pretty much a devtool. As well as ru
 
 	optional arguments:
 	  -h, --help  show this help message and exit
-	  -t T        Single test to run or comma seperated list of tests (-t 10 or -t 10,11,12,13)
+	  -t T        Single test to run or comma separated list of tests (-t 10 or -t 10,11,12,13)
 	  -p          Print passed test information
 	  -f          Print failed tests (during -np...)
 	  -i          Interactive Markdown input mode

@@ -39,7 +39,7 @@ parser = argparse.ArgumentParser(
     "against the CommonMark.py parser")
 parser.add_argument(
     '-t',
-    help="Single test to run or comma seperated list " +
+    help="Single test to run or comma separated list " +
     "of tests (-t 10 or -t 10,11,12,13)")
 parser.add_argument(
     '-p',
