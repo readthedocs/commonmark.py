@@ -1,0 +1,4 @@
+python:
+   version: 2
+   setup_py_install: false
+requirements_file: docs/requirements.txt
