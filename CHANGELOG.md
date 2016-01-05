@@ -1,4 +1,4 @@
-## 0.6.1 (2016-01-04)
+## 0.6.1 (2016-01-05)
 - Fixed an IndexError exception that occurred when input string
   was empty.
 
