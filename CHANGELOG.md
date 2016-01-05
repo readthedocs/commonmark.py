@@ -1,3 +1,7 @@
+## 0.6.1 (2016-01-05)
+- Fixed an IndexError exception that occurred when input string
+  was empty.
+
 ## 0.6.0 (2016-01-04)
 - CommonMark-py now complies to the 0.23 CommonMark spec
   http://spec.commonmark.org/0.23/
