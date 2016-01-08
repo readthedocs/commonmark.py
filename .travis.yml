@@ -11,6 +11,6 @@ install:
 script:
  - python setup.py flake8
  - python setup.py test
- - cmark.py README.md
- - cmark.py README.md -a
- - cmark.py README.md -aj
+ - cmark.py CommonMark/test/test.md
+ - cmark.py CommonMark/test/test.md -a
+ - cmark.py CommonMark/test/test.md -aj
