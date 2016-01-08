@@ -6,6 +6,7 @@ import time
 import codecs
 import argparse
 import sys
+from builtins import str
 import CommonMark
 
 

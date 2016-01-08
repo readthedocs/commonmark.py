@@ -10,6 +10,7 @@
 # print(renderer.render(parser.parse('Hello *world*')))
 from __future__ import absolute_import, unicode_literals
 import json
+from builtins import str
 from CommonMark.blocks import Parser
 from CommonMark.html import HtmlRenderer
 
