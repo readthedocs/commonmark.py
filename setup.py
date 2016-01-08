@@ -35,6 +35,9 @@ setup(
     url="https://github.com/rtfd/CommonMark-py",
     keywords=["markup", "markdown", "commonmark"],
     cmdclass={'test': Test},
+    install_requires=[
+        'future',
+    ],
     setup_requires=[
         'flake8',
     ],

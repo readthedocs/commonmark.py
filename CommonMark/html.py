@@ -1,7 +1,7 @@
 from __future__ import absolute_import, unicode_literals
 
 import re
-
+from builtins import str
 from CommonMark.common import escape_xml
 
 
