@@ -33,6 +33,11 @@ Usage
 ::
 
     import CommonMark
+
+    CommonMark.commonmark('*hello!*')
+    # '<p><em>hello!</em></p>\n'
+
+    # Or, without the syntactic sugar:
     parser = CommonMark.Parser()
     renderer = CommonMark.HtmlRenderer()
     ast = parser.parse("Hello *World*")
