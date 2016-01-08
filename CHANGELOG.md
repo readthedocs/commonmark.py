@@ -1,3 +1,9 @@
+## 0.6.2 (2016-01-08)
+- Fixed a UnicodeEncodeError when parsing unicode entities on
+  Python 2. As a result, CommonMark-py now relies on the "future"
+  module in Python 2, as documented in setup.py. This can be found on
+  pypi: https://pypi.python.org/pypi/future
+
 ## 0.6.1 (2016-01-05)
 - Fixed an IndexError exception that occurred when input string
   was empty.

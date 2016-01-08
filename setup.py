@@ -24,7 +24,7 @@ setup(
     name="CommonMark",
     packages=['CommonMark'],
     scripts=['bin/cmark.py'],
-    version="0.6.1",
+    version="0.6.2",
     license="BSD License",
     description="Python parser for the CommonMark Markdown spec",
     author="Bibek Kafle <bkafle662@gmail.com>, " +
