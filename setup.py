@@ -1,4 +1,3 @@
-# CommonMark.py - setup.py
 from setuptools import setup, Command
 
 
@@ -15,8 +14,7 @@ class Test(Command):
         import subprocess
         import sys
         errno = subprocess.call([
-            sys.executable,
-            'CommonMark/test/test-CommonMark.py'])
+            sys.executable, 'CommonMark/tests/run_spec_tests.py'])
         raise SystemExit(errno)
 
 

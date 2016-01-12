@@ -218,7 +218,7 @@ for i, example in enumerate(examples):  # [0,examples[0]]
 print('\n' + str(passed) + ' tests passed, ' + str(failed) + ' failed')
 
 endTime = time.clock()
-runTime = endTime-startTime
+runTime = endTime - startTime
 
 if args.s:
     for i in catStats.keys():

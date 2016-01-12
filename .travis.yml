@@ -10,7 +10,8 @@ install:
  - python setup.py install
 script:
  - python setup.py flake8
+ - python -m unittest CommonMark.tests.unit_tests
  - python setup.py test
- - cmark.py CommonMark/test/test.md
- - cmark.py CommonMark/test/test.md -a
- - cmark.py CommonMark/test/test.md -aj
+ - cmark.py CommonMark/tests/test.md
+ - cmark.py CommonMark/tests/test.md -a
+ - cmark.py CommonMark/tests/test.md -aj
