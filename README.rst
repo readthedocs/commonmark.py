@@ -14,7 +14,7 @@ because we have implemented HTML entity conversion and href URL
 escaping) as ``commonmark.js``. Since Python versions pre-3.4 use outdated
 (i.e. not HTML5 spec) entity conversion, I've converted the 3.4
 implementation into a single file, ``entitytrans.py`` which so far seems
-to work (all tests pass on 2.7, 3.3, 3.4, and 3.5).
+to work (all tests pass on 2.6, 2.7, 3.3, 3.4, and 3.5).
 
 **Current version:** 0.6.2
 
