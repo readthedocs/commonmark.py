@@ -68,7 +68,7 @@ def unescape_string(s):
 
 def normalize_uri(uri):
     try:
-        return quote(uri, safe='/@:+?=&()%#*')
+        return quote(uri, safe=str('/@:+?=&()%#*'))
     except KeyError:
         # Python 2 throws a KeyError sometimes
         try:
