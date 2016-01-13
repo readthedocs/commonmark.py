@@ -98,7 +98,7 @@ def showSpaces(t):
 
 t = re.sub("\r\n", "\n", data)
 
-tests = re.sub("^<!-- END TESTS -->(.|[\n])*", '', t, flags=re.M)
+tests = re.sub(re.compile("^<!-- END TESTS -->(.|[\n])*",flags=re.M), '', t)
 testMatch = re.findall(
     re.compile(
         "^\.\n([\s\S]*?)^\.\n([\s\S]*?)^\.$|^#{1,6} *(.*)$",

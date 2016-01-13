@@ -16,7 +16,7 @@ def tag(name, attrs=[], selfclosing=False):
     """Helper function to produce an HTML tag."""
     result = '<' + name
     for attr in attrs:
-        result += ' {}="{}"'.format(attr[0], attr[1])
+        result += ' {0}="{1}"'.format(attr[0], attr[1])
     if selfclosing:
         result += ' /'
 
@@ -112,7 +112,7 @@ class HtmlRenderer:
                             self.out('<img src="" alt="')
                         else:
                             self.out(
-                                '<img src="{}" alt="'.format(
+                                '<img src="{0}" alt="'.format(
                                     escape_xml(node.destination, True)))
                     self.disable_tags += 1
                 else:
@@ -211,7 +211,7 @@ class HtmlRenderer:
                 self.out(tag('hr', attrs, True))
                 self.cr()
             else:
-                raise ValueError('Unknown node type {}'.format(node.t))
+                raise ValueError('Unknown node type {0}'.format(node.t))
             event = walker.nxt()
         return self.buf
 
