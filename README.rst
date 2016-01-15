@@ -79,7 +79,7 @@ a pull request adding your test to the existing test suite.
 Tests
 -----
 
-The tests script, ``CommonMark-tests.py``, is pretty much a devtool. As
+The tests script, ``run_spec_tests.py``, is pretty much a devtool. As
 well as running all the tests embedded in ``spec.txt`` it also allows you
 to run specific tests using the ``-t`` argument, provide information
 about passed tests with ``-p``, percentage passed by category of test
@@ -90,8 +90,8 @@ tracing.
 
 ::
 
-    rolands@kamaji:~/utils/CommonMark-py$ python CommonMark-tests.py -h
-    usage: CommonMark-tests.py [-h] [-t T] [-p] [-f] [-i] [-d] [-np] [-s]
+    rolands@kamaji:~/utils/CommonMark-py$ python run_spec_tests.py -h
+    usage: run_spec_tests.py [-h] [-t T] [-p] [-f] [-i] [-d] [-np] [-s]
 
     script to run the CommonMark specification tests against the CommonMark.py
     parser

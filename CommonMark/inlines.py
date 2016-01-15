@@ -34,7 +34,7 @@ reLinkTitle = re.compile(
     '|' +
     '\\((' + ESCAPED_CHAR + '|[^)\\x00])*\\))')
 reLinkDestinationBraces = re.compile(
-    '^(?:[<](?:[^<>\\n\\\\\\x00]' + '|' + ESCAPED_CHAR + '|' +
+    '^(?:[<](?:[^ <>\\t\\n\\\\\\x00]' + '|' + ESCAPED_CHAR + '|' +
     '\\\\)*[>])')
 reLinkDestination = re.compile(
     '^(?:' + REG_CHAR + '+|' + ESCAPED_CHAR + '|\\\\|' +
@@ -51,23 +51,7 @@ reEmailAutolink = re.compile(
     r"(?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?"
     r"(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*)>")
 reAutolink = re.compile(
-    r'^<(?:coap|doi|javascript|aaa|aaas|about|acap|cap|cid|crid|data|'
-    r'dav|dict|dns|file|ftp|geo|go|gopher|h323|http|https|iax|icap|im|'
-    r'imap|info|ipp|iris|iris.beep|iris.xpc|iris.xpcs|iris.lwz|ldap|'
-    r'mailto|mid|msrp|msrps|mtqp|mupdate|news|nfs|ni|nih|nntp|'
-    r'opaquelocktoken|pop|pres|rtsp|service|session|shttp|sieve|'
-    r'sip|sips|sms|snmp|soap.beep|soap.beeps|tag|tel|telnet|tftp|'
-    r'thismessage|tn3270|tip|tv|urn|vemmi|ws|wss|xcon|xcon-userid|'
-    r'xmlrpc.beep|xmlrpc.beeps|xmpp|z39.50r|z39.50s|adiumxtra|afp|afs|'
-    r'aim|apt|attachment|aw|beshare|bitcoin|bolo|callto|chrome|'
-    r'chrome-extension|com-eventbrite-attendee|content|cvs|dlna-playsingle|'
-    r'dlna-playcontainer|dtn|dvb|ed2k|facetime|feed|finger|fish|gg|git|'
-    r'gizmoproject|gtalk|hcp|icon|ipn|irc|irc6|ircs|itms|jar|jms|keyparc|'
-    r'lastfm|ldaps|magnet|maps|market|message|mms|ms-help|msnim|mumble|mvn|'
-    r'notes|oid|palm|paparazzi|platform|proxy|psyc|query|res|resource|rmi|'
-    r'rsync|rtmp|secondlife|sftp|sgn|skype|smb|soldat|spotify|ssh|steam|svn|'
-    r'teamspeak|things|udp|unreal|ut2004|ventrilo|view-source|webcal|wtai|'
-    r'wyciwyg|xfire|xri|ymsgr):[^<>\x00-\x20]*>',
+    r'^<[A-Za-z][A-Za-z0-9.+-]{1,31}:[^<>\x00-\x20]*>',
     re.IGNORECASE)
 reSpnl = re.compile(r'^ *(?:\n *)?')
 reWhitespaceChar = re.compile(r'^\s')

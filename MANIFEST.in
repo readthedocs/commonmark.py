@@ -1,8 +1,13 @@
-include README.md
+include README.rst
 include LICENSE
 include .gitignore
 include spec.txt
 include CommonMark/CommonMark.py
+include CommonMark/common.py
+include CommonMark/html.py
+include CommonMark/blocks.py
+include CommonMark/inlines.py
+include CommonMark/node.py
 include CommonMark/entitytrans.py
-include CommonMark/test/test-CommonMark.py
-include docs/CommonMark.py.html
+include CommonMark/tests/run_spec_tests.py
+include CommonMark/tests/unit_tests.py
