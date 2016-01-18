@@ -1,3 +1,6 @@
+## 0.6.3
+- CommonMark-py now supports Python 2.6.
+
 ## 0.6.2 (2016-01-08)
 - Fixed a UnicodeEncodeError when parsing unicode entities on
   Python 2. As a result, CommonMark-py now relies on the "future"
