@@ -101,7 +101,10 @@ t = re.sub("\r\n", "\n", data)
 tests = re.sub(re.compile("^<!-- END TESTS -->(.|[\n])*", flags=re.M), '', t)
 testMatch = re.findall(
     re.compile(
-        "^\.\n([\s\S]*?)^\.\n([\s\S]*?)^\.$|^#{1,6} *(.*)$",
+        "^`{32} example\n"
+        "([\s\S]*?)^\.\n([\s\S]*?)"
+        "^`{32}$"
+        "|^#{1,6} *(.*)$",
         re.M),
     tests)
 

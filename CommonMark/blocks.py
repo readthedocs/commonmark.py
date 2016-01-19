@@ -493,9 +493,7 @@ class BlockStarts:
 
     @staticmethod
     def setext_heading(parser, container=None):
-        if (not parser.indented and container.t == 'Paragraph' and
-            (container.string_content.index('\n') ==
-             len(container.string_content) - 1)):
+        if not parser.indented and container.t == 'Paragraph':
             m = re.match(
                 reSetextHeadingLine,
                 parser.current_line[parser.next_nonspace:])
