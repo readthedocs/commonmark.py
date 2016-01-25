@@ -94,17 +94,14 @@ def normalize_uri(uri):
             return s
 
 
+UNSAFE_MAP = {
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+}
 def replace_unsafe_char(s):
-    if s == '&':
-        return '&amp;'
-    elif s == '<':
-        return '&lt;'
-    elif s == '>':
-        return '&gt;'
-    elif s == '"':
-        return '&quot;'
-    else:
-        return s
+    return UNSAFE_MAP.get(s, s)
 
 
 def escape_xml(s, preserve_entities):
