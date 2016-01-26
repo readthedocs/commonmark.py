@@ -100,6 +100,8 @@ UNSAFE_MAP = {
     '>': '&gt;',
     '"': '&quot;',
 }
+
+
 def replace_unsafe_char(s):
     return UNSAFE_MAP.get(s, s)
 
