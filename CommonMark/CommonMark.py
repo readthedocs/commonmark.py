@@ -49,10 +49,10 @@ def prepare(block):
         block.__dict__[r] = None
     if block.is_open is not None:
         block.__dict__['open'] = block.is_open
-        del(block.is_open)
+        del block.is_open
 
     # trim empty elements...
-    for attr, value in block.__dict__.items():
+    for attr, value in list(block.__dict__.items()):
         if not attr.startswith("__"):
             if value in ["", [], None, {}]:
                 del block.__dict__[attr]
