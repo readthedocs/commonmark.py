@@ -50,14 +50,12 @@ def prepare(block):
     if block.is_open is not None:
         block.__dict__['open'] = block.is_open
         del(block.is_open)
+
     # trim empty elements...
-    for attr in dir(block):
-        if not callable(attr) and not attr.startswith("__") and \
-           attr not in ['pretty', 'is_container',
-                        'append_child', 'prepend_child', 'unlink',
-                        'insert_after', 'insert_before', 'walker']:
-            if block.__dict__[attr] in ["", [], None, {}]:
-                del(block.__dict__[attr])
+    for attr, value in block.__dict__.items():
+        if not attr.startswith("__"):
+            if value in ["", [], None, {}]:
+                del block.__dict__[attr]
     return block
 
 
