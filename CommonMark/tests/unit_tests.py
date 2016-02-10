@@ -42,6 +42,11 @@ class TestNodeWalker(unittest.TestCase):
         node = Node('Document', [[1, 1], [0, 0]])
         NodeWalker(node)
 
+    def test_node_walker_iter(self):
+        node = Node('Document', [[1, 1], [0, 0]])
+        for subnode, entered in node.walker():
+            pass
+
 
 class TestParser(unittest.TestCase):
     def setUp(self):

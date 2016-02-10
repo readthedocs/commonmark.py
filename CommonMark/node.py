@@ -20,12 +20,12 @@ class NodeWalker(object):
         self.root = root
         self.entering = True
 
-    def nxt(self):
+    def __next__(self):
         cur = self.current
         entering = self.entering
 
         if cur is None:
-            return None
+            raise StopIteration
 
         container = is_container(cur)
 
@@ -45,10 +45,23 @@ class NodeWalker(object):
             self.current = cur.nxt
             self.entering = True
 
-        return {
-            'entering': entering,
-            'node': cur,
-        }
+        return cur, entering
+
+    next = __next__
+
+    def __iter__(self):
+        return self
+
+    def nxt(self):
+        """ for backwards compatibility """
+        try:
+            cur, entering = next(self)
+            return {
+                'entering': entering,
+                'node': cur,
+            }
+        except StopIteration:
+            return None
 
     def resume_at(self, node, entering):
         self.current = node
