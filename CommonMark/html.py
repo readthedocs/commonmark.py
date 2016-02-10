@@ -29,7 +29,7 @@ def potentially_unsafe(url):
         re.search(reSafeDataProtocol, url)
 
 
-class HtmlRenderer:
+class HtmlRenderer(object):
 
     def __init__(self, options={}):
         # by default, soft breaks are rendered as newlines in HTML.

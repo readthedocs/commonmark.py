@@ -101,7 +101,7 @@ def smart_dashes(chars):
     return ('\u2014' * em_count) + ('\u2013' * en_count)
 
 
-class InlineParser:
+class InlineParser(object):
     """INLINE PARSER
 
     These are methods of an InlineParser class, defined below.

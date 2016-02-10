@@ -146,7 +146,7 @@ def lists_match(list_data, item_data):
         list_data.get('bullet_char') == item_data.get('bullet_char')
 
 
-class Block:
+class Block(object):
     accepts_lines = None
 
     @staticmethod
@@ -398,7 +398,7 @@ class Paragraph(Block):
         return False
 
 
-class BlockStarts:
+class BlockStarts(object):
     """Block start functions.
 
     Return values:
@@ -556,7 +556,7 @@ class BlockStarts:
         return 0
 
 
-class Parser:
+class Parser(object):
     def __init__(self, options={}):
         self.doc = Node('Document', [[1, 1], [0, 0]])
         self.block_starts = BlockStarts()
