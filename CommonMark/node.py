@@ -13,7 +13,7 @@ def is_container(node):
     return (re.match(reContainer, node.t) is not None)
 
 
-class NodeWalker:
+class NodeWalker(object):
 
     def __init__(self, root):
         self.current = root
@@ -55,7 +55,7 @@ class NodeWalker:
         self.entering = (entering is True)
 
 
-class Node:
+class Node(object):
     def __init__(self, node_type, sourcepos):
         self.t = node_type
         self.parent = None
