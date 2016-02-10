@@ -67,7 +67,7 @@ def ASTtoJSON(block):
     return json.dumps(prepare(block), default=lambda o: o.__dict__)
 
 
-def dumpAST(obj, ind=0, topnode=False):
+def dumpAST(obj, ind=0):
     """ Print out a block/entire AST."""
     indChar = ("\t" * ind) + "-> " if ind else ""
     print(indChar + "[" + obj.t + "]")
@@ -111,10 +111,9 @@ def dumpAST(obj, ind=0, topnode=False):
             print(
                 "\t\t" + indChar + "[marker_offset] = " +
                 str(obj.list_data.get('marker_offset')))
-    if obj.walker:
+    if obj.first_child:
         print("\t" + indChar + "Children:")
-        walker = obj.walker()
-        nxt = walker.nxt()
-        while nxt is not None and topnode is False:
-            dumpAST(nxt['node'], ind + 2, topnode=True)
-            nxt = walker.nxt()
+        node = obj.first_child
+        while node is not None:
+            dumpAST(node, ind + 2)
+            node = node.nxt
