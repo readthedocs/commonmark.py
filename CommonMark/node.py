@@ -47,6 +47,8 @@ class NodeWalker(object):
 
         return cur, entering
 
+    next = __next__
+
     def __iter__(self):
         return self
 
