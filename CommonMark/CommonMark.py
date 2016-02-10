@@ -111,9 +111,7 @@ def dumpAST(obj, ind=0):
             print(
                 "\t\t" + indChar + "[marker_offset] = " +
                 str(obj.list_data.get('marker_offset')))
-    if obj.first_child:
+    if obj.is_container():
         print("\t" + indChar + "Children:")
-        node = obj.first_child
-        while node is not None:
+        for node in obj.children():
             dumpAST(node, ind + 2)
-            node = node.nxt

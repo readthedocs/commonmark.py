@@ -90,6 +90,12 @@ class Node(object):
     def is_container(self):
         return is_container(self)
 
+    def children(self):
+        node = self.first_child
+        while node is not None:
+            yield node
+            node = node.nxt
+
     def append_child(self, child):
         child.unlink()
         child.parent = self
