@@ -6,6 +6,7 @@ from CommonMark import common
 from CommonMark.common import unescape_string
 from CommonMark.inlines import InlineParser
 from CommonMark.node import Node
+from CommonMark.utils import to_camel_case
 
 
 CODE_INDENT = 4
@@ -67,7 +68,7 @@ def ends_with_blank_line(block):
     while block:
         if block.last_line_blank:
             return True
-        if (block.t == "List" or block.t == "Item"):
+        if (block.t == 'list' or block.t == 'item'):
             block = block.last_child
         else:
             break
@@ -91,11 +92,11 @@ def parse_list_marker(parser):
     m = re.match(reBulletListMarker, rest)
     m2 = re.match(reOrderedListMarker, rest)
     if m:
-        data['type'] = 'Bullet'
+        data['type'] = 'bullet'
         data['bullet_char'] = m.group()[0]
     elif m2:
         m = m2
-        data['type'] = 'Ordered'
+        data['type'] = 'ordered'
         data['start'] = int(m.group(1))
         data['delimiter'] = m.group(2)
     else:
@@ -175,7 +176,7 @@ class Document(Block):
 
     @staticmethod
     def can_contain(t):
-        return t != 'Item'
+        return t != 'item'
 
 
 class List(Block):
@@ -206,7 +207,7 @@ class List(Block):
 
     @staticmethod
     def can_contain(t):
-        return t == 'Item'
+        return t == 'item'
 
 
 class BlockQuote(Block):
@@ -230,7 +231,7 @@ class BlockQuote(Block):
 
     @staticmethod
     def can_contain(t):
-        return t != 'Item'
+        return t != 'item'
 
 
 class Item(Block):
@@ -255,7 +256,7 @@ class Item(Block):
 
     @staticmethod
     def can_contain(t):
-        return t != 'Item'
+        return t != 'item'
 
 
 class Heading(Block):
@@ -427,7 +428,7 @@ class BlockStarts(object):
             if peek(parser.current_line, parser.offset) == ' ':
                 parser.advance_offset(1, False)
             parser.close_unmatched_blocks()
-            parser.add_child('BlockQuote', parser.next_nonspace)
+            parser.add_child('block_quote', parser.next_nonspace)
             return 1
 
         return 0
@@ -441,7 +442,7 @@ class BlockStarts(object):
                 parser.advance_next_nonspace()
                 parser.advance_offset(len(m.group()), False)
                 parser.close_unmatched_blocks()
-                container = parser.add_child('Heading', parser.next_nonspace)
+                container = parser.add_child('heading', parser.next_nonspace)
                 # number of #s
                 container.level = len(m.group().strip())
                 # remove trailing ###s:
@@ -463,7 +464,7 @@ class BlockStarts(object):
             if m:
                 fence_length = len(m.group())
                 parser.close_unmatched_blocks()
-                container = parser.add_child('CodeBlock', parser.next_nonspace)
+                container = parser.add_child('code_block', parser.next_nonspace)
                 container.is_fenced = True
                 container.fence_length = fence_length
                 container.fence_char = m.group()[0]
@@ -482,24 +483,24 @@ class BlockStarts(object):
 
             for block_type in range(1, 8):
                 if re.search(reHtmlBlockOpen[block_type], s) and \
-                   (block_type < 7 or container.t != 'Paragraph'):
+                   (block_type < 7 or container.t != 'paragraph'):
                     parser.close_unmatched_blocks()
                     # We don't adjust parser.offset;
                     # spaces are part of the HTML block:
-                    b = parser.add_child('HtmlBlock', parser.offset)
+                    b = parser.add_child('html_block', parser.offset)
                     b.html_block_type = block_type
                     return 2
         return 0
 
     @staticmethod
     def setext_heading(parser, container=None):
-        if not parser.indented and container.t == 'Paragraph':
+        if not parser.indented and container.t == 'paragraph':
             m = re.match(
                 reSetextHeadingLine,
                 parser.current_line[parser.next_nonspace:])
             if m:
                 parser.close_unmatched_blocks()
-                heading = Node('Heading', container.sourcepos)
+                heading = Node('heading', container.sourcepos)
                 heading.level = 1 if m.group()[0] == '=' else 2
                 heading.string_content = container.string_content
                 container.insert_after(heading)
@@ -516,7 +517,7 @@ class BlockStarts(object):
         if not parser.indented and re.search(
                 reThematicBreak, parser.current_line[parser.next_nonspace:]):
             parser.close_unmatched_blocks()
-            parser.add_child('ThematicBreak', parser.next_nonspace)
+            parser.add_child('thematic_break', parser.next_nonspace)
             parser.advance_offset(
                 len(parser.current_line) - parser.offset, False)
             return 2
@@ -524,19 +525,19 @@ class BlockStarts(object):
 
     @staticmethod
     def list_item(parser, container=None):
-        if (not parser.indented or container.t == 'List'):
+        if (not parser.indented or container.t == 'list'):
             data = parse_list_marker(parser)
             if data:
                 parser.close_unmatched_blocks()
 
                 # add the list if needed
-                if parser.tip.t != 'List' or \
+                if parser.tip.t != 'list' or \
                    not lists_match(container.list_data, data):
-                    container = parser.add_child('List', parser.next_nonspace)
+                    container = parser.add_child('list', parser.next_nonspace)
                     container.list_data = data
 
                 # add the list item
-                container = parser.add_child('Item', parser.next_nonspace)
+                container = parser.add_child('item', parser.next_nonspace)
                 container.list_data = data
                 return 1
 
@@ -545,12 +546,12 @@ class BlockStarts(object):
     @staticmethod
     def indented_code_block(parser, container=None):
         if parser.indented and \
-           parser.tip.t != 'Paragraph' and \
+           parser.tip.t != 'paragraph' and \
                            not parser.blank:
             # indented code
             parser.advance_offset(CODE_INDENT, True)
             parser.close_unmatched_blocks()
-            parser.add_child('CodeBlock', parser.offset)
+            parser.add_child('code_block', parser.offset)
             return 2
 
         return 0
@@ -558,7 +559,7 @@ class BlockStarts(object):
 
 class Parser(object):
     def __init__(self, options={}):
-        self.doc = Node('Document', [[1, 1], [0, 0]])
+        self.doc = Node('document', [[1, 1], [0, 0]])
         self.block_starts = BlockStarts()
         self.tip = self.doc
         self.oldtip = self.doc
@@ -588,7 +589,7 @@ class Parser(object):
         b = block
         last_list = None
         while True:
-            if (b.t == "List"):
+            if (b.t == 'list'):
                 last_list = b
             b = b.parent
             if not b:
@@ -610,11 +611,13 @@ class Parser(object):
         """ Add block of type tag as a child of the tip.  If the tip can't
         accept children, close and finalize it and try its parent,
         and so on til we find a block that can accept children."""
-        block_class = getattr(import_module('CommonMark.blocks'), self.tip.t)
+        block_class = getattr(import_module('CommonMark.blocks'),
+                              to_camel_case(self.tip.t))
         while not block_class.can_contain(tag):
             self.finalize(self.tip, self.line_number - 1)
             block_class = getattr(
-                import_module('CommonMark.blocks'), self.tip.t)
+                import_module('CommonMark.blocks'),
+                to_camel_case(self.tip.t))
 
         column_number = offset + 1
         new_block = Node(tag, [[self.line_number, column_number], [0, 0]])
@@ -719,7 +722,8 @@ class Parser(object):
 
             self.find_next_nonspace()
             block_class = getattr(
-                import_module('CommonMark.blocks'), container.t)
+                import_module('CommonMark.blocks'),
+                to_camel_case(container.t))
             rv = block_class.continue_(self, container)
             if rv == 0:
                 # we've matched, keep going
@@ -749,8 +753,9 @@ class Parser(object):
             self.break_out_of_lists(container)
             container = self.tip
 
-        block_class = getattr(import_module('CommonMark.blocks'), container.t)
-        matched_leaf = container.t != 'Paragraph' and block_class.accepts_lines
+        block_class = getattr(import_module('CommonMark.blocks'),
+                              to_camel_case(container.t))
+        matched_leaf = container.t != 'paragraph' and block_class.accepts_lines
         starts = self.block_starts
         starts_len = len(starts.METHODS)
         # Unless last matched container is a code block, try new container
@@ -785,7 +790,7 @@ class Parser(object):
         # What remains at the offset is a text line. Add the text to the
         # appropriate container.
         if not self.all_closed and not self.blank and \
-           self.tip.t == 'Paragraph':
+           self.tip.t == 'paragraph':
             # lazy paragraph continuation
             self.add_line()
         else:
@@ -803,9 +808,9 @@ class Parser(object):
             # don't set last_line_blank on an empty list item, or if we
             # just closed a fenced block.
             last_line_blank = self.blank and \
-                not (t == 'BlockQuote' or
-                     (t == 'CodeBlock' and container.is_fenced) or
-                     (t == 'Item' and
+                not (t == 'block_quote' or
+                     (t == 'code_block' and container.is_fenced) or
+                     (t == 'item' and
                       not container.first_child and
                       container.sourcepos[0][0] == self.line_number))
 
@@ -815,11 +820,12 @@ class Parser(object):
                 cont.last_line_blank = last_line_blank
                 cont = cont.parent
 
-            block_class = getattr(import_module('CommonMark.blocks'), t)
+            block_class = getattr(import_module('CommonMark.blocks'),
+                                  to_camel_case(t))
             if block_class.accepts_lines:
                 self.add_line()
                 # if HtmlBlock, check for end condition
-                if t == 'HtmlBlock' and \
+                if t == 'html_block' and \
                    container.html_block_type >= 1 and \
                    container.html_block_type <= 5 and \
                    re.search(
@@ -828,7 +834,7 @@ class Parser(object):
                     self.finalize(container, self.line_number)
             elif self.offset < len(ln) and not self.blank:
                 # create a paragraph container for one line
-                container = self.add_child('Paragraph', self.offset)
+                container = self.add_child('paragraph', self.offset)
                 self.advance_next_nonspace()
                 self.add_line()
 
@@ -843,7 +849,8 @@ class Parser(object):
         above = block.parent
         block.is_open = False
         block.sourcepos[1] = [line_number, self.last_line_length]
-        block_class = getattr(import_module('CommonMark.blocks'), block.t)
+        block_class = getattr(import_module('CommonMark.blocks'),
+                              to_camel_case(block.t))
         block_class.finalize(self, block)
 
         self.tip = above
@@ -860,13 +867,13 @@ class Parser(object):
         while event is not None:
             node = event['node']
             t = node.t
-            if not event['entering'] and (t == 'Paragraph' or t == 'Heading'):
+            if not event['entering'] and (t == 'paragraph' or t == 'heading'):
                 self.inline_parser.parse(node)
             event = walker.nxt()
 
     def parse(self, my_input):
         """ The main parsing function.  Returns a parsed document AST."""
-        self.doc = Node('Document', [[1, 1], [0, 0]])
+        self.doc = Node('document', [[1, 1], [0, 0]])
         self.tip = self.doc
         self.refmap = {}
         self.line_number = 0
