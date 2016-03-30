@@ -86,7 +86,7 @@ something like this:
 ::
 
    $ pyvenv venv
-   $ ./venv/bin/python setup.py install && ./venv/bin/python setup.py test
+   $ ./venv/bin/python setup.py install test
 
 The tests script, ``run_spec_tests.py``, is pretty much a devtool. As
 well as running all the tests embedded in ``spec.txt`` it also allows you
