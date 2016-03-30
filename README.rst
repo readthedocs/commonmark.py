@@ -79,6 +79,15 @@ a pull request adding your test to the existing test suite.
 Tests
 -----
 
+To work on CommonMark-py, you will need to be able to run the test suite to
+make sure your changes don't break anything. To run the tests, you can do
+something like this:
+
+::
+
+   $ pyvenv venv
+   $ ./venv/bin/python setup.py install && ./venv/bin/python setup.py test
+
 The tests script, ``run_spec_tests.py``, is pretty much a devtool. As
 well as running all the tests embedded in ``spec.txt`` it also allows you
 to run specific tests using the ``-t`` argument, provide information
