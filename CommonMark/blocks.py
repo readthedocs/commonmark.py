@@ -27,7 +27,7 @@ reHtmlBlockOpen = [
         r'(?:\s|[/]?[>]|$)',
         re.IGNORECASE),
     re.compile(
-        '^(?:' + common.OPENTAG + '|' + common.CLOSETAG + ')\s*$',
+        '^(?:' + common.OPENTAG + '|' + common.CLOSETAG + ')\\s*$',
         re.IGNORECASE),
 ]
 reHtmlBlockClose = [
@@ -53,6 +53,10 @@ reLineEnding = re.compile(r'\r\n|\n|\r')
 def is_blank(s):
     """Returns True if string contains only space characters."""
     return re.search(reNonSpace, s) is None
+
+
+def is_space_or_tab(s):
+    return s == ' ' or s == '\t'
 
 
 def peek(ln, pos):
@@ -116,7 +120,7 @@ def parse_list_marker(parser):
         parser.advance_offset(1, True)
         nextc = peek(parser.current_line, parser.offset)
         if parser.column - spaces_start_col < 5 and \
-           (nextc == ' ' or nextc == '\t'):
+           is_space_or_tab(nextc):
             pass
         else:
             break
@@ -128,7 +132,7 @@ def parse_list_marker(parser):
         data['padding'] = len(m.group()) + 1
         parser.column = spaces_start_col
         parser.offset = spaces_start_offset
-        if peek(parser.current_line, parser.offset) == ' ':
+        if is_space_or_tab(peek(parser.current_line, parser.offset)):
             parser.advance_offset(1, True)
     else:
         data['padding'] = len(m.group()) + spaces_after_marker
@@ -219,8 +223,8 @@ class BlockQuote(Block):
         if not parser.indented and peek(ln, parser.next_nonspace) == '>':
             parser.advance_next_nonspace()
             parser.advance_offset(1, False)
-            if peek(ln, parser.offset) == ' ':
-                parser.offset += 1
+            if is_space_or_tab(peek(ln, parser.offset)):
+                parser.advance_offset(1, True)
         else:
             return 1
         return 0
@@ -239,8 +243,12 @@ class Item(Block):
 
     @staticmethod
     def continue_(parser=None, container=None):
-        if parser.blank and container.last_child is not None:
-            parser.advance_next_nonspace()
+        if parser.blank:
+            if container.first_child is None:
+                # Blank line after empty list item
+                return 1
+            else:
+                parser.advance_next_nonspace()
         elif parser.indent >= (container.list_data['marker_offset'] +
                                container.list_data['padding']):
             parser.advance_offset(
@@ -312,8 +320,8 @@ class CodeBlock(Block):
             else:
                 # skip optional spaces of fence offset
                 i = container.fence_offset
-                while i > 0 and peek(ln, parser.offset) == ' ':
-                    parser.advance_offset(1, False)
+                while i > 0 and is_space_or_tab(peek(ln, parser.offset)):
+                    parser.advance_offset(1, True)
                     i -= 1
         else:
             # indented
@@ -359,10 +367,6 @@ class HtmlBlock(Block):
 
     @staticmethod
     def finalize(parser=None, block=None):
-        if block.string_content == '<div>\n' and \
-           block.sourcepos == [[1, 3], [1, 7]]:
-            # FIXME :P
-            block.string_content = '\n<div>'
         block.literal = re.sub(r'(\n *)+$', '', block.string_content)
         # allow GC
         block.string_content = None
@@ -425,8 +429,8 @@ class BlockStarts(object):
             parser.advance_next_nonspace()
             parser.advance_offset(1, False)
             # optional following space
-            if peek(parser.current_line, parser.offset) == ' ':
-                parser.advance_offset(1, False)
+            if is_space_or_tab(peek(parser.current_line, parser.offset)):
+                parser.advance_offset(1, True)
             parser.close_unmatched_blocks()
             parser.add_child('block_quote', parser.next_nonspace)
             return 1
@@ -464,7 +468,8 @@ class BlockStarts(object):
             if m:
                 fence_length = len(m.group())
                 parser.close_unmatched_blocks()
-                container = parser.add_child('code_block', parser.next_nonspace)
+                container = parser.add_child(
+                    'code_block', parser.next_nonspace)
                 container.is_fenced = True
                 container.fence_length = fence_length
                 container.fence_char = m.group()[0]
@@ -572,6 +577,7 @@ class Parser(object):
         self.indent = 0
         self.indented = False
         self.blank = False
+        self.partially_consumed_tab = False
         self.all_closed = True
         self.last_matched_container = self.doc
         self.refmap = {}
@@ -605,6 +611,12 @@ class Parser(object):
     def add_line(self):
         """ Add a line to the block at the tip.  We assume the tip
         can accept lines -- that check should be done before calling this."""
+        if self.partially_consumed_tab:
+            # Skip over tab
+            self.offset += 1
+            # Add space characters
+            chars_to_tab = 4 - (self.column % 4)
+            self.tip.string_content += (' ' * chars_to_tab)
         self.tip.string_content += (self.current_line[self.offset:] + '\n')
 
     def add_child(self, tag, offset):
@@ -668,6 +680,7 @@ class Parser(object):
     def advance_next_nonspace(self):
         self.offset = self.next_nonspace
         self.column = self.next_nonspace_column
+        self.partially_consumed_tab = False
 
     def advance_offset(self, count, columns):
         cols = 0
@@ -679,10 +692,19 @@ class Parser(object):
         while count > 0 and c is not None:
             if c == '\t':
                 chars_to_tab = 4 - (self.column % 4)
-                self.column += chars_to_tab
-                self.offset += 1
-                count -= chars_to_tab if columns else 1
+                if columns:
+                    self.partially_consumed_tab = chars_to_tab > count
+                    chars_to_advance = min(count, chars_to_tab)
+                    self.column += chars_to_advance
+                    self.offset += 0 if self.partially_consumed_tab else 1
+                    count -= chars_to_advance
+                else:
+                    self.partially_consumed_tab = False
+                    self.column += chars_to_tab
+                    self.offset += 1
+                    self.count -= 1
             else:
+                self.partially_consumed_tab = False
                 cols += 1
                 self.offset += 1
                 # assume ascii; block starts are ascii
@@ -705,6 +727,8 @@ class Parser(object):
         self.oldtip = self.tip
         self.offset = 0
         self.column = 0
+        self.blank = False
+        self.partially_consumed_tab = False
         self.line_number += 1
 
         # replace NUL characters for security

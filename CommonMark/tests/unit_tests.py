@@ -3,7 +3,7 @@ from __future__ import unicode_literals
 import unittest
 import CommonMark
 from CommonMark.blocks import Parser
-from CommonMark.html import HtmlRenderer
+from CommonMark.render.html import HtmlRenderer
 from CommonMark.inlines import InlineParser
 from CommonMark.node import NodeWalker, Node
 from CommonMark.utils import to_camel_case

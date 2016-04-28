@@ -7,7 +7,8 @@ import codecs
 import argparse
 import sys
 from builtins import str
-import CommonMark
+from CommonMark.render.html import HtmlRenderer
+from CommonMark.main import Parser, dumpAST
 
 
 class colors(object):
@@ -71,8 +72,8 @@ args = parser.parse_args()
 if args.d:
     sys.settrace(trace_calls)
 
-renderer = CommonMark.HtmlRenderer()
-parser = CommonMark.Parser()
+renderer = HtmlRenderer()
+parser = Parser()
 
 f = codecs.open("spec.txt", encoding="utf-8")
 datalist = []
@@ -148,7 +149,7 @@ if args.i:
         ast = parser.parse(s)
         html = renderer.render(ast)
         print(colors.WARNING+"="*10+"AST====="+colors.ENDC)
-        CommonMark.dumpAST(ast)
+        dumpAST(ast)
         print(colors.WARNING+"="*10+"HTML===="+colors.ENDC)
         print(html)
 
@@ -184,7 +185,7 @@ for i, example in enumerate(examples):  # [0,examples[0]]
         if not args.f:
             print(colors.OKGREEN + '✓' + colors.ENDC, end='')
         if args.d:
-            CommonMark.dumpAST(ast)
+            dumpAST(ast)
         if args.p or args.d and not args.np:
             print(
                 colors.OKBLUE +
@@ -205,7 +206,7 @@ for i, example in enumerate(examples):  # [0,examples[0]]
             print("Test #" + str(i+1), end='')
         print(' ' + colors.FAIL + "✗" + colors.ENDC)
         if args.d:
-            CommonMark.dumpAST(ast)
+            dumpAST(ast)
         if not args.np or args.f:
             print(
                 colors.WARNING +
