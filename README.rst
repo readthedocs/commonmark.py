@@ -18,7 +18,7 @@ to work (all tests pass on 2.6, 2.7, 3.3, 3.4, and 3.5).
 
 **Current version:** 0.6.3
 
-|Build Status|
+|Build Status| |Doc Link|
 
 Installation
 ------------
@@ -123,3 +123,7 @@ Authors
 
 .. |Build Status| image:: https://travis-ci.org/rtfd/CommonMark-py.svg?branch=master
    :target: https://travis-ci.org/rtfd/CommonMark-py
+   
+.. |Doc Link| image:: https://readthedocs.org/projects/commonmark-py/badge/?version=latest
+   :target: https://commonmark-py.readthedocs.io/en/latest/?badge=latest
+   :alt: Documentation Status
