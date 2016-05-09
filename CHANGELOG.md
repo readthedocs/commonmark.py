@@ -1,4 +1,4 @@
-## 0.6.4
+## 0.6.4 (2016-05-09)
 - The CommonMark spec has been updated to 0.25.
 
 ## 0.6.3 (2016-01-19)
