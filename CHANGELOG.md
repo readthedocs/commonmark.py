@@ -1,5 +1,7 @@
 ## 0.6.4 (2016-05-09)
 - The CommonMark spec has been updated to 0.25.
+- Python 2 fixes from @eric-wieser
+- Contributions from @funkybob and @hyperknot
 
 ## 0.6.3 (2016-01-19)
 - CommonMark-py now supports Python 2.6.
