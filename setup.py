@@ -1,4 +1,4 @@
-from setuptools import setup, Command
+from setuptools import setup, find_packages, Command
 
 
 class Test(Command):
@@ -20,7 +20,7 @@ class Test(Command):
 
 setup(
     name="CommonMark",
-    packages=['CommonMark'],
+    packages=find_packages(exclude=['tests']),
     scripts=['bin/cmark.py'],
     version="0.6.3",
     license="BSD License",

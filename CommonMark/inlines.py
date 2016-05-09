@@ -75,7 +75,7 @@ def normalizeReference(s):
 
 
 def text(s):
-    node = Node('Text', None)
+    node = Node('text', None)
     node.literal = s
     return node
 
@@ -155,7 +155,7 @@ class InlineParser(object):
         matched = self.match(reTicks)
         while matched is not None:
             if (matched == ticks):
-                node = Node('Code', None)
+                node = Node('code', None)
                 c = self.subject[after_open_ticks:self.pos - len(ticks)]
                 c = c.strip()
                 c = re.sub(reWhitespace, ' ', c)
@@ -185,7 +185,7 @@ class InlineParser(object):
 
         if self.peek() == '\n':
             self.pos += 1
-            node = Node('Hardbreak', None)
+            node = Node('linebreak', None)
             block.append_child(node)
         elif subjchar and re.match(reEscapable, subjchar):
             block.append_child(text(subjchar))
@@ -202,7 +202,7 @@ class InlineParser(object):
         if m:
             # email
             dest = m[1:-1]
-            node = Node('Link', None)
+            node = Node('link', None)
             node.destination = normalize_uri('mailto:' + dest)
             node.title = ''
             node.append_child(text(dest))
@@ -213,7 +213,7 @@ class InlineParser(object):
             if m:
                 # link
                 dest = m[1:-1]
-                node = Node('Link', None)
+                node = Node('link', None)
                 node.destination = normalize_uri(dest)
                 node.title = ''
                 node.append_child(text(dest))
@@ -228,7 +228,7 @@ class InlineParser(object):
         if m is None:
             return False
         else:
-            node = Node('HtmlInline', None)
+            node = Node('html_inline', None)
             node.literal = m
             block.append_child(node)
             return True
@@ -409,9 +409,9 @@ class InlineParser(object):
 
                         # Build contents for new Emph element
                         if use_delims == 1:
-                            emph = Node('Emph', None)
+                            emph = Node('emph', None)
                         else:
-                            emph = Node('Strong', None)
+                            emph = Node('strong', None)
 
                         tmp = opener_inl.nxt
                         while tmp and tmp != closer_inl:
@@ -633,7 +633,7 @@ class InlineParser(object):
                 matched = True
 
         if matched:
-            node = Node('Image' if is_image else 'Link', None)
+            node = Node('image' if is_image else 'link', None)
 
             node.destination = dest
             node.title = title or ''
@@ -702,16 +702,16 @@ class InlineParser(object):
         # assume we're at a \n
         self.pos += 1
         lastc = block.last_child
-        if lastc and lastc.t == 'Text' and lastc.literal[-1] == ' ':
-            hardbreak = len(lastc.literal) >= 2 and lastc.literal[-2] == ' '
+        if lastc and lastc.t == 'text' and lastc.literal[-1] == ' ':
+            linebreak = len(lastc.literal) >= 2 and lastc.literal[-2] == ' '
             lastc.literal = re.sub(reFinalSpace, '', lastc.literal)
-            if hardbreak:
-                node = Node('Hardbreak', None)
+            if linebreak:
+                node = Node('linebreak', None)
             else:
-                node = Node('Softbreak', None)
+                node = Node('softbreak', None)
             block.append_child(node)
         else:
-            block.append_child(Node('Softbreak', None))
+            block.append_child(Node('softbreak', None))
 
         # gobble leading spaces in next line
         self.match(reInitialSpace)

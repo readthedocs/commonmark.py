@@ -4,9 +4,9 @@ import re
 
 
 reContainer = re.compile(
-    r'(Document|BlockQuote|List|Item|Paragraph|'
-    r'Heading|Emph|Strong|Link|Image|'
-    r'CustomInline|CustomBlock)')
+    r'(document|block_quote|list|item|paragraph|'
+    r'heading|emph|strong|link|image|'
+    r'custom_inline|custom_block)')
 
 
 def is_container(node):

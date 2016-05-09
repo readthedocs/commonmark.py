@@ -1,6 +1,6 @@
-#!/usr/bin/env python
 # 2014 - Bibek Kafle & Roland Shoemaker
-# Port of @jgm's JavaScript stmd.js implementation of the CommonMark spec
+# 2015-2016 - Nik Nyby
+# Port of @jgm's commonmark.js implementation of the CommonMark spec.
 
 # Basic usage:
 #
@@ -8,11 +8,13 @@
 # parser = CommonMark.Parser()
 # renderer = CommonMark.HtmlRenderer()
 # print(renderer.render(parser.parse('Hello *world*')))
+
 from __future__ import absolute_import, unicode_literals
+
 import json
 from builtins import str
 from CommonMark.blocks import Parser
-from CommonMark.html import HtmlRenderer
+from CommonMark.render.html import HtmlRenderer
 
 
 # Utility functions
