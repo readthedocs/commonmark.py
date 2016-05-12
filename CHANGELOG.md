@@ -1,5 +1,6 @@
 ## 0.6.4 (2016-05-09)
 - The CommonMark spec has been updated to 0.25.
+- The HtmlRenderer has been refactored based on upstream changes in commonmark.js.
 - Python 2 fixes from @eric-wieser
 - Contributions from @funkybob and @hyperknot
 
