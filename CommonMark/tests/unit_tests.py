@@ -22,6 +22,13 @@ class TestCommonmark(unittest.TestCase):
         CommonMark.commonmark('# unicode: \u2020')
         CommonMark.commonmark('```\n# unicode: \u2020\n```')
 
+    def test_null_string_bug(self):
+        s = CommonMark.commonmark('>     sometext\n>\n\n')
+        self.assertEqual(
+            s,
+            '<blockquote>\n<pre><code>sometext\n</code></pre>'
+            '\n</blockquote>\n')
+
 
 class TestHtmlRenderer(unittest.TestCase):
     def test_init(self):

@@ -1,3 +1,5 @@
+- Fixed a bug where a TypeError could occur, reported by @civalin
+
 ## 0.6.4 (2016-05-09)
 - The CommonMark spec has been updated to 0.25.
 - The HtmlRenderer has been refactored based on upstream changes in commonmark.js.
