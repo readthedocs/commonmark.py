@@ -21,7 +21,6 @@ class Test(Command):
 setup(
     name="CommonMark",
     packages=find_packages(exclude=['tests']),
-    scripts=['bin/cmark.py'],
     version="0.6.4",
     license="BSD License",
     description="Python parser for the CommonMark Markdown spec",
@@ -32,6 +31,11 @@ setup(
     maintainer_email="nikolas@gnu.org",
     url="https://github.com/rtfd/CommonMark-py",
     keywords=["markup", "markdown", "commonmark"],
+    entry_points={
+        'console_scripts': [
+            'cmark = CommonMark.cmark:cmark',
+        ]
+    },
     cmdclass={'test': Test},
     install_requires=[
         'future',

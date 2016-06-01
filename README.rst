@@ -48,11 +48,11 @@ Usage
 
     ----- or -----
 
-    rolands@kamaji:~$ cmark.py README.md -o README.html
-    rolands@kamaji:~$ cmark.py README.md -o README.json -aj # output AST as JSON
-    rolands@kamaji:~$ cmark.py README.md -a # pretty print generated AST structure
-    rolands@kamaji:~$ cmark.py -h
-    usage: cmark.py [-h] [-o [O]] [-a] [-aj] [infile]
+    rolands@kamaji:~$ cmark README.md -o README.html
+    rolands@kamaji:~$ cmark README.md -o README.json -aj # output AST as JSON
+    rolands@kamaji:~$ cmark README.md -a # pretty print generated AST structure
+    rolands@kamaji:~$ cmark -h
+    usage: cmark [-h] [-o [O]] [-a] [-aj] [infile]
 
     Process Markdown according to the CommonMark specification.
 
