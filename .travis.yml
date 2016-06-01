@@ -6,9 +6,9 @@ python:
   - "3.3"
   - "3.4"
   - "3.5"
-# test command
 install:
  - python setup.py install
+ - pip install flake8 hypothesis hypothesislegacysupport
 script:
  - python setup.py flake8
  - python -m unittest CommonMark.tests.unit_tests

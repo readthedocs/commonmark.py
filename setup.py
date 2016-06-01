@@ -36,8 +36,11 @@ setup(
     install_requires=[
         'future',
     ],
-    setup_requires=[
+    tests_require=[
         'flake8',
+        'hypothesis',
+        # For python 2.6
+        'hypothesislegacysupport',
     ],
     classifiers=[
         "Programming Language :: Python",
