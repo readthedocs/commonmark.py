@@ -13,6 +13,6 @@ script:
  - python setup.py flake8
  - python -m unittest CommonMark.tests.unit_tests
  - python setup.py test
- - cmark.py CommonMark/tests/test.md
- - cmark.py CommonMark/tests/test.md -a
- - cmark.py CommonMark/tests/test.md -aj
+ - cmark CommonMark/tests/test.md
+ - cmark CommonMark/tests/test.md -a
+ - cmark CommonMark/tests/test.md -aj
