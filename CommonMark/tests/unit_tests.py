@@ -1,6 +1,8 @@
 from __future__ import unicode_literals
 
 import unittest
+from hypothesis import given, example
+from hypothesis.strategies import text
 import CommonMark
 from CommonMark.blocks import Parser
 from CommonMark.render.html import HtmlRenderer
@@ -28,6 +30,10 @@ class TestCommonmark(unittest.TestCase):
             s,
             '<blockquote>\n<pre><code>sometext\n</code></pre>'
             '\n</blockquote>\n')
+
+    @given(text())
+    def test_random_text(self, s):
+        CommonMark.commonmark(s)
 
 
 class TestHtmlRenderer(unittest.TestCase):
@@ -60,11 +66,11 @@ class TestParser(unittest.TestCase):
     def setUp(self):
         self.parser = Parser()
 
-    def test_empty_string(self):
-        self.parser.parse('')
-
-    def test_unicode(self):
-        self.parser.parse('* unicode: \u2020')
+    @given(text())
+    @example('')
+    @example('* unicode: \u2020')
+    def test_text(self, s):
+        self.parser.parse(s)
 
 
 class TestUtils(unittest.TestCase):
@@ -72,3 +78,7 @@ class TestUtils(unittest.TestCase):
         self.assertEqual(to_camel_case('snake_case'), 'SnakeCase')
         self.assertEqual(to_camel_case(''), '')
         self.assertEqual(to_camel_case('word'), 'Word')
+
+    @given(text())
+    def test_random_text(self, s):
+        to_camel_case(s)
