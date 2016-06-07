@@ -33,7 +33,7 @@ setup(
     keywords=["markup", "markdown", "commonmark"],
     entry_points={
         'console_scripts': [
-            'cmark = CommonMark.cmark:cmark',
+            'cmark = CommonMark.cmark:main',
         ]
     },
     cmdclass={'test': Test},
