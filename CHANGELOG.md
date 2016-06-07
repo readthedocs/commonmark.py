@@ -1,4 +1,8 @@
-- Fixed a bug where a TypeError could occur, reported by @civalin
+## 0.7.0 (2016-06-07)
+- The `cmark.py` script is now just called `cmark`.
+- Fixed a bug where the `cmark.py` script contained a bogus path, reported
+  by @yuhui-lin.
+- Fixed a bug where a TypeError could occur, reported by @civalin.
 
 ## 0.6.4 (2016-05-09)
 - The CommonMark spec has been updated to 0.25.
