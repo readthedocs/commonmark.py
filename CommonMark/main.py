@@ -100,7 +100,9 @@ def dumpAST(obj, ind=0, topnode=False):
                 "\t\t" + indChar + "[bullet_char] = " +
                 obj.list_data['bullet_char'])
         if obj.list_data.get('start'):
-            print("\t\t" + indChar + "[start] = " + obj.list_data.get('start'))
+            print(
+                "\t\t" + indChar + "[start] = " +
+                str(obj.list_data.get('start')))
         if obj.list_data.get('delimiter'):
             print(
                 "\t\t" + indChar + "[delimiter] = " +
