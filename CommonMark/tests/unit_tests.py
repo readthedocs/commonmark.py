@@ -31,6 +31,11 @@ class TestCommonmark(unittest.TestCase):
             '<blockquote>\n<pre><code>sometext\n</code></pre>'
             '\n</blockquote>\n')
 
+    def test_dumpAST_orderedlist(self):
+        md = '1.'
+        ast = Parser().parse(md)
+        CommonMark.dumpAST(ast)
+
     @given(text())
     def test_random_text(self, s):
         CommonMark.commonmark(s)
