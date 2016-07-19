@@ -80,7 +80,7 @@ def ends_with_blank_line(block):
     return False
 
 
-def parse_list_marker(parser):
+def parse_list_marker(parser, container):
     """ Parse a list marker and return data on the marker (type,
     start, delimiter, bullet character, padding) or None."""
     rest = parser.current_line[parser.next_nonspace:]
@@ -98,7 +98,7 @@ def parse_list_marker(parser):
     if m:
         data['type'] = 'bullet'
         data['bullet_char'] = m.group()[0]
-    elif m2:
+    elif m2 and (container.t != 'paragraph' or m2.group(1) == '1'):
         m = m2
         data['type'] = 'ordered'
         data['start'] = int(m.group(1))
@@ -531,7 +531,7 @@ class BlockStarts(object):
     @staticmethod
     def list_item(parser, container=None):
         if (not parser.indented or container.t == 'list'):
-            data = parse_list_marker(parser)
+            data = parse_list_marker(parser, container)
             if data:
                 parser.close_unmatched_blocks()
 
