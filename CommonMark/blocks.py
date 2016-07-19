@@ -585,29 +585,6 @@ class Parser(object):
         self.inline_parser = InlineParser(options)
         self.options = options
 
-    def break_out_of_lists(self, block):
-        """
-        Break out of all containing lists, resetting the tip of the
-        document to the parent of the highest list, and finalizing
-        all the lists.  (This is used to implement the "two blank lines
-        break out of all lists" feature.)
-        """
-        b = block
-        last_list = None
-        while True:
-            if (b.t == 'list'):
-                last_list = b
-            b = b.parent
-            if not b:
-                break
-
-        if (last_list):
-            while block != last_list:
-                self.finalize(block, self.line_number)
-                block = block.parent
-            self.finalize(last_list, self.line_number)
-            self.tip = last_list.parent
-
     def add_line(self):
         """ Add a line to the block at the tip.  We assume the tip
         can accept lines -- that check should be done before calling this."""
@@ -769,11 +746,6 @@ class Parser(object):
 
         self.all_closed = (container == self.oldtip)
         self.last_matched_container = container
-
-        # Check to see if we've hit 2nd blank line; if so break out of list:
-        if self.blank and container.last_line_blank:
-            self.break_out_of_lists(container)
-            container = self.tip
 
         block_class = getattr(import_module('CommonMark.blocks'),
                               to_camel_case(container.t))
