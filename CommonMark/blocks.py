@@ -38,12 +38,12 @@ reHtmlBlockClose = [
     re.compile(r'>'),
     re.compile(r'\]\]>'),
 ]
-reThematicBreak = re.compile(r'^(?:(?:\* *){3,}|(?:_ *){3,}|(?:- *){3,}) *$')
+reThematicBreak = re.compile(r'^(?:(?:\*[ \t]*){3,}|(?:_[ \t]*){3,}|(?:-[ \t]*){3,})[ \t]*$')
 reMaybeSpecial = re.compile(r'^[#`~*+_=<>0-9-]')
 reNonSpace = re.compile(r'[^ \t\f\v\r\n]')
 reBulletListMarker = re.compile(r'^[*+-]')
 reOrderedListMarker = re.compile(r'^(\d{1,9})([.)])')
-reATXHeadingMarker = re.compile(r'^#{1,6}(?: +|$)')
+reATXHeadingMarker = re.compile(r'^#{1,6}(?:[ \t]+|$)')
 reCodeFence = re.compile(r'^`{3,}(?!.*`)|^~{3,}(?!.*~)')
 reClosingCodeFence = re.compile(r'^(?:`{3,}|~{3,})(?= *$)')
 reSetextHeadingLine = re.compile(r'^(?:=+|-+) *$')
@@ -702,7 +702,7 @@ class Parser(object):
                     self.partially_consumed_tab = False
                     self.column += chars_to_tab
                     self.offset += 1
-                    self.count -= 1
+                    count -= 1
             else:
                 self.partially_consumed_tab = False
                 cols += 1
