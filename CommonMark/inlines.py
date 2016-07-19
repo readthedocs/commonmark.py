@@ -350,6 +350,7 @@ class InlineParser(object):
             "'": stack_bottom,
             '"': stack_bottom,
         }
+        odd_match = False
         use_delims = 0
 
         # Find first closer above stack_bottom
@@ -369,7 +370,13 @@ class InlineParser(object):
                 closercc = closer.get('cc')
                 while (opener is not None and opener != stack_bottom and
                        opener != openers_bottom[closercc]):
-                    if opener.get('cc') == closercc and opener.get('can_open'):
+                    odd_match = (closer.get('can_open') or
+                                 opener.get('can_close')) and \
+                                 (opener.get('numdelims') +
+                                  closer.get('numdelims')) % 3 == 0
+                    if opener.get('cc') == closercc and \
+                       opener.get('can_open') and \
+                       not odd_match:
                         opener_found = True
                         break
                     opener = opener.get('previous')
@@ -445,8 +452,12 @@ class InlineParser(object):
                         opener['node'].literal = '\u201C'
                     closer = closer['next']
 
-                if not opener_found:
+                if not opener_found and not odd_match:
                     # Set lower bound for future searches for openers:
+                    # We don't do this with odd_match because a **
+                    # that doesn't match an earlier * might turn into
+                    # an opener, and the * might be matched by something
+                    # else.
                     openers_bottom[closercc] = old_closer['previous']
                     if not old_closer['can_open']:
                         # We can remove a closer that can't be an opener,
