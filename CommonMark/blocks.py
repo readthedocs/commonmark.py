@@ -114,7 +114,7 @@ def parse_list_marker(parser, container):
 
     # if it interrupts paragraph, make sure first line isn't blank
     if container.t == 'paragraph' and \
-       not re.match(
+       not re.search(
            reNonSpace,
            parser.current_line[parser.next_nonspace + len(m.group()):]):
         return None
