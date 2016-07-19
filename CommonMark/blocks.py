@@ -38,7 +38,8 @@ reHtmlBlockClose = [
     re.compile(r'>'),
     re.compile(r'\]\]>'),
 ]
-reThematicBreak = re.compile(r'^(?:(?:\*[ \t]*){3,}|(?:_[ \t]*){3,}|(?:-[ \t]*){3,})[ \t]*$')
+reThematicBreak = re.compile(
+    r'^(?:(?:\*[ \t]*){3,}|(?:_[ \t]*){3,}|(?:-[ \t]*){3,})[ \t]*$')
 reMaybeSpecial = re.compile(r'^[#`~*+_=<>0-9-]')
 reNonSpace = re.compile(r'[^ \t\f\v\r\n]')
 reBulletListMarker = re.compile(r'^[*+-]')
@@ -109,6 +110,13 @@ def parse_list_marker(parser, container):
     # make sure we have spaces after
     nextc = peek(parser.current_line, parser.next_nonspace + len(m.group()))
     if not (nextc is None or nextc == '\t' or nextc == ' '):
+        return None
+
+    # if it interrupts paragraph, make sure first line isn't blank
+    if container.t == 'paragraph' and \
+       not re.match(
+           reNonSpace,
+           parser.current_line[parser.next_nonspace + len(m.group()):]):
         return None
 
     # we've got a match! advance offset and calculate padding
