@@ -683,7 +683,6 @@ class Parser(object):
         self.partially_consumed_tab = False
 
     def advance_offset(self, count, columns):
-        cols = 0
         current_line = self.current_line
         try:
             c = current_line[self.offset]
@@ -705,7 +704,6 @@ class Parser(object):
                     count -= 1
             else:
                 self.partially_consumed_tab = False
-                cols += 1
                 self.offset += 1
                 # assume ascii; block starts are ascii
                 self.column += 1
