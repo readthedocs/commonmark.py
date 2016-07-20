@@ -21,7 +21,7 @@ Usage
 	renderer = CommonMark.HtmlRenderer()
 	ast = parser.parse("Hello *World*")
 	html = renderer.render(ast)
-	json = CommonMark.ASTtoJSON(ast)
+	json = CommonMark.dumpJSON(ast)
 	CommonMark.dumpAST(ast) # pretty print generated AST structure
 	print(html) # <p>Hello <em>World</em><p/>
 
