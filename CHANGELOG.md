@@ -1,6 +1,6 @@
 ## 0.7.1 (2016-07-20)
 - Updated CommonMark spec to 0.26.
-- Fixed JSON output invoked by `cmark -aj somefile.md`
+- Fixed JSON output invoked by `cmark -aj somefile.md`, reported by @rplCloud
 - Fixed a bug with `dumpAST()` on ordered lists, from @rflynn
 
 ## 0.7.0 (2016-06-07)
