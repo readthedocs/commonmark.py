@@ -38,12 +38,13 @@ reHtmlBlockClose = [
     re.compile(r'>'),
     re.compile(r'\]\]>'),
 ]
-reThematicBreak = re.compile(r'^(?:(?:\* *){3,}|(?:_ *){3,}|(?:- *){3,}) *$')
+reThematicBreak = re.compile(
+    r'^(?:(?:\*[ \t]*){3,}|(?:_[ \t]*){3,}|(?:-[ \t]*){3,})[ \t]*$')
 reMaybeSpecial = re.compile(r'^[#`~*+_=<>0-9-]')
 reNonSpace = re.compile(r'[^ \t\f\v\r\n]')
 reBulletListMarker = re.compile(r'^[*+-]')
 reOrderedListMarker = re.compile(r'^(\d{1,9})([.)])')
-reATXHeadingMarker = re.compile(r'^#{1,6}(?: +|$)')
+reATXHeadingMarker = re.compile(r'^#{1,6}(?:[ \t]+|$)')
 reCodeFence = re.compile(r'^`{3,}(?!.*`)|^~{3,}(?!.*~)')
 reClosingCodeFence = re.compile(r'^(?:`{3,}|~{3,})(?= *$)')
 reSetextHeadingLine = re.compile(r'^(?:=+|-+) *$')
@@ -80,7 +81,7 @@ def ends_with_blank_line(block):
     return False
 
 
-def parse_list_marker(parser):
+def parse_list_marker(parser, container):
     """ Parse a list marker and return data on the marker (type,
     start, delimiter, bullet character, padding) or None."""
     rest = parser.current_line[parser.next_nonspace:]
@@ -98,7 +99,7 @@ def parse_list_marker(parser):
     if m:
         data['type'] = 'bullet'
         data['bullet_char'] = m.group()[0]
-    elif m2:
+    elif m2 and (container.t != 'paragraph' or m2.group(1) == '1'):
         m = m2
         data['type'] = 'ordered'
         data['start'] = int(m.group(1))
@@ -109,6 +110,13 @@ def parse_list_marker(parser):
     # make sure we have spaces after
     nextc = peek(parser.current_line, parser.next_nonspace + len(m.group()))
     if not (nextc is None or nextc == '\t' or nextc == ' '):
+        return None
+
+    # if it interrupts paragraph, make sure first line isn't blank
+    if container.t == 'paragraph' and \
+       not re.search(
+           reNonSpace,
+           parser.current_line[parser.next_nonspace + len(m.group()):]):
         return None
 
     # we've got a match! advance offset and calculate padding
@@ -531,7 +539,7 @@ class BlockStarts(object):
     @staticmethod
     def list_item(parser, container=None):
         if (not parser.indented or container.t == 'list'):
-            data = parse_list_marker(parser)
+            data = parse_list_marker(parser, container)
             if data:
                 parser.close_unmatched_blocks()
 
@@ -584,29 +592,6 @@ class Parser(object):
         self.last_line_length = 0
         self.inline_parser = InlineParser(options)
         self.options = options
-
-    def break_out_of_lists(self, block):
-        """
-        Break out of all containing lists, resetting the tip of the
-        document to the parent of the highest list, and finalizing
-        all the lists.  (This is used to implement the "two blank lines
-        break out of all lists" feature.)
-        """
-        b = block
-        last_list = None
-        while True:
-            if (b.t == 'list'):
-                last_list = b
-            b = b.parent
-            if not b:
-                break
-
-        if (last_list):
-            while block != last_list:
-                self.finalize(block, self.line_number)
-                block = block.parent
-            self.finalize(last_list, self.line_number)
-            self.tip = last_list.parent
 
     def add_line(self):
         """ Add a line to the block at the tip.  We assume the tip
@@ -683,7 +668,6 @@ class Parser(object):
         self.partially_consumed_tab = False
 
     def advance_offset(self, count, columns):
-        cols = 0
         current_line = self.current_line
         try:
             c = current_line[self.offset]
@@ -702,10 +686,9 @@ class Parser(object):
                     self.partially_consumed_tab = False
                     self.column += chars_to_tab
                     self.offset += 1
-                    self.count -= 1
+                    count -= 1
             else:
                 self.partially_consumed_tab = False
-                cols += 1
                 self.offset += 1
                 # assume ascii; block starts are ascii
                 self.column += 1
@@ -771,11 +754,6 @@ class Parser(object):
 
         self.all_closed = (container == self.oldtip)
         self.last_matched_container = container
-
-        # Check to see if we've hit 2nd blank line; if so break out of list:
-        if self.blank and container.last_line_blank:
-            self.break_out_of_lists(container)
-            container = self.tip
 
         block_class = getattr(import_module('CommonMark.blocks'),
                               to_camel_case(container.t))

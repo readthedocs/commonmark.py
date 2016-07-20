@@ -7,7 +7,6 @@ from CommonMark.common import escape_xml
 from CommonMark.render.renderer import Renderer
 
 
-reHtmlTag = re.compile(r'\<[^>]*\>')
 reUnsafeProtocol = re.compile(
     r'^javascript:|vbscript:|file:|data:', re.IGNORECASE)
 reSafeDataProtocol = re.compile(
@@ -16,7 +15,7 @@ reSafeDataProtocol = re.compile(
 
 def potentially_unsafe(url):
     return re.match(reUnsafeProtocol, url) and \
-        (not re.match(reSafeDataProtocol(url)))
+        (not re.match(reSafeDataProtocol, url))
 
 
 class HtmlRenderer(Renderer):

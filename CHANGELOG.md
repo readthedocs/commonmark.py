@@ -1,3 +1,5 @@
+- Updated CommonMark spec to 0.26.
+
 ## 0.7.0 (2016-06-07)
 - The `cmark.py` script is now just called `cmark`.
 - Fixed a bug where the `cmark.py` script contained a bogus path, reported
