@@ -16,7 +16,7 @@ escaping) as ``commonmark.js``. Since Python versions pre-3.4 use outdated
 implementation into a single file, ``entitytrans.py`` which so far seems
 to work (all tests pass on 2.6, 2.7, 3.3, 3.4, and 3.5).
 
-**Current version:** 0.7.0
+**Current version:** 0.7.1
 
 |Build Status| |Doc Link|
 
