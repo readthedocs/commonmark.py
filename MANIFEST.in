@@ -5,6 +5,7 @@ include spec.txt
 include CommonMark/__init__.py
 include CommonMark/blocks.py
 include CommonMark/common.py
+include CommonMark/dump.py
 include CommonMark/entitytrans.py
 include CommonMark/inlines.py
 include CommonMark/main.py

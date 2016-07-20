@@ -45,7 +45,7 @@ def main():
         exit()
 
     # o.write(ast.to_JSON())
-    o.write(CommonMark.ASTtoJSON(ast))
+    o.write(CommonMark.dumpJSON(ast))
     exit()
 
 
