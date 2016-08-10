@@ -1,3 +1,6 @@
+## 0.7.2 (2016-08-10)
+- Removed outdated files from distributed packages, reported by @hyperknot
+
 ## 0.7.1 (2016-07-20)
 - Updated CommonMark spec to 0.26.
 - Fixed JSON output invoked by `cmark -aj somefile.md`, reported by @rplCloud
