@@ -25,33 +25,41 @@ Installation
 
 ::
 
-    rolands@kamaji:~$ pip install commonmark
+    $ pip install commonmark
 
 Usage
 -----
 
 ::
 
+    >>> import CommonMark
+    >>> CommonMark.commonmark('*hello!*')
+    '<p><em>hello!</em></p>\n'
+
+Or, without the syntactic sugar:
+
+.. code:: python
+
     import CommonMark
-
-    CommonMark.commonmark('*hello!*')
-    # '<p><em>hello!</em></p>\n'
-
-    # Or, without the syntactic sugar:
     parser = CommonMark.Parser()
-    renderer = CommonMark.HtmlRenderer()
     ast = parser.parse("Hello *World*")
+    
+    renderer = CommonMark.HtmlRenderer()
     html = renderer.render(ast)
+    print(html) # <p>Hello <em>World</em><p/>
+    
+    # inspecting the abstract syntax tree
     json = CommonMark.dumpJSON(ast)
     CommonMark.dumpAST(ast) # pretty print generated AST structure
-    print(html) # <p>Hello <em>World</em><p/>
+   
+There is also a CLI:
 
-    ----- or -----
+::
 
-    rolands@kamaji:~$ cmark README.md -o README.html
-    rolands@kamaji:~$ cmark README.md -o README.json -aj # output AST as JSON
-    rolands@kamaji:~$ cmark README.md -a # pretty print generated AST structure
-    rolands@kamaji:~$ cmark -h
+    $ cmark README.md -o README.html
+    $ cmark README.md -o README.json -aj # output AST as JSON
+    $ cmark README.md -a # pretty print generated AST structure
+    $ cmark -h
     usage: cmark [-h] [-o [O]] [-a] [-aj] [infile]
 
     Process Markdown according to the CommonMark specification.
@@ -88,7 +96,7 @@ something like this:
    $ pyvenv venv
    $ ./venv/bin/python setup.py develop test
 
-The tests script, ``run_spec_tests.py``, is pretty much a devtool. As
+The tests script, ``CommonMark/tests/run_spec_tests.py``, is pretty much a devtool. As
 well as running all the tests embedded in ``spec.txt`` it also allows you
 to run specific tests using the ``-t`` argument, provide information
 about passed tests with ``-p``, percentage passed by category of test
@@ -99,7 +107,7 @@ tracing.
 
 ::
 
-    rolands@kamaji:~/utils/CommonMark-py$ python run_spec_tests.py -h
+    $ python run_spec_tests.py -h
     usage: run_spec_tests.py [-h] [-t T] [-p] [-f] [-i] [-d] [-np] [-s]
 
     script to run the CommonMark specification tests against the CommonMark.py
