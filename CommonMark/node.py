@@ -4,7 +4,7 @@ import re
 
 
 reContainer = re.compile(
-    r'(document|block_quote|list|item|paragraph|'
+    r'(document|spoiler|block_quote|list|item|paragraph|'
     r'heading|emph|strong|link|image|'
     r'custom_inline|custom_block)')
 

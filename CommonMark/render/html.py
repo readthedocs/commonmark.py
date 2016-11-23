@@ -156,6 +156,18 @@ class HtmlRenderer(Renderer):
             self.tag('/blockquote')
             self.cr()
 
+    def spoiler(self, node, entering):
+        attrs = self.attrs(node)
+        if entering:
+            attrs.append(['class', 'spoiler'])
+            self.cr()
+            self.tag('blockquote', attrs)            
+            self.cr()
+        else:
+            self.cr()
+            self.tag('/blockquote')
+            self.cr()
+
     def list(self, node, entering):
         tagname = 'ul' if node.list_data['type'] == 'bullet' else 'ol'
         attrs = self.attrs(node)
