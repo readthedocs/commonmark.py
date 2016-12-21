@@ -124,6 +124,16 @@ class HtmlRenderer(Renderer):
         self.out(node.literal)
         self.tag('/code')
 
+    def sub(self, node, entering):
+        self.tag('sub')
+        self.out(node.literal)
+        self.tag('/sub')
+
+    def sup(self, node, entering):
+        self.tag('sup')
+        self.out(node.literal)
+        self.tag('/sup')
+
     def code_block(self, node, entering):
         info_words = node.info.split() if node.info else []
         attrs = self.attrs(node)

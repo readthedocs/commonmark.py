@@ -44,6 +44,11 @@ reEscapable = re.compile('^' + common.ESCAPABLE)
 reEntityHere = re.compile('^' + common.ENTITY, re.IGNORECASE)
 reTicks = re.compile(r'`+')
 reTicksHere = re.compile(r'^`+')
+reSubscript = re.compile(r'~+')
+reSubscriptHere = re.compile(r'^~+')
+reSupscript = re.compile(r'\^+')
+reSupscriptHere = re.compile(r'^\^+')
+
 reEllipses = re.compile(r'\.\.\.')
 reDash = re.compile(r'--+')
 reEmailAutolink = re.compile(
@@ -62,7 +67,7 @@ reSpaceAtEndOfLine = re.compile(r'^ *(?:\n|$)')
 reLinkLabel = re.compile('^\\[(?:[^\\\\\\[\\]]|' + ESCAPED_CHAR +
                          '|\\\\){0,1000}\\]')
 # Matches a string of non-special characters.
-reMain = re.compile(r'^[^\n`\[\]\\!<&*_\'"]+', re.MULTILINE)
+reMain = re.compile(r'^[^\n`\[\]\\!<&*_\'"~\^]+', re.MULTILINE)
 
 
 def normalizeReference(s):
@@ -146,28 +151,40 @@ class InlineParser(object):
     # in the subject.  If they succeed in matching anything, they
     # push an inline matched, advancing the subject.
 
-    def parseBackticks(self, block):
-        """ Attempt to parse backticks, adding either a backtick code span or a
-        literal sequence of backticks to the 'inlines' list."""
-        ticks = self.match(reTicksHere)
-        if ticks is None:
+    def parseWrappedText(self, block, reWrap, reWrapHere, tagname):
+        """ Parsing subscript for support message like H~2~0."""
+        subs = self.match(reWrapHere)
+        if subs is None:
             return False
-        after_open_ticks = self.pos
-        matched = self.match(reTicks)
+        after_open_subs = self.pos
+        matched = self.match(reWrap)
         while matched is not None:
-            if (matched == ticks):
-                node = Node('code', None)
-                c = self.subject[after_open_ticks:self.pos - len(ticks)]
+            if (matched == subs):
+                node = Node(tagname, None)
+                c = self.subject[after_open_subs:self.pos - len(subs)]
                 c = c.strip()
                 c = re.sub(reWhitespace, ' ', c)
                 node.literal = c
                 block.append_child(node)
+                print(node)
                 return True
-            matched = self.match(reTicks)
-        # If we got here, we didn't match a closing backtick sequence.
-        self.pos = after_open_ticks
-        block.append_child(text(ticks))
+            matched = self.match(reWrap)
+        # If we got here, we didn't math a closing  sequence.
+        self.pos = after_open_subs
+        block.append_child(text(subs))
         return True
+
+    def parseSubscript(self, block):
+        return self.parseWrappedText(
+            block, reSubscript, reSubscriptHere, 'sub')
+
+    def parseSupscript(self, block):
+        return self.parseWrappedText(
+            block, reSupscript, reSupscriptHere, 'sup')
+
+    def parseBackticks(self, block):
+        return self.parseWrappedText(
+            block, reTicks, reTicksHere, 'code')
 
     def parseBackslash(self, block):
         """
@@ -801,6 +818,10 @@ class InlineParser(object):
             res = self.parseBackslash(block)
         elif c == '`':
             res = self.parseBackticks(block)
+        elif c == '~':
+            res = self.parseSubscript(block)
+        elif c == '^':
+            res = self.parseSupscript(block)
         elif c == '*' or c == '_':
             res = self.handleDelim(c, block)
         elif c == "'" or c == '"':
