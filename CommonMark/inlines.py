@@ -151,7 +151,10 @@ class InlineParser(object):
     # in the subject.  If they succeed in matching anything, they
     # push an inline matched, advancing the subject.
 
-    def parseWrappedText(self, block, reWrap, reWrapHere, tagname):
+    def parseWrappedText(
+            self, block, reWrap, reWrapHere, tagname,
+            break_on_whitespace=False,
+    ):
         """ Parsing subscript for support message like H~2~0."""
         subs = self.match(reWrapHere)
         if subs is None:
@@ -162,25 +165,33 @@ class InlineParser(object):
             if (matched == subs):
                 node = Node(tagname, None)
                 c = self.subject[after_open_subs:self.pos - len(subs)]
-                c = c.strip()
-                c = re.sub(reWhitespace, ' ', c)
+                if not break_on_whitespace:
+                    c = c.strip()
+                    c = re.sub(reWhitespace, ' ', c)
+                elif ' ' in c:
+                    break
+
                 node.literal = c
                 block.append_child(node)
-                print(node)
                 return True
             matched = self.match(reWrap)
-        # If we got here, we didn't math a closing  sequence.
+
+        # If we got here, we didn't math a closing sequence, or skip here
         self.pos = after_open_subs
         block.append_child(text(subs))
         return True
 
     def parseSubscript(self, block):
         return self.parseWrappedText(
-            block, reSubscript, reSubscriptHere, 'sub')
+            block, reSubscript, reSubscriptHere, 'sub',
+            break_on_whitespace=True,
+        )
 
     def parseSupscript(self, block):
         return self.parseWrappedText(
-            block, reSupscript, reSupscriptHere, 'sup')
+            block, reSupscript, reSupscriptHere, 'sup',
+            break_on_whitespace=True,
+        )
 
     def parseBackticks(self, block):
         return self.parseWrappedText(
