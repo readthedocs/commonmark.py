@@ -20,8 +20,6 @@ else:
 # Some regexps used in inline parser:
 
 ESCAPED_CHAR = '\\\\' + common.ESCAPABLE
-REG_CHAR = '[^\\\\()\\x00-\\x20]'
-IN_PARENS_NOSP = '\\((' + REG_CHAR + '|' + ESCAPED_CHAR + '|\\\\)*\\)'
 
 rePunctuation = re.compile(
     r'^[\u2000-\u206F\u2E00-\u2E7F\\' + "'" + '!"#\$%&\(\)'
@@ -36,9 +34,6 @@ reLinkTitle = re.compile(
 reLinkDestinationBraces = re.compile(
     '^(?:[<](?:[^ <>\\t\\n\\\\\\x00]' + '|' + ESCAPED_CHAR + '|' +
     '\\\\)*[>])')
-reLinkDestination = re.compile(
-    '^(?:' + REG_CHAR + '+|' + ESCAPED_CHAR + '|\\\\|' +
-    IN_PARENS_NOSP + ')*')
 
 reEscapable = re.compile('^' + common.ESCAPABLE)
 reEntityHere = re.compile('^' + common.ENTITY, re.IGNORECASE)
@@ -54,8 +49,9 @@ reAutolink = re.compile(
     r'^<[A-Za-z][A-Za-z0-9.+-]{1,31}:[^<>\x00-\x20]*>',
     re.IGNORECASE)
 reSpnl = re.compile(r'^ *(?:\n *)?')
-reWhitespaceChar = re.compile(r'^\s')
-reWhitespace = re.compile(r'\s+')
+reWhitespaceChar = re.compile(r'^^[ \t\n\x0b\x0c\x0d]')
+reWhitespace = re.compile(r'[ \t\n\x0b\x0c\x0d]+')
+reUnicodeWhitespaceChar = re.compile(r'^\s')
 reFinalSpace = re.compile(r' *$')
 reInitialSpace = re.compile(r'^ *')
 reSpaceAtEndOfLine = re.compile(r'^ *(?:\n|$)')
@@ -262,10 +258,10 @@ class InlineParser(object):
             c_after = '\n'
 
         # Python 2 doesn't recognize '\xa0' as whitespace
-        after_is_whitespace = re.match(reWhitespaceChar, c_after) or \
+        after_is_whitespace = re.match(reUnicodeWhitespaceChar, c_after) or \
             c_after == '\xa0'
         after_is_punctuation = re.match(rePunctuation, c_after)
-        before_is_whitespace = re.match(reWhitespaceChar, c_before) or \
+        before_is_whitespace = re.match(reUnicodeWhitespaceChar, c_before) or \
             c_before == '\xa0'
         before_is_punctuation = re.match(rePunctuation, c_before)
 
@@ -318,6 +314,7 @@ class InlineParser(object):
         self.delimiters = {
             'cc': cc,
             'numdelims': numdelims,
+            'origdelims': numdelims,
             'node': node,
             'previous': self.delimiters,
             'next': None,
@@ -372,8 +369,8 @@ class InlineParser(object):
                        opener != openers_bottom[closercc]):
                     odd_match = (closer.get('can_open') or
                                  opener.get('can_close')) and \
-                                 (opener.get('numdelims') +
-                                  closer.get('numdelims')) % 3 == 0
+                                 (opener.get('origdelims') +
+                                  closer.get('origdelims')) % 3 == 0
                     if opener.get('cc') == closercc and \
                        opener.get('can_open') and \
                        not odd_match:
@@ -487,11 +484,31 @@ class InlineParser(object):
         """
         res = self.match(reLinkDestinationBraces)
         if res is None:
-            res = self.match(reLinkDestination)
-            if res is None:
-                return None
-            else:
-                return normalize_uri(unescape_string(res))
+            # TODO handrolled parser; res should be None or the string
+            savepos = self.pos
+            openparens = 0
+            c = self.peek()
+            while c is not None:
+                if c == '\\':
+                    self.pos += 1
+                    if self.peek() is not None:
+                        self.pos += 1
+                elif c == '(':
+                    self.pos += 1
+                    openparens += 1
+                elif c == ')':
+                    if openparens < 1:
+                        break
+                    else:
+                        self.pos += 1
+                        openparens -= 1
+                elif re.match(reWhitespaceChar, c):
+                    break
+                else:
+                    self.pos += 1
+                c = self.peek()
+            res = self.subject[savepos:self.pos]
+            return normalize_uri(unescape_string(res))
         else:
             # chop off surrounding <..>:
             return normalize_uri(unescape_string(res[1:-1]))
@@ -575,22 +592,25 @@ class InlineParser(object):
 
         # Check to see if we have a link/image
 
+        savepos = self.pos
+
         # Inline link?
         if self.peek() == '(':
             self.pos += 1
             self.spnl()
             dest = self.parseLinkDestination()
-            if dest is not None and \
-               self.spnl():
+            if dest is not None and self.spnl():
                 # make sure there's a space before the title
                 if re.match(reWhitespaceChar, self.subject[self.pos-1]):
                     title = self.parseLinkTitle()
                 if self.spnl() and self.peek() == ')':
                     self.pos += 1
                     matched = True
-        else:
+            else:
+                self.pos = savepos
+
+        if not matched:
             # Next, see if there's a link label
-            savepos = self.pos
             beforelabel = self.pos
             n = self.parseLinkLabel()
             if n > 2:
