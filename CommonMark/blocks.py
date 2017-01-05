@@ -47,7 +47,7 @@ reOrderedListMarker = re.compile(r'^(\d{1,9})([.)])')
 reATXHeadingMarker = re.compile(r'^#{1,6}(?:[ \t]+|$)')
 reCodeFence = re.compile(r'^`{3,}(?!.*`)|^~{3,}(?!.*~)')
 reClosingCodeFence = re.compile(r'^(?:`{3,}|~{3,})(?= *$)')
-reSetextHeadingLine = re.compile(r'^(?:=+|-+) *$')
+reSetextHeadingLine = re.compile(r'^(?:=+|-+)[ \t]*$')
 reLineEnding = re.compile(r'\r\n|\n|\r')
 
 

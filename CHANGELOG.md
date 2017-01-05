@@ -1,3 +1,6 @@
+## 0.7.3
+- The CommonMark spec has been updated to 0.27.
+
 ## 0.7.2 (2016-08-10)
 - Removed outdated files from distributed packages, reported by @hyperknot
 
