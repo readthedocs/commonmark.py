@@ -11,7 +11,7 @@ install:
  - pip install flake8==2.6.2 hypothesis hypothesislegacysupport
 script:
  - python setup.py flake8
- - python -m unittest CommonMark.tests.unit_tests
+ - python CommonMark/tests/unit_tests.py
  - python setup.py test
  - cmark CommonMark/tests/test.md
  - cmark CommonMark/tests/test.md -a
