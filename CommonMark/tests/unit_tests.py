@@ -1,8 +1,25 @@
 from __future__ import unicode_literals
 
 import unittest
-from hypothesis import given, example
-from hypothesis.strategies import text
+
+try:
+    from hypothesis import given, example
+except ImportError:
+    # Mock out hypothesis stuff for python 2.6
+    def given(a):
+        def func(b):
+            return
+        return func
+
+    example = given
+
+try:
+    from hypothesis.strategies import text
+except ImportError:
+    def text():
+        pass
+
+
 import CommonMark
 from CommonMark.blocks import Parser
 from CommonMark.render.html import HtmlRenderer
@@ -87,3 +104,7 @@ class TestUtils(unittest.TestCase):
     @given(text())
     def test_random_text(self, s):
         to_camel_case(s)
+
+
+if __name__ == '__main__':
+    unittest.main()
