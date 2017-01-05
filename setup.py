@@ -21,7 +21,7 @@ class Test(Command):
 setup(
     name="CommonMark",
     packages=find_packages(exclude=['tests']),
-    version="0.7.2",
+    version="0.7.3",
     license="BSD License",
     description="Python parser for the CommonMark Markdown spec",
     author="Bibek Kafle <bkafle662@gmail.com>, " +
