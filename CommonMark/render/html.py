@@ -29,6 +29,9 @@ class HtmlRenderer(Renderer):
         self.last_out = '\n'
         self.options = options
 
+    def escape(self, text, preserve_entities):
+        return escape_xml(text, preserve_entities)
+
     def tag(self, name, attrs=None, selfclosing=None):
         """Helper function to produce an HTML tag."""
         if self.disable_tags > 0:
@@ -62,10 +65,10 @@ class HtmlRenderer(Renderer):
         if entering:
             if not (self.options.get('safe') and
                     potentially_unsafe(node.destination)):
-                attrs.append(['href', escape_xml(node.destination, True)])
+                attrs.append(['href', self.escape(node.destination, True)])
 
             if node.title:
-                attrs.append(['title', escape_xml(node.title, True)])
+                attrs.append(['title', self.escape(node.title, True)])
 
             self.tag('a', attrs)
         else:
@@ -79,14 +82,14 @@ class HtmlRenderer(Renderer):
                     self.lit('<img src="" alt="')
                 else:
                     self.lit('<img src="' +
-                             escape_xml(node.destination, True) +
+                             self.escape(node.destination, True) +
                              '" alt="')
             self.disable_tags += 1
         else:
             self.disable_tags -= 1
             if self.disable_tags == 0:
                 if node.title:
-                    self.lit('" title="' + escape_xml(node.title, True))
+                    self.lit('" title="' + self.escape(node.title, True))
                 self.lit('" />')
 
     def emph(self, node, entering):
@@ -129,7 +132,7 @@ class HtmlRenderer(Renderer):
         attrs = self.attrs(node)
         if len(info_words) > 0 and len(info_words[0]) > 0:
             attrs.append(['class', 'language-' +
-                          escape_xml(info_words[0], True)])
+                          self.escape(info_words[0], True)])
 
         self.cr()
         self.tag('pre')
@@ -211,7 +214,7 @@ class HtmlRenderer(Renderer):
     # Helper methods #
 
     def out(self, s):
-        self.lit(escape_xml(s, False))
+        self.lit(self.escape(s, False))
 
     def attrs(self, node):
         att = []
