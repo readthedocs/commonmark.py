@@ -594,9 +594,13 @@ class InlineParser(object):
 
         savepos = self.pos
 
+        link_start = 0
+        link_end = 0
+
         # Inline link?
         if self.peek() == '(':
             self.pos += 1
+            link_start = self.pos + 1
             self.spnl()
             dest = self.parseLinkDestination()
             if dest is not None and self.spnl():
@@ -608,6 +612,8 @@ class InlineParser(object):
                     matched = True
             else:
                 self.pos = savepos
+
+            link_end = self.pos - 1
 
         if not matched:
             # Next, see if there's a link label
@@ -634,7 +640,9 @@ class InlineParser(object):
                     matched = True
 
         if matched:
-            node = Node('image' if is_image else 'link', None)
+            pos = list(block.sourcepos)
+            pos[1] = [link_start, link_end]
+            node = Node('image' if is_image else 'link', pos)
 
             node.destination = dest
             node.title = title or ''
