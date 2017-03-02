@@ -6,6 +6,7 @@ python:
   - "3.3"
   - "3.4"
   - "3.5"
+  - "3.6"
 install:
  - python setup.py install
  - pip install flake8==2.6.2 hypothesis hypothesislegacysupport
