@@ -246,6 +246,29 @@ class BlockQuote(Block):
         return t != 'item'
 
 
+class Spoiler(Block):
+    accepts_lines = False
+
+    @staticmethod
+    def continue_(parser=None, container=None):
+        ln = parser.current_line
+        if not parser.indented and peek(ln, parser.next_nonspace) == '>' and peek(ln, parser.next_nonspace + 1) == '!':
+            parser.advance_next_nonspace()
+            parser.advance_offset(2, False)
+            if is_space_or_tab(peek(ln, parser.offset)):
+                parser.advance_offset(1, True)
+        else:
+            return 1
+        return 0
+
+    @staticmethod
+    def finalize(parser=None, block=None):
+        return
+
+    @staticmethod
+    def can_contain(t):
+        return t != 'item'
+
 class Item(Block):
     accepts_lines = False
 
@@ -420,6 +443,7 @@ class BlockStarts(object):
     2 = matched leaf, no more block starts
     """
     METHODS = [
+        'spoiler',
         'block_quote',
         'atx_heading',
         'fenced_code_block',
@@ -429,6 +453,22 @@ class BlockStarts(object):
         'list_item',
         'indented_code_block',
     ]
+
+    @staticmethod
+    def spoiler(parser, container=None):
+        if not parser.indented and \
+           peek(parser.current_line, parser.next_nonspace) == '>' and \
+           peek(parser.current_line, parser.next_nonspace + 1) == '!':
+            parser.advance_next_nonspace()
+            parser.advance_offset(2, False)
+            # optional following space
+            if is_space_or_tab(peek(parser.current_line, parser.offset)):
+                parser.advance_offset(1, True)
+            parser.close_unmatched_blocks()
+            parser.add_child('spoiler', parser.next_nonspace)
+            return 1
+
+        return 0
 
     @staticmethod
     def block_quote(parser, container=None):
