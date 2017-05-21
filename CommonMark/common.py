@@ -1,4 +1,4 @@
-from __future__ import absolute_import, unicode_literals
+
 
 import re
 import sys
@@ -6,7 +6,7 @@ import sys
 try:
     from urllib.parse import quote
 except ImportError:
-    from urllib import quote
+    from urllib.parse import quote
 
 if sys.version_info >= (3, 0):
     if sys.version_info >= (3, 4):

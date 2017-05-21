@@ -9,7 +9,7 @@
 # renderer = CommonMark.HtmlRenderer()
 # print(renderer.render(parser.parse('Hello *world*')))
 
-from __future__ import absolute_import, unicode_literals
+
 
 from CommonMark.blocks import Parser
 from CommonMark.dump import dumpAST, dumpJSON

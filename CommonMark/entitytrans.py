@@ -4,7 +4,7 @@ Python 3.4 HTML5 entity unescaping for all!
 Based on
 https://hg.python.org/cpython/file/500d3d6f22ff/Lib/html/__init__.py
 """
-from __future__ import unicode_literals
+
 import sys
 import re as _re
 
@@ -2322,7 +2322,7 @@ def _replace_charref(s):
         if sys.version_info >= (3, 0):
             return chr(num)
         else:
-            return unichr(num)  # noqa
+            return chr(num)  # noqa
     else:
         # named charref
         if s in _html5:
