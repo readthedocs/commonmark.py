@@ -1,4 +1,4 @@
-from __future__ import absolute_import, unicode_literals
+
 
 from builtins import str
 import json
@@ -56,51 +56,51 @@ def dumpJSON(obj):
 def dumpAST(obj, ind=0, topnode=False):
     """Print out a block/entire AST."""
     indChar = ("\t" * ind) + "-> " if ind else ""
-    print(indChar + "[" + obj.t + "]")
+    print((indChar + "[" + obj.t + "]"))
     if not obj.title == "":
-        print("\t" + indChar + "Title: " + (obj.title or ''))
+        print(("\t" + indChar + "Title: " + (obj.title or '')))
     if not obj.info == "":
-        print("\t" + indChar + "Info: " + (obj.info or ''))
+        print(("\t" + indChar + "Info: " + (obj.info or '')))
     if not obj.destination == "":
-        print("\t" + indChar + "Destination: " + (obj.destination or ''))
+        print(("\t" + indChar + "Destination: " + (obj.destination or '')))
     if obj.is_open:
-        print("\t" + indChar + "Open: " + str(obj.is_open))
+        print(("\t" + indChar + "Open: " + str(obj.is_open)))
     if obj.last_line_blank:
-        print(
-            "\t" + indChar + "Last line blank: " + str(obj.last_line_blank))
+        print((
+            "\t" + indChar + "Last line blank: " + str(obj.last_line_blank)))
     if obj.sourcepos:
-        print("\t" + indChar + "Sourcepos: " + str(obj.sourcepos))
+        print(("\t" + indChar + "Sourcepos: " + str(obj.sourcepos)))
     if not obj.string_content == "":
-        print("\t" + indChar + "String content: " + (obj.string_content or ''))
+        print(("\t" + indChar + "String content: " + (obj.string_content or '')))
     if not obj.info == "":
-        print("\t" + indChar + "Info: " + (obj.info or ''))
+        print(("\t" + indChar + "Info: " + (obj.info or '')))
     if not obj.literal == "":
-        print("\t" + indChar + "Literal: " + (obj.literal or ''))
+        print(("\t" + indChar + "Literal: " + (obj.literal or '')))
     if obj.list_data.get('type'):
-        print("\t" + indChar + "List Data: ")
-        print("\t\t" + indChar + "[type] = " + obj.list_data.get('type'))
+        print(("\t" + indChar + "List Data: "))
+        print(("\t\t" + indChar + "[type] = " + obj.list_data.get('type')))
         if obj.list_data.get('bullet_char'):
-            print(
+            print((
                 "\t\t" + indChar + "[bullet_char] = " +
-                obj.list_data['bullet_char'])
+                obj.list_data['bullet_char']))
         if obj.list_data.get('start'):
-            print(
+            print((
                 "\t\t" + indChar + "[start] = " +
-                str(obj.list_data.get('start')))
+                str(obj.list_data.get('start'))))
         if obj.list_data.get('delimiter'):
-            print(
+            print((
                 "\t\t" + indChar + "[delimiter] = " +
-                obj.list_data.get('delimiter'))
+                obj.list_data.get('delimiter')))
         if obj.list_data.get('padding'):
-            print(
+            print((
                 "\t\t" + indChar + "[padding] = " +
-                str(obj.list_data.get('padding')))
+                str(obj.list_data.get('padding'))))
         if obj.list_data.get('marker_offset'):
-            print(
+            print((
                 "\t\t" + indChar + "[marker_offset] = " +
-                str(obj.list_data.get('marker_offset')))
+                str(obj.list_data.get('marker_offset'))))
     if obj.walker:
-        print("\t" + indChar + "Children:")
+        print(("\t" + indChar + "Children:"))
         walker = obj.walker()
         nxt = walker.nxt()
         while nxt is not None and topnode is False:

@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # coding: utf-8
-from __future__ import division, print_function, unicode_literals
+
 import re
 import time
 import codecs
@@ -136,9 +136,9 @@ def main():
             s = ""
             while True:
                 if sys.version_info >= (3, 0):
-                    inp = input(colors.OKBLUE + 'Markdown: ' + colors.ENDC)
+                    inp = eval(input(colors.OKBLUE + 'Markdown: ' + colors.ENDC))
                 else:
-                    inp = raw_input(colors.OKBLUE + 'Markdown: ' + colors.ENDC)  # noqa
+                    inp = input(colors.OKBLUE + 'Markdown: ' + colors.ENDC)  # noqa
 
                 if not inp == "end" and inp != "quit":
                     s += inp + "\n"
@@ -227,7 +227,7 @@ def main():
     runTime = endTime - startTime
 
     if args.s:
-        for i in catStats.keys():
+        for i in list(catStats.keys()):
             per = catStats[i][0]/catStats[i][2]
             print(colors.HEADER + "[" + i + "]" + colors.ENDC +
                   "\t" + str(per*100) + "% Passed")
