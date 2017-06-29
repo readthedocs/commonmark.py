@@ -22,7 +22,7 @@ setup(
     name="CommonMark",
     packages=find_packages(exclude=['tests']),
     version="0.7.3",
-    license="BSD License",
+    license="BSD-3-Clause",
     description="Python parser for the CommonMark Markdown spec",
     author="Bibek Kafle <bkafle662@gmail.com>, " +
     "Roland Shoemaker <rolandshoemaker@gmail.com>",
