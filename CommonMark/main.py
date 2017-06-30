@@ -14,6 +14,7 @@ from __future__ import absolute_import, unicode_literals
 from CommonMark.blocks import Parser
 from CommonMark.dump import dumpAST, dumpJSON
 from CommonMark.render.html import HtmlRenderer
+from CommonMark.render.rst import ReStructuredTextRenderer
 
 
 def commonmark(text, format="html"):
@@ -26,7 +27,7 @@ def commonmark(text, format="html"):
     """
     parser = Parser()
     ast = parser.parse(text)
-    if format not in ["html", "json", "ast"]:
+    if format not in ["html", "json", "ast", "rst"]:
         raise ValueError("format must be 'html', 'json' or 'ast'")
     if format == "html":
         renderer = HtmlRenderer()
@@ -35,3 +36,6 @@ def commonmark(text, format="html"):
         return dumpJSON(ast)
     if format == "ast":
         return dumpAST(ast)
+    if format == "rst":
+        renderer = ReStructuredTextRenderer()
+        return renderer.render(ast)
