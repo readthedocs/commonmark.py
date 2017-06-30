@@ -11,9 +11,9 @@ class ReStructuredTextRenderer(Renderer):
 
     def lit(self, s):
         if s == '\n':
-            indent = u''  # Avoid whitespace if we're just adding a newline
+            indent = ''  # Avoid whitespace if we're just adding a newline
         elif self.last_out != '\n':
-            indent = u''  # Don't indent if we're in the middle of a line
+            indent = ''  # Don't indent if we're in the middle of a line
         else:
             indent = self.indent_char * self.indent_length
 
