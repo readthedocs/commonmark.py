@@ -5,6 +5,22 @@ from CommonMark.render.renderer import Renderer
 
 
 class ReStructuredTextRenderer(Renderer):
+    """
+    Render reStructuredText from Markdown
+
+    Example:
+
+    .. code:: python
+
+        import CommonMark
+
+        parser = CommonMark.Parser()
+        ast = parser.parse('Hello `inline code` example')
+
+        renderer = CommonMark.ReStructuredTextRenderer()
+        rst = renderer.render(ast)
+        print(rst)  # Hello ``inline code`` example
+    """
     def __init__(self, indent_char=' '):
         self.indent_char = indent_char
         self.indent_length = 0
