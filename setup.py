@@ -41,7 +41,7 @@ setup(
         'future',
     ],
     tests_require=[
-        'flake8==3.3.0',
+        'flake8==3.4.0',
         'hypothesis',
         # For python 2.6
         'hypothesislegacysupport',
