@@ -42,7 +42,7 @@ setup(
     ],
     tests_require=[
         'flake8==3.4.0',
-        'hypothesis',
+        'hypothesis==3.7.1',
         # For python 2.6
         'hypothesislegacysupport',
     ],
