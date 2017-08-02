@@ -14,8 +14,8 @@ reSafeDataProtocol = re.compile(
 
 
 def potentially_unsafe(url):
-    return re.match(reUnsafeProtocol, url) and \
-        (not re.match(reSafeDataProtocol, url))
+    return re.search(reUnsafeProtocol, url) and \
+        (not re.search(reSafeDataProtocol, url))
 
 
 class HtmlRenderer(Renderer):

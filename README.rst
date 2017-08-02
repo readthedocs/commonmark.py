@@ -103,7 +103,7 @@ tracing.
 
 ::
 
-    $ python run_spec_tests.py -h
+    $ ./venv/bin/python CommonMark/tests/run_spec_tests.py -h
     usage: run_spec_tests.py [-h] [-t T] [-p] [-f] [-i] [-d] [-np] [-s]
 
     script to run the CommonMark specification tests against the CommonMark.py
