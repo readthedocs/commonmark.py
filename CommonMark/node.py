@@ -10,7 +10,7 @@ reContainer = re.compile(
 
 
 def is_container(node):
-    return (re.match(reContainer, node.t) is not None)
+    return (re.search(reContainer, node.t) is not None)
 
 
 class NodeWalker(object):

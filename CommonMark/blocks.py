@@ -94,8 +94,8 @@ def parse_list_marker(parser, container):
         'padding': None,
         'marker_offset': parser.indent,
     }
-    m = re.match(reBulletListMarker, rest)
-    m2 = re.match(reOrderedListMarker, rest)
+    m = re.search(reBulletListMarker, rest)
+    m2 = re.search(reOrderedListMarker, rest)
     if m:
         data['type'] = 'bullet'
         data['bullet_char'] = m.group()[0]
@@ -320,7 +320,7 @@ class CodeBlock(Block):
             match = indent <= 3 and \
                 len(ln) >= parser.next_nonspace + 1 and \
                 ln[parser.next_nonspace] == container.fence_char and \
-                re.match(reClosingCodeFence, ln[parser.next_nonspace:])
+                re.search(reClosingCodeFence, ln[parser.next_nonspace:])
             if match and len(match.group()) >= container.fence_length:
                 # closing fence - we're at end of line, so we can return
                 parser.finalize(container, parser.line_number)
@@ -448,8 +448,8 @@ class BlockStarts(object):
     @staticmethod
     def atx_heading(parser, container=None):
         if not parser.indented:
-            m = re.match(reATXHeadingMarker,
-                         parser.current_line[parser.next_nonspace:])
+            m = re.search(reATXHeadingMarker,
+                          parser.current_line[parser.next_nonspace:])
             if m:
                 parser.advance_next_nonspace()
                 parser.advance_offset(len(m.group()), False)
@@ -459,8 +459,10 @@ class BlockStarts(object):
                 container.level = len(m.group().strip())
                 # remove trailing ###s:
                 container.string_content = re.sub(
-                    r' +#+ *$', '', re.sub(
-                        r'^ *#+ *$', '', parser.current_line[parser.offset:]))
+                    r'[ \t]+#+[ \t]*$', '', re.sub(
+                        r'^[ \t]*#+[ \t]*$',
+                        '',
+                        parser.current_line[parser.offset:]))
                 parser.advance_offset(
                     len(parser.current_line) - parser.offset, False)
                 return 2
@@ -470,7 +472,7 @@ class BlockStarts(object):
     @staticmethod
     def fenced_code_block(parser, container=None):
         if not parser.indented:
-            m = re.match(
+            m = re.search(
                 reCodeFence,
                 parser.current_line[parser.next_nonspace:])
             if m:
@@ -508,7 +510,7 @@ class BlockStarts(object):
     @staticmethod
     def setext_heading(parser, container=None):
         if not parser.indented and container.t == 'paragraph':
-            m = re.match(
+            m = re.search(
                 reSetextHeadingLine,
                 parser.current_line[parser.next_nonspace:])
             if m:
