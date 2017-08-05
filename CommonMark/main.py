@@ -1,5 +1,5 @@
 # 2014 - Bibek Kafle & Roland Shoemaker
-# 2015-2016 - Nik Nyby
+# 2015-2017 - Nik Nyby
 # Port of @jgm's commonmark.js implementation of the CommonMark spec.
 
 # Basic usage:

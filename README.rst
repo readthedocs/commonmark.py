@@ -124,6 +124,7 @@ Authors
 
 -  `Bibek Kafle <https://github.com/kafle>`__
 -  `Roland Shoemaker <https://github.com/rolandshoemaker>`__
+-  `Nik Nyby <https://github.com/nikolas>`__
 
 .. |Build Status| image:: https://travis-ci.org/rtfd/CommonMark-py.svg?branch=master
    :target: https://travis-ci.org/rtfd/CommonMark-py
