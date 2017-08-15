@@ -57,6 +57,24 @@ class TestCommonmark(unittest.TestCase):
     def test_random_text(self, s):
         CommonMark.commonmark(s)
 
+    def test_smart_dashes(self):
+        md = 'a - b -- c --- d ---- e ----- f'
+        EM = '\u2014'
+        EN = '\u2013'
+        expected_html = (
+            '<p>'
+            + 'a - '
+            + 'b ' + EN + ' '
+            + 'c ' + EM + ' '
+            + 'd ' + EN + EN + ' '
+            + 'e ' + EM + EN + ' '
+            + 'f</p>\n')
+        parser = CommonMark.Parser(options=dict(smart=True))
+        ast = parser.parse(md)
+        renderer = CommonMark.HtmlRenderer()
+        html = renderer.render(ast)
+        self.assertEqual(html, expected_html)
+
 
 class TestHtmlRenderer(unittest.TestCase):
     def test_init(self):
