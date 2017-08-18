@@ -18,6 +18,14 @@ class Test(Command):
         raise SystemExit(errno)
 
 
+tests_require = [
+    'flake8==3.4.0',
+    'hypothesis==3.7.1',
+    # For python 2.6
+    'hypothesislegacysupport',
+]
+
+
 setup(
     name="CommonMark",
     packages=find_packages(exclude=['tests']),
@@ -40,12 +48,8 @@ setup(
     install_requires=[
         'future',
     ],
-    tests_require=[
-        'flake8==3.4.0',
-        'hypothesis==3.7.1',
-        # For python 2.6
-        'hypothesislegacysupport',
-    ],
+    tests_require=tests_require,
+    extras_require={'test': tests_require},
     classifiers=[
         "Programming Language :: Python",
         "Programming Language :: Python :: 2",
