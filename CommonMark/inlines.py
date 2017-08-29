@@ -1,4 +1,4 @@
-from __future__ import absolute_import, unicode_literals
+from __future__ import absolute_import, unicode_literals, division
 
 import re
 import sys
@@ -105,19 +105,19 @@ def smart_dashes(chars):
     em_count = 0
     if len(chars) % 3 == 0:
         # If divisible by 3, use all em dashes
-        em_count = len(chars) / 3
+        em_count = len(chars) // 3
     elif len(chars) % 2 == 0:
         # If divisble by 2, use all en dashes
-        en_count = len(chars) / 2
+        en_count = len(chars) // 2
     elif len(chars) % 3 == 2:
         # if 2 extra dashes, use en dashfor last 2;
         # em dashes for rest
         en_count = 1
-        em_count = (len(chars) - 2) / 3
+        em_count = (len(chars) - 2) // 3
     else:
         # Use en dashes for last 4 hyphens; em dashes for rest
         en_count = 2
-        em_count = (len(chars) - 4) / 3
+        em_count = (len(chars) - 4) // 3
     return ('\u2014' * em_count) + ('\u2013' * en_count)
 
 
