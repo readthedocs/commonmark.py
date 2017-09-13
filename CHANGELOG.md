@@ -1,3 +1,6 @@
+## 0.7.5
+- Fixed smart dashes bug in Python 3 (from @alvra)
+
 ## 0.7.4 (2017-08-05)
 - The CommonMark spec has been updated to 0.28.
 
