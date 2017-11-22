@@ -9,7 +9,7 @@ python:
   - "3.6"
 install:
  - python setup.py install
- - pip install flake8==2.6.2 hypothesis==3.7.1 hypothesislegacysupport
+ - pip install -r test_reqs.txt
 script:
  - python setup.py flake8
  - python CommonMark/tests/unit_tests.py
