@@ -20,7 +20,7 @@ class Test(Command):
 
 tests_require = [
     'flake8==3.5.0',
-    'hypothesis==3.44.24',
+    'hypothesis==3.44.25',
     # For python 2.6
     'hypothesislegacysupport',
 ]
