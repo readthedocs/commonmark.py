@@ -1,4 +1,4 @@
-## 0.7.5
+## 0.7.5 (2018-03-13)
 - Fixed smart dashes bug in Python 3 (from @alvra)
 
 ## 0.7.4 (2017-08-05)
