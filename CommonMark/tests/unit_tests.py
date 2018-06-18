@@ -48,6 +48,31 @@ class TestCommonmark(unittest.TestCase):
             '<blockquote>\n<pre><code>sometext\n</code></pre>'
             '\n</blockquote>\n')
 
+    def test_normalize_contracts_text_nodes(self):
+        md = '_a'
+        ast = Parser().parse(md)
+
+        def assert_text_literals(text_literals):
+            walker = ast.walker()
+            document, _ = walker.next()
+            self.assertEqual(document.t, 'document')
+            paragraph, _ = walker.next()
+            self.assertEqual(paragraph.t, 'paragraph')
+            for literal in text_literals:
+                text, _ = walker.next()
+                self.assertEqual(text.t, 'text')
+                self.assertEqual(text.literal, literal)
+            paragraph, _ = walker.next()
+            self.assertEqual(paragraph.t, 'paragraph')
+
+        assert_text_literals(['_', 'a'])
+        ast.normalize()
+        # assert text nodes are contracted
+        assert_text_literals(['_a'])
+        ast.normalize()
+        # assert normalize() doesn't alter a normalized ast
+        assert_text_literals(['_a'])
+
     def test_dumpAST_orderedlist(self):
         md = '1.'
         ast = Parser().parse(md)
