@@ -29,13 +29,13 @@ tests_require = [
 setup(
     name="commonmark",
     packages=find_packages(exclude=['tests']),
-    version="0.7.5",
+    version="0.8.0",
     license="BSD-3-Clause",
     description="Python parser for the CommonMark Markdown spec",
     author="Bibek Kafle <bkafle662@gmail.com>, " +
     "Roland Shoemaker <rolandshoemaker@gmail.com>",
     author_email="rolandshoemaker@gmail.com",
-    maintainer="Nik Nyby",
+    maintainer="Nikolas Nyby",
     maintainer_email="nikolas@gnu.org",
     url="https://github.com/rtfd/CommonMark-py",
     keywords=["markup", "markdown", "commonmark"],
