@@ -1,5 +1,5 @@
-sudo: false
 language: python
+dist: trusty
 python:
   - "2.6"
   - "2.7"
@@ -7,6 +7,11 @@ python:
   - "3.4"
   - "3.5"
   - "3.6"
+matrix:
+  include:
+    - python: 3.7
+      dist: xenial
+      sudo: true
 install:
  - python setup.py install
  - pip install -r test_reqs.txt
