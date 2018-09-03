@@ -2,9 +2,9 @@ from __future__ import absolute_import, unicode_literals, division
 
 import re
 import sys
-from CommonMark import common
-from CommonMark.common import normalize_uri, unescape_string
-from CommonMark.node import Node
+from commonmark import common
+from commonmark.common import normalize_uri, unescape_string
+from commonmark.node import Node
 
 if sys.version_info >= (3, 0):
     if sys.version_info >= (3, 4):
@@ -14,7 +14,7 @@ if sys.version_info >= (3, 0):
         from .entitytrans import _unescape
         HTMLunescape = _unescape
 else:
-    from CommonMark import entitytrans
+    from commonmark import entitytrans
     HTMLunescape = entitytrans._unescape
 
 # Some regexps used in inline parser:

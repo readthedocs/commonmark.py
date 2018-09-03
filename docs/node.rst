@@ -1,7 +1,7 @@
 Node
 ====
 
-.. currentmodule:: CommonMark.node
+.. currentmodule:: commonmark.node
 
 .. autoclass:: NodeWalker
    :members:

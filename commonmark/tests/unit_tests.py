@@ -20,29 +20,29 @@ except ImportError:
         pass
 
 
-import CommonMark
-from CommonMark.blocks import Parser
-from CommonMark.render.html import HtmlRenderer
-from CommonMark.inlines import InlineParser
-from CommonMark.node import NodeWalker, Node
-from CommonMark.utils import to_camel_case
+import commonmark
+from commonmark.blocks import Parser
+from commonmark.render.html import HtmlRenderer
+from commonmark.inlines import InlineParser
+from commonmark.node import NodeWalker, Node
+from commonmark.utils import to_camel_case
 
 
 class TestCommonmark(unittest.TestCase):
     def test_output(self):
-        s = CommonMark.commonmark('*hello!*')
+        s = commonmark.commonmark('*hello!*')
         self.assertEqual(s, '<p><em>hello!</em></p>\n')
 
     def test_unicode(self):
-        s = CommonMark.commonmark('<div>\u2020</div>\n')
+        s = commonmark.commonmark('<div>\u2020</div>\n')
         self.assertEqual(s, '<div>\u2020</div>\n',
                          'Unicode works in an HTML block.')
-        CommonMark.commonmark('* unicode: \u2020')
-        CommonMark.commonmark('# unicode: \u2020')
-        CommonMark.commonmark('```\n# unicode: \u2020\n```')
+        commonmark.commonmark('* unicode: \u2020')
+        commonmark.commonmark('# unicode: \u2020')
+        commonmark.commonmark('```\n# unicode: \u2020\n```')
 
     def test_null_string_bug(self):
-        s = CommonMark.commonmark('>     sometext\n>\n\n')
+        s = commonmark.commonmark('>     sometext\n>\n\n')
         self.assertEqual(
             s,
             '<blockquote>\n<pre><code>sometext\n</code></pre>'
@@ -76,11 +76,11 @@ class TestCommonmark(unittest.TestCase):
     def test_dumpAST_orderedlist(self):
         md = '1.'
         ast = Parser().parse(md)
-        CommonMark.dumpAST(ast)
+        commonmark.dumpAST(ast)
 
     @given(text())
     def test_random_text(self, s):
-        CommonMark.commonmark(s)
+        commonmark.commonmark(s)
 
     def test_smart_dashes(self):
         md = 'a - b -- c --- d ---- e ----- f'
@@ -94,9 +94,9 @@ class TestCommonmark(unittest.TestCase):
             + 'd ' + EN + EN + ' '
             + 'e ' + EM + EN + ' '
             + 'f</p>\n')
-        parser = CommonMark.Parser(options=dict(smart=True))
+        parser = commonmark.Parser(options=dict(smart=True))
         ast = parser.parse(md)
-        renderer = CommonMark.HtmlRenderer()
+        renderer = commonmark.HtmlRenderer()
         html = renderer.render(ast)
         self.assertEqual(html, expected_html)
 

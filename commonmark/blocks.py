@@ -2,11 +2,11 @@ from __future__ import absolute_import, unicode_literals
 
 import re
 from importlib import import_module
-from CommonMark import common
-from CommonMark.common import unescape_string
-from CommonMark.inlines import InlineParser
-from CommonMark.node import Node
-from CommonMark.utils import to_camel_case
+from commonmark import common
+from commonmark.common import unescape_string
+from commonmark.inlines import InlineParser
+from commonmark.node import Node
+from commonmark.utils import to_camel_case
 
 
 CODE_INDENT = 4
@@ -610,12 +610,12 @@ class Parser(object):
         """ Add block of type tag as a child of the tip.  If the tip can't
         accept children, close and finalize it and try its parent,
         and so on til we find a block that can accept children."""
-        block_class = getattr(import_module('CommonMark.blocks'),
+        block_class = getattr(import_module('commonmark.blocks'),
                               to_camel_case(self.tip.t))
         while not block_class.can_contain(tag):
             self.finalize(self.tip, self.line_number - 1)
             block_class = getattr(
-                import_module('CommonMark.blocks'),
+                import_module('commonmark.blocks'),
                 to_camel_case(self.tip.t))
 
         column_number = offset + 1
@@ -731,7 +731,7 @@ class Parser(object):
 
             self.find_next_nonspace()
             block_class = getattr(
-                import_module('CommonMark.blocks'),
+                import_module('commonmark.blocks'),
                 to_camel_case(container.t))
             rv = block_class.continue_(self, container)
             if rv == 0:
@@ -757,7 +757,7 @@ class Parser(object):
         self.all_closed = (container == self.oldtip)
         self.last_matched_container = container
 
-        block_class = getattr(import_module('CommonMark.blocks'),
+        block_class = getattr(import_module('commonmark.blocks'),
                               to_camel_case(container.t))
         matched_leaf = container.t != 'paragraph' and block_class.accepts_lines
         starts = self.block_starts
@@ -824,7 +824,7 @@ class Parser(object):
                 cont.last_line_blank = last_line_blank
                 cont = cont.parent
 
-            block_class = getattr(import_module('CommonMark.blocks'),
+            block_class = getattr(import_module('commonmark.blocks'),
                                   to_camel_case(t))
             if block_class.accepts_lines:
                 self.add_line()
@@ -853,7 +853,7 @@ class Parser(object):
         above = block.parent
         block.is_open = False
         block.sourcepos[1] = [line_number, self.last_line_length]
-        block_class = getattr(import_module('CommonMark.blocks'),
+        block_class = getattr(import_module('commonmark.blocks'),
                               to_camel_case(block.t))
         block_class.finalize(self, block)
 

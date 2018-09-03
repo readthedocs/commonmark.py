@@ -1,20 +1,20 @@
 # 2014 - Bibek Kafle & Roland Shoemaker
-# 2015-2017 - Nik Nyby
+# 2015-2017 - Nikolas Nyby
 # Port of @jgm's commonmark.js implementation of the CommonMark spec.
 
 # Basic usage:
 #
-# import CommonMark
-# parser = CommonMark.Parser()
-# renderer = CommonMark.HtmlRenderer()
+# import commonmark
+# parser = commonmark.Parser()
+# renderer = commonmark.HtmlRenderer()
 # print(renderer.render(parser.parse('Hello *world*')))
 
 from __future__ import absolute_import, unicode_literals
 
-from CommonMark.blocks import Parser
-from CommonMark.dump import dumpAST, dumpJSON
-from CommonMark.render.html import HtmlRenderer
-from CommonMark.render.rst import ReStructuredTextRenderer
+from commonmark.blocks import Parser
+from commonmark.dump import dumpAST, dumpJSON
+from commonmark.render.html import HtmlRenderer
+from commonmark.render.rst import ReStructuredTextRenderer
 
 
 def commonmark(text, format="html"):

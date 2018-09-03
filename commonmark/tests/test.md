@@ -16,13 +16,13 @@ Installation
 Usage
 -----
 
-	import CommonMark
-	parser = CommonMark.Parser()
-	renderer = CommonMark.HtmlRenderer()
+	import commonmark
+	parser = commonmark.Parser()
+	renderer = commonmark.HtmlRenderer()
 	ast = parser.parse("Hello *World*")
 	html = renderer.render(ast)
-	json = CommonMark.dumpJSON(ast)
-	CommonMark.dumpAST(ast) # pretty print generated AST structure
+	json = commonmark.dumpJSON(ast)
+	commonmark.dumpAST(ast) # pretty print generated AST structure
 	print(html) # <p>Hello <em>World</em><p/>
 
     ----- or -----

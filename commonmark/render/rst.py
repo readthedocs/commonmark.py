@@ -1,7 +1,7 @@
 from __future__ import unicode_literals
 
 
-from CommonMark.render.renderer import Renderer
+from commonmark.render.renderer import Renderer
 
 
 class ReStructuredTextRenderer(Renderer):
@@ -12,12 +12,12 @@ class ReStructuredTextRenderer(Renderer):
 
     .. code:: python
 
-        import CommonMark
+        import commonmark
 
-        parser = CommonMark.Parser()
+        parser = commonmark.Parser()
         ast = parser.parse('Hello `inline code` example')
 
-        renderer = CommonMark.ReStructuredTextRenderer()
+        renderer = commonmark.ReStructuredTextRenderer()
         rst = renderer.render(ast)
         print(rst)  # Hello ``inline code`` example
     """

@@ -2,7 +2,7 @@ from __future__ import absolute_import, unicode_literals
 
 from builtins import str
 import json
-from CommonMark.node import is_container
+from commonmark.node import is_container
 
 
 def prepare(obj, topnode=False):

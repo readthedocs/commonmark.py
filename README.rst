@@ -28,25 +28,25 @@ Usage
 
 ::
 
-    >>> import CommonMark
-    >>> CommonMark.commonmark('*hello!*')
+    >>> import dommonmark
+    >>> commonmark.commonmark('*hello!*')
     '<p><em>hello!</em></p>\n'
 
 Or, without the syntactic sugar:
 
 .. code:: python
 
-    import CommonMark
-    parser = CommonMark.Parser()
+    import commonmark
+    parser = commonmark.Parser()
     ast = parser.parse("Hello *World*")
     
-    renderer = CommonMark.HtmlRenderer()
+    renderer = commonmark.HtmlRenderer()
     html = renderer.render(ast)
     print(html) # <p>Hello <em>World</em><p/>
     
     # inspecting the abstract syntax tree
-    json = CommonMark.dumpJSON(ast)
-    CommonMark.dumpAST(ast) # pretty print generated AST structure
+    json = commonmark.dumpJSON(ast)
+    commonmark.dumpAST(ast) # pretty print generated AST structure
    
 There is also a CLI:
 
@@ -92,7 +92,7 @@ something like this:
    $ pyvenv venv
    $ ./venv/bin/python setup.py develop test
 
-The tests script, ``CommonMark/tests/run_spec_tests.py``, is pretty much a devtool. As
+The tests script, ``commonmark/tests/run_spec_tests.py``, is pretty much a devtool. As
 well as running all the tests embedded in ``spec.txt`` it also allows you
 to run specific tests using the ``-t`` argument, provide information
 about passed tests with ``-p``, percentage passed by category of test
@@ -103,11 +103,11 @@ tracing.
 
 ::
 
-    $ ./venv/bin/python CommonMark/tests/run_spec_tests.py -h
+    $ ./venv/bin/python commonmark/tests/run_spec_tests.py -h
     usage: run_spec_tests.py [-h] [-t T] [-p] [-f] [-i] [-d] [-np] [-s]
 
-    script to run the CommonMark specification tests against the CommonMark.py
-    parser
+    script to run the CommonMark specification tests against the CommonMark-py
+    parser.
 
     optional arguments:
       -h, --help  show this help message and exit
@@ -124,7 +124,7 @@ Authors
 
 -  `Bibek Kafle <https://github.com/kafle>`__
 -  `Roland Shoemaker <https://github.com/rolandshoemaker>`__
--  `Nik Nyby <https://github.com/nikolas>`__
+-  `Nikolas Nyby <https://github.com/nikolas>`__
 
 .. |Build Status| image:: https://travis-ci.org/rtfd/CommonMark-py.svg?branch=master
    :target: https://travis-ci.org/rtfd/CommonMark-py
