@@ -1,7 +1,7 @@
 reStructuredText
 ================
 
-.. currentmodule:: CommonMark.render.rst
+.. currentmodule:: commonmark.render.rst
 
 .. autoclass:: ReStructuredTextRenderer
    :members:

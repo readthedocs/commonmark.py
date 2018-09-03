@@ -2,7 +2,7 @@
 from __future__ import unicode_literals
 import argparse
 import sys
-import CommonMark
+import commonmark
 
 
 def main():
@@ -27,7 +27,7 @@ def main():
     parser.add_argument('-a', action="store_true", help="Print formatted AST")
     parser.add_argument('-aj', action="store_true", help="Output JSON AST")
     args = parser.parse_args()
-    parser = CommonMark.Parser()
+    parser = commonmark.Parser()
     f = args.infile
     o = args.o
     lines = []
@@ -36,16 +36,16 @@ def main():
     data = "".join(lines)
     ast = parser.parse(data)
     if not args.a and not args.aj:
-        renderer = CommonMark.HtmlRenderer()
+        renderer = commonmark.HtmlRenderer()
         o.write(renderer.render(ast))
         exit()
     if args.a:
         # print ast
-        CommonMark.dumpAST(ast)
+        commonmark.dumpAST(ast)
         exit()
 
     # o.write(ast.to_JSON())
-    o.write(CommonMark.dumpJSON(ast))
+    o.write(commonmark.dumpJSON(ast))
     exit()
 
 

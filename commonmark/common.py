@@ -16,7 +16,7 @@ if sys.version_info >= (3, 0):
         from .entitytrans import _unescape
         HTMLunescape = _unescape
 else:
-    from CommonMark import entitytrans
+    from commonmark import entitytrans
     HTMLunescape = entitytrans._unescape
 
 ENTITY = '&(?:#x[a-f0-9]{1,8}|#[0-9]{1,8}|[a-z][a-z0-9]{1,31});'

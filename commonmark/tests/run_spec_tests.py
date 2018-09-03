@@ -7,8 +7,8 @@ import codecs
 import argparse
 import sys
 from builtins import str
-from CommonMark.render.html import HtmlRenderer
-from CommonMark.main import Parser, dumpAST
+from commonmark.render.html import HtmlRenderer
+from commonmark.main import Parser, dumpAST
 
 
 class colors(object):

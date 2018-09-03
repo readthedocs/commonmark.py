@@ -1,7 +1,7 @@
 HTML
 ====
 
-.. currentmodule:: CommonMark.render.html
+.. currentmodule:: commonmark.render.html
 
 .. autoclass:: HtmlRenderer
    :members:

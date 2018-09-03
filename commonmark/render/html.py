@@ -3,8 +3,8 @@ from __future__ import unicode_literals
 
 import re
 from builtins import str
-from CommonMark.common import escape_xml
-from CommonMark.render.renderer import Renderer
+from commonmark.common import escape_xml
+from commonmark.render.renderer import Renderer
 
 
 reUnsafeProtocol = re.compile(

@@ -14,7 +14,7 @@ class Test(Command):
         import subprocess
         import sys
         errno = subprocess.call([
-            sys.executable, 'CommonMark/tests/run_spec_tests.py'])
+            sys.executable, 'commonmark/tests/run_spec_tests.py'])
         raise SystemExit(errno)
 
 
@@ -27,7 +27,7 @@ tests_require = [
 
 
 setup(
-    name="CommonMark",
+    name="commonmark",
     packages=find_packages(exclude=['tests']),
     version="0.7.5",
     license="BSD-3-Clause",
@@ -41,7 +41,7 @@ setup(
     keywords=["markup", "markdown", "commonmark"],
     entry_points={
         'console_scripts': [
-            'cmark = CommonMark.cmark:main',
+            'cmark = commonmark.cmark:main',
         ]
     },
     cmdclass={'test': Test},

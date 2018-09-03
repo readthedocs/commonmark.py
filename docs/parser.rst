@@ -1,7 +1,7 @@
 Parser
 ======
 
-.. currentmodule:: CommonMark.blocks
+.. currentmodule:: commonmark.blocks
 
 .. autoclass:: Parser
    :members:

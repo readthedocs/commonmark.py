@@ -1,12 +1,12 @@
 import unittest
 
-import CommonMark
+import commonmark
 
 
 class TestCommonmark(unittest.TestCase):
     def setUp(self):
-        self.parser = CommonMark.Parser()
-        self.renderer = CommonMark.ReStructuredTextRenderer()
+        self.parser = commonmark.Parser()
+        self.renderer = commonmark.ReStructuredTextRenderer()
 
     def render_rst(self, test_str):
         ast = self.parser.parse(test_str)
