@@ -28,7 +28,7 @@ Usage
 
 ::
 
-    >>> import dommonmark
+    >>> import commonmark
     >>> commonmark.commonmark('*hello!*')
     '<p><em>hello!</em></p>\n'
 
