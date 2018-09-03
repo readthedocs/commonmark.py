@@ -1,6 +1,7 @@
 ## 0.8.0
 - Added the `Node.normalize()` method. (from @lez)
 - Renamed package name to `commonmark` for PEP8 compliance. You can now do `import commonmark` as well as `import CommonMark`. Closes [#60](https://github.com/rtfd/CommonMark-py/issues/60)
+- Added testing on Python 3.7.
 
 ## 0.7.5 (2018-03-13)
 - Fixed smart dashes bug in Python 3. (from @alvra)
