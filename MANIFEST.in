@@ -16,3 +16,4 @@ include commonmark/render/renderer.py
 include commonmark/render/html.py
 include commonmark/tests/run_spec_tests.py
 include commonmark/tests/unit_tests.py
+include CommonMark
