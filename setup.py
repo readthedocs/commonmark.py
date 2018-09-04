@@ -1,4 +1,6 @@
 from setuptools import setup, find_packages, Command
+import io
+from os import path
 
 
 class Test(Command):
@@ -26,12 +28,19 @@ tests_require = [
 ]
 
 
+this_directory = path.abspath(path.dirname(__file__))
+with io.open(path.join(this_directory, 'README.rst'), encoding='utf-8') as f:
+    long_description = f.read()
+
+
 setup(
     name="commonmark",
     packages=find_packages(exclude=['tests']),
     version="0.8.0",
     license="BSD-3-Clause",
     description="Python parser for the CommonMark Markdown spec",
+    long_description=long_description,
+    long_description_content_type='text/x-rst',
     author="Bibek Kafle <bkafle662@gmail.com>, " +
     "Roland Shoemaker <rolandshoemaker@gmail.com>",
     author_email="rolandshoemaker@gmail.com",
