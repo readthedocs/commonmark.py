@@ -1,3 +1,6 @@
+## 0.8.1 (2018-09-06)
+- Removed `CommonMark` symlink.
+
 ## 0.8.0 (2018-09-03)
 - Added the `Node.normalize()` method. (from @lez)
 - Renamed package name to `commonmark` for PEP8 compliance. You can now do `import commonmark` as well as `import CommonMark`. Closes [#60](https://github.com/rtfd/CommonMark-py/issues/60)
