@@ -1,5 +1,5 @@
 ## 0.8.1 (2018-09-06)
-- Removed `CommonMark` symlink.
+- Removed `CommonMark` symlink. So, as of this version, you need to replace all instances of `CommonMark` with `commonmark` in your code.
 
 ## 0.8.0 (2018-09-03)
 - Added the `Node.normalize()` method. (from @lez)
