@@ -184,9 +184,12 @@ class SsmlRenderer(Renderer):
         self.out(node.literal)
 
     # Pause before starting to read off a list
+    list_counter = 0
     def list(self, node, entering):
         if entering:
             self.tag('break', attrs=[('time', '500ms')], selfclosing=True)
+            global list_counter
+            list_counter = 1
         else:
             self.tag('break', attrs=[('time', '500ms')], selfclosing=True)
 
@@ -196,8 +199,12 @@ class SsmlRenderer(Renderer):
         attrs.append(('interpret-as', 'cardinal'))
         if entering:
             self.tag('say-as', attrs)
-        else:
+            global list_counter
+            self.out(f"{list_counter}.")
+            list_counter += 1
             self.tag('/say-as')
+        else:
+
             self.cr()
 
     # def html_inline(self, node, entering):
