@@ -1,12 +1,10 @@
 """ Renders to SSML spec subset, compatible with AWS Polly and Google Cloud Text-to-Speech """
 from __future__ import unicode_literals
 
-
 import re
 from builtins import str
 from commonmark.common import escape_xml
 from commonmark.render.renderer import Renderer
-
 
 reUnsafeProtocol = re.compile(
     r'^javascript:|vbscript:|file:|data:', re.IGNORECASE)
@@ -16,7 +14,7 @@ reSafeDataProtocol = re.compile(
 
 def potentially_unsafe(url):
     return re.search(reUnsafeProtocol, url) and \
-        (not re.search(reSafeDataProtocol, url))
+           (not re.search(reSafeDataProtocol, url))
 
 
 class SsmlRenderer(Renderer):
@@ -68,7 +66,7 @@ class SsmlRenderer(Renderer):
         self.lit(self.options['softbreak'])
 
     def linebreak(self, node=None, entering=None):
-        self.tag('br', [], True)
+        # self.tag('br', [], True)
         self.cr()
 
     def link(self, node, entering):
@@ -89,7 +87,7 @@ class SsmlRenderer(Renderer):
         if entering:
             if self.disable_tags == 0:
                 if self.options.get('safe') and \
-                   potentially_unsafe(node.destination):
+                        potentially_unsafe(node.destination):
                     self.lit('<img src="" alt="')
                 else:
                     self.lit('<img src="' +
@@ -115,7 +113,6 @@ class SsmlRenderer(Renderer):
         else:
             self.tag('/emphasis')
 
-
     def paragraph(self, node, entering):
         grandparent = node.parent.parent
         attrs = self.attrs(node)
@@ -136,103 +133,100 @@ class SsmlRenderer(Renderer):
         attrs = self.attrs(node)
         attrs.append(('pitch', '-' + str(node.level) + 'st'))
         attrs.append(('rate', 'slow'))
-        attrs.append(('volumne', 'loud'))
+        attrs.append(('volume', 'loud'))
         # print(f"heading attrs: {attrs}")
         if entering:
             self.cr()
+            self.tag('break', attrs=[('time', '200ms')], selfclosing=True)
             self.tag(tagname, attrs)
         else:
             self.tag('/' + tagname)
+            self.tag('break', attrs=[('time', '200ms')], selfclosing=True)
             self.cr()
 
     def code(self, node, entering):
-        self.tag('code')
+        tagname = 'prosody'
+        attrs = self.attrs(node)
+        attrs.append(('pitch', '+2st'))
+        if entering:
+            self.tag(tagname, attrs)
+        else:
+            self.tag('/' + tagname)
         self.out(node.literal)
-        self.tag('/code')
 
     def code_block(self, node, entering):
-        info_words = node.info.split() if node.info else []
+        tagname = 'prosody'
         attrs = self.attrs(node)
-        if len(info_words) > 0 and len(info_words[0]) > 0:
-            attrs.append(['class', 'language-' +
-                          self.escape(info_words[0], True)])
+        attrs.append(('pitch', '+2st'))
 
-        self.cr()
-        self.tag('pre')
-        self.tag('code', attrs)
+        if entering:
+            self.tag('break', attrs=[('time', '200ms')], selfclosing=True)
+            self.tag(tagname, attrs)
+        else:
+            self.tag('/' + tagname)
+            self.tag('break', attrs=[('time', '200ms')], selfclosing=True)
         self.out(node.literal)
-        self.tag('/code')
-        self.tag('/pre')
-        self.cr()
 
     def thematic_break(self, node, entering):
-        attrs = self.attrs(node)
-        self.cr()
-        self.tag('hr', attrs, True)
-        self.cr()
+        self.tag('break', attrs=[('time', '2s')], selfclosing=True)
 
     def block_quote(self, node, entering):
+        tagname = 'prosody'
         attrs = self.attrs(node)
-        if entering:
-            self.cr()
-            self.tag('blockquote', attrs)
-            self.cr()
-        else:
-            self.cr()
-            self.tag('/blockquote')
-            self.cr()
+        attrs.append(('pitch', '-2st'))
 
-    def list(self, node, entering):
-        tagname = 'ul' if node.list_data['type'] == 'bullet' else 'ol'
-        attrs = self.attrs(node)
         if entering:
-            start = node.list_data['start']
-            if start is not None and start != 1:
-                attrs.append(['start', str(start)])
-
-            self.cr()
+            self.tag('break', attrs=[('time', '200ms')], selfclosing=True)
             self.tag(tagname, attrs)
-            self.cr()
         else:
-            self.cr()
             self.tag('/' + tagname)
-            self.cr()
+            self.tag('break', attrs=[('time', '200ms')], selfclosing=True)
+        self.out(node.literal)
 
+    # Pause before starting to read off a list
+    def list(self, node, entering):
+        if entering:
+            self.tag('break', attrs=[('time', '500ms')], selfclosing=True)
+        else:
+            self.tag('break', attrs=[('time', '500ms')], selfclosing=True)
+
+    # TODO handle saying list number as cardinals
     def item(self, node, entering):
         attrs = self.attrs(node)
+        attrs.append(('interpret-as', 'cardinal'))
         if entering:
-            self.tag('li', attrs)
+            self.tag('say-as', attrs)
         else:
-            self.tag('/li')
+            self.tag('/say-as')
             self.cr()
 
-    def html_inline(self, node, entering):
-        if self.options.get('safe'):
-            self.lit('<!-- raw HTML omitted -->')
-        else:
-            self.lit(node.literal)
-
-    def html_block(self, node, entering):
-        self.cr()
-        if self.options.get('safe'):
-            self.lit('<!-- raw HTML omitted -->')
-        else:
-            self.lit(node.literal)
-        self.cr()
-
-    def custom_inline(self, node, entering):
-        if entering and node.on_enter:
-            self.lit(node.on_enter)
-        elif (not entering) and node.on_exit:
-            self.lit(node.on_exit)
-
-    def custom_block(self, node, entering):
-        self.cr()
-        if entering and node.on_enter:
-            self.lit(node.on_enter)
-        elif (not entering) and node.on_exit:
-            self.lit(node.on_exit)
-        self.cr()
+    # def html_inline(self, node, entering):
+    #     if self.options.get('safe'):
+    #         self.lit('<!-- raw HTML omitted -->')
+    #     else:
+    #         self.lit(node.literal)
+    #
+    # def html_block(self, node, entering):
+    #     self.cr()
+    #     if self.options.get('safe'):
+    #         self.lit('<!-- raw HTML omitted -->')
+    #     else:
+    #         self.lit(node.literal)
+    #     self.cr()
+    #
+    # def custom_inline(self, node, entering):
+    #     if entering and node.on_enter:
+    #         self.lit(node.on_enter)
+    #     elif (not entering) and node.on_exit:
+    #         self.lit(node.on_exit)
+    #
+    # def custom_block(self, node, entering):
+    #     self.cr()
+    #     if entering and node.on_enter:
+    #         self.lit(node.on_enter)
+    #     elif (not entering) and node.on_exit:
+    #         self.lit(node.on_exit)
+    #     self.cr()
 
     # Helper methods #
 
