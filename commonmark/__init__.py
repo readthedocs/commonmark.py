@@ -6,3 +6,4 @@ from commonmark.dump import dumpAST, dumpJSON
 from commonmark.blocks import Parser
 from commonmark.render.html import HtmlRenderer
 from commonmark.render.rst import ReStructuredTextRenderer
+from commonmark.render.ssml import SsmlRenderer

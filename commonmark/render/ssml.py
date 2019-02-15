@@ -122,9 +122,9 @@ class SsmlRenderer(Renderer):
 
         if entering:
             self.cr()
-            self.tag('p', attrs)
+            # self.tag('p', attrs)
         else:
-            self.tag('/p')
+            # self.tag('/p')
             self.cr()
 
     def heading(self, node, entering):
@@ -148,24 +148,23 @@ class SsmlRenderer(Renderer):
         tagname = 'prosody'
         attrs = self.attrs(node)
         attrs.append(('pitch', '+2st'))
-        if entering:
-            self.tag(tagname, attrs)
-        else:
-            self.tag('/' + tagname)
+        # code blocks only have `entering=True`
+        self.tag(tagname, attrs)
         self.out(node.literal)
+        self.tag('/' + tagname)
+
 
     def code_block(self, node, entering):
         tagname = 'prosody'
         attrs = self.attrs(node)
         attrs.append(('pitch', '+2st'))
 
-        if entering:
-            self.tag('break', attrs=[('time', '200ms')], selfclosing=True)
-            self.tag(tagname, attrs)
-        else:
-            self.tag('/' + tagname)
-            self.tag('break', attrs=[('time', '200ms')], selfclosing=True)
+        self.tag('break', attrs=[('time', '200ms')], selfclosing=True)
+        self.tag(tagname, attrs)
         self.out(node.literal)
+        self.tag('/' + tagname)
+        self.tag('break', attrs=[('time', '200ms')], selfclosing=True)
+
 
     def thematic_break(self, node, entering):
         self.tag('break', attrs=[('time', '2s')], selfclosing=True)
@@ -187,24 +186,26 @@ class SsmlRenderer(Renderer):
     list_counter = 0
     def list(self, node, entering):
         if entering:
-            self.tag('break', attrs=[('time', '500ms')], selfclosing=True)
+            # self.tag('break', attrs=[('time', '500ms')], selfclosing=True)
+            self.cr()
             global list_counter
             list_counter = 1
         else:
             self.tag('break', attrs=[('time', '500ms')], selfclosing=True)
+            self.cr()
 
-    # TODO handle saying list number as cardinals
     def item(self, node, entering):
         attrs = self.attrs(node)
         attrs.append(('interpret-as', 'cardinal'))
         if entering:
+            self.cr()
             self.tag('say-as', attrs)
             global list_counter
-            self.out(f"{list_counter}.")
+            # self.out(f"{list_counter}")
             list_counter += 1
             self.tag('/say-as')
+            self.tag('break', attrs=[('time', '200ms')], selfclosing=True)
         else:
-
             self.cr()
 
     # def html_inline(self, node, entering):
