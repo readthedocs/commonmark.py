@@ -10,8 +10,8 @@ except ImportError:
 
 if sys.version_info >= (3, 0):
     if sys.version_info >= (3, 4):
-        import html.parser
-        HTMLunescape = html.parser.HTMLParser().unescape
+        import html
+        HTMLunescape = html.unescape
     else:
         from .entitytrans import _unescape
         HTMLunescape = _unescape
@@ -68,30 +68,26 @@ def unescape_string(s):
 
 def normalize_uri(uri):
     try:
-        return quote(uri, safe=str('/@:+?=&()%#*,'))
-    except KeyError:
-        # Python 2 throws a KeyError sometimes
-        try:
-            return quote(uri.encode('utf-8'), safe=str('/@:+?=&()%#*,'))
-        except UnicodeDecodeError:
-            # Python 2 also throws a UnicodeDecodeError, complaining about
-            # the width of the "safe" string. Removing this parameter
-            # solves the issue, but yields overly aggressive quoting, but we
-            # can correct those errors manually.
-            s = quote(uri.encode('utf-8'))
-            s = re.sub(r'%40', '@', s)
-            s = re.sub(r'%3A', ':', s)
-            s = re.sub(r'%2B', '+', s)
-            s = re.sub(r'%3F', '?', s)
-            s = re.sub(r'%3D', '=', s)
-            s = re.sub(r'%26', '&', s)
-            s = re.sub(r'%28', '(', s)
-            s = re.sub(r'%29', ')', s)
-            s = re.sub(r'%25', '%', s)
-            s = re.sub(r'%23', '#', s)
-            s = re.sub(r'%2A', '*', s)
-            s = re.sub(r'%2C', ',', s)
-            return s
+        return quote(uri.encode('utf-8'), safe=str('/@:+?=&()%#*,'))
+    except UnicodeDecodeError:
+        # Python 2 also throws a UnicodeDecodeError, complaining about
+        # the width of the "safe" string. Removing this parameter
+        # solves the issue, but yields overly aggressive quoting, but we
+        # can correct those errors manually.
+        s = quote(uri.encode('utf-8'))
+        s = re.sub(r'%40', '@', s)
+        s = re.sub(r'%3A', ':', s)
+        s = re.sub(r'%2B', '+', s)
+        s = re.sub(r'%3F', '?', s)
+        s = re.sub(r'%3D', '=', s)
+        s = re.sub(r'%26', '&', s)
+        s = re.sub(r'%28', '(', s)
+        s = re.sub(r'%29', ')', s)
+        s = re.sub(r'%25', '%', s)
+        s = re.sub(r'%23', '#', s)
+        s = re.sub(r'%2A', '*', s)
+        s = re.sub(r'%2C', ',', s)
+        return s
 
 
 UNSAFE_MAP = {
