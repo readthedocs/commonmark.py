@@ -78,6 +78,7 @@ class Node(object):
         self.nxt = None
         self.sourcepos = sourcepos
         self.last_line_blank = False
+        self.last_line_checked = False
         self.is_open = True
         self.string_content = ''
         self.literal = None
