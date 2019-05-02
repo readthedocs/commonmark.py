@@ -44,7 +44,7 @@ setup(
     author_email="rolandshoemaker@gmail.com",
     maintainer="Nikolas Nyby",
     maintainer_email="nikolas@gnu.org",
-    url="https://github.com/rtfd/CommonMark-py",
+    url="https://github.com/rtfd/commonmark.py",
     keywords=["markup", "markdown", "commonmark"],
     entry_points={
         'console_scripts': [

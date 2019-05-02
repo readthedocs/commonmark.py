@@ -129,8 +129,8 @@ Authors
 .. |Pypi Link| image:: https://img.shields.io/pypi/v/commonmark.svg
    :target: https://pypi.org/project/commonmark/
 
-.. |Build Status| image:: https://travis-ci.org/rtfd/CommonMark-py.svg?branch=master
-   :target: https://travis-ci.org/rtfd/CommonMark-py
+.. |Build Status| image:: https://travis-ci.org/rtfd/commonmark.py.svg?branch=master
+   :target: https://travis-ci.org/rtfd/commonmark.py
    
 .. |Doc Link| image:: https://readthedocs.org/projects/commonmark-py/badge/?version=latest
    :target: https://commonmark-py.readthedocs.io/en/latest/?badge=latest
