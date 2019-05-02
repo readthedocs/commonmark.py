@@ -19,7 +19,7 @@ else:
     from commonmark import entitytrans
     HTMLunescape = entitytrans._unescape
 
-ENTITY = '&(?:#x[a-f0-9]{1,8}|#[0-9]{1,8}|[a-z][a-z0-9]{1,31});'
+ENTITY = '&(?:#x[a-f0-9]{1,6}|#[0-9]{1,7}|[a-z][a-z0-9]{1,31});'
 
 TAGNAME = '[A-Za-z][A-Za-z0-9-]*'
 ATTRIBUTENAME = '[a-zA-Z_:][a-zA-Z0-9:._-]*'
@@ -45,7 +45,6 @@ reEntityOrEscapedChar = re.compile(
     '\\\\' + ESCAPABLE + '|' + ENTITY, re.IGNORECASE)
 XMLSPECIAL = '[&<>"]'
 reXmlSpecial = re.compile(XMLSPECIAL)
-reXmlSpecialOrEntity = re.compile(ENTITY + '|' + XMLSPECIAL, re.IGNORECASE)
 
 
 def unescape_char(s):
@@ -102,19 +101,13 @@ def replace_unsafe_char(s):
     return UNSAFE_MAP.get(s, s)
 
 
-def escape_xml(s, preserve_entities):
+def escape_xml(s):
     if s is None:
         return ''
     if re.search(reXmlSpecial, s):
-        if preserve_entities:
-            return re.sub(
-                reXmlSpecialOrEntity,
-                lambda m: replace_unsafe_char(m.group()),
-                s)
-        else:
-            return re.sub(
-                reXmlSpecial,
-                lambda m: replace_unsafe_char(m.group()),
-                s)
+        return re.sub(
+            reXmlSpecial,
+            lambda m: replace_unsafe_char(m.group()),
+            s)
     else:
         return s

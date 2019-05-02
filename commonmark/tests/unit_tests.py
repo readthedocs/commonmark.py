@@ -25,7 +25,6 @@ from commonmark.blocks import Parser
 from commonmark.render.html import HtmlRenderer
 from commonmark.inlines import InlineParser
 from commonmark.node import NodeWalker, Node
-from commonmark.utils import to_camel_case
 
 
 class TestCommonmark(unittest.TestCase):
@@ -100,6 +99,22 @@ class TestCommonmark(unittest.TestCase):
         html = renderer.render(ast)
         self.assertEqual(html, expected_html)
 
+    def test_regex_vulnerability_link_label(self):
+        i = 200
+        while i <= 2000:
+            s = commonmark.commonmark('[' + ('\\' * i) + '\n')
+            self.assertEqual(s, '<p>' + '[' + ('\\' * (i // 2)) + '</p>\n',
+                             '[\\\\... %d deep' % (i,))
+            i *= 10
+
+    def test_regex_vulnerability_link_destination(self):
+        i = 200
+        while i <= 2000:
+            s = commonmark.commonmark(('[](' * i) + '\n')
+            self.assertEqual(s, '<p>' + ('[](' * i) + '</p>\n',
+                             '[]( %d deep' % (i,))
+            i *= 10
+
 
 class TestHtmlRenderer(unittest.TestCase):
     def test_init(self):
@@ -136,17 +151,6 @@ class TestParser(unittest.TestCase):
     @example('* unicode: \u2020')
     def test_text(self, s):
         self.parser.parse(s)
-
-
-class TestUtils(unittest.TestCase):
-    def test_to_camel_case(self):
-        self.assertEqual(to_camel_case('snake_case'), 'SnakeCase')
-        self.assertEqual(to_camel_case(''), '')
-        self.assertEqual(to_camel_case('word'), 'Word')
-
-    @given(text())
-    def test_random_text(self, s):
-        to_camel_case(s)
 
 
 if __name__ == '__main__':
