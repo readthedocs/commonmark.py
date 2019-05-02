@@ -127,7 +127,7 @@ Authors
 -  `Nikolas Nyby <https://github.com/nikolas>`__
 
 .. |Pypi Link| image:: https://img.shields.io/pypi/v/commonmark.svg
-   :target: https://pypi.org/project/requests/
+   :target: https://pypi.org/project/commonmark/
 
 .. |Build Status| image:: https://travis-ci.org/rtfd/CommonMark-py.svg?branch=master
    :target: https://travis-ci.org/rtfd/CommonMark-py
