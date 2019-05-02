@@ -6,7 +6,7 @@
 
 ## 0.8.0 (2018-09-03)
 - Added the `Node.normalize()` method. (from @lez)
-- Renamed package name to `commonmark` for PEP8 compliance. You can now do `import commonmark` as well as `import CommonMark`. Closes [#60](https://github.com/rtfd/CommonMark-py/issues/60)
+- Renamed package name to `commonmark` for PEP8 compliance. You can now do `import commonmark` as well as `import CommonMark`. Closes [#60](https://github.com/rtfd/commonmark.py/issues/60)
 - Added testing on Python 3.7.
 
 ## 0.7.5 (2018-03-13)
