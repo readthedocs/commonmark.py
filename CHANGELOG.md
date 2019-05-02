@@ -1,3 +1,6 @@
+## 0.9.0 (2019-05-02)
+- The CommonMark spec has been updated to 0.29. Completed by @iamahuman.
+
 ## 0.8.1 (2018-09-06)
 - Removed `CommonMark` symlink. So, as of this version, you need to replace all instances of `CommonMark` with `commonmark` in your code.
 
