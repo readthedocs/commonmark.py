@@ -1,7 +1,7 @@
-CommonMark-py
+commonmark.py
 =============
 
-CommonMark-py is a pure Python port of `jgm <https://github.com/jgm>`__'s
+commonmark.py is a pure Python port of `jgm <https://github.com/jgm>`__'s
 `commonmark.js <https://github.com/jgm/commonmark.js>`__, a
 Markdown parser and renderer for the
 `CommonMark <http://commonmark.org>`__ specification, using only native
@@ -9,7 +9,7 @@ modules. Once both this project and the CommonMark specification are
 stable we will release the first ``1.0`` version and attempt to keep up
 to date with changes in ``commonmark.js``.
 
-CommonMark-py is tested against the CommonMark spec with Python versions
+commonmark.py is tested against the CommonMark spec with Python versions
 2.7, 3.4, 3.5, 3.6, and 3.7.
 
 **Current version:** 0.9.0
@@ -83,7 +83,7 @@ a pull request adding your test to the existing test suite.
 Tests
 -----
 
-To work on CommonMark-py, you will need to be able to run the test suite to
+To work on commonmark.py, you will need to be able to run the test suite to
 make sure your changes don't break anything. To run the tests, you can do
 something like this:
 
@@ -106,7 +106,7 @@ tracing.
     $ ./venv/bin/python commonmark/tests/run_spec_tests.py -h
     usage: run_spec_tests.py [-h] [-t T] [-p] [-f] [-i] [-d] [-np] [-s]
 
-    script to run the CommonMark specification tests against the CommonMark-py
+    script to run the CommonMark specification tests against the commonmark.py
     parser.
 
     optional arguments:

@@ -39,12 +39,12 @@
 - Contributions from @funkybob and @hyperknot
 
 ## 0.6.3 (2016-01-19)
-- CommonMark-py now supports Python 2.6.
+- commonmark.py now supports Python 2.6.
 - The CommonMark spec has been updated to 0.24.
 
 ## 0.6.2 (2016-01-08)
 - Fixed a UnicodeEncodeError when parsing unicode entities on
-  Python 2. As a result, CommonMark-py now relies on the "future"
+  Python 2. As a result, commonmark.py now relies on the "future"
   module in Python 2, as documented in setup.py. This can be found on
   pypi: https://pypi.python.org/pypi/future
 
@@ -53,7 +53,7 @@
   was empty.
 
 ## 0.6.0 (2016-01-04)
-- CommonMark-py now complies to the 0.23 CommonMark spec
+- commonmark.py now complies to the 0.23 CommonMark spec
   http://spec.commonmark.org/0.23/
 - The ExtensionBlock has been removed in this release, since
   the parser has been rewritten.
