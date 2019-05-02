@@ -23,8 +23,6 @@ class Test(Command):
 tests_require = [
     'flake8==3.5.0',
     'hypothesis==3.55.3',
-    # For python 2.6
-    'hypothesislegacysupport',
 ]
 
 
@@ -36,7 +34,7 @@ with io.open(path.join(this_directory, 'README.rst'), encoding='utf-8') as f:
 setup(
     name="commonmark",
     packages=find_packages(exclude=['tests']),
-    version="0.8.1",
+    version="0.9.0",
     license="BSD-3-Clause",
     description="Python parser for the CommonMark Markdown spec",
     long_description=long_description,
