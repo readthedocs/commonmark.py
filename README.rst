@@ -14,7 +14,7 @@ CommonMark-py is tested against the CommonMark spec with Python versions
 
 **Current version:** 0.8.1
 
-|Build Status| |Doc Link|
+|Pypi Link| |Build Status| |Doc Link|
 
 Installation
 ------------
@@ -125,6 +125,9 @@ Authors
 -  `Bibek Kafle <https://github.com/kafle>`__
 -  `Roland Shoemaker <https://github.com/rolandshoemaker>`__
 -  `Nikolas Nyby <https://github.com/nikolas>`__
+
+.. |Pypi Link| image:: https://img.shields.io/pypi/v/commonmark.svg
+   :target: https://pypi.org/project/requests/
 
 .. |Build Status| image:: https://travis-ci.org/rtfd/CommonMark-py.svg?branch=master
    :target: https://travis-ci.org/rtfd/CommonMark-py
