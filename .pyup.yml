@@ -1,0 +1,4 @@
+requirements:
+  - test_reqs.txt:
+      update: all
+      pin: True
