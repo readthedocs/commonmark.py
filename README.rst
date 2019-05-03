@@ -132,6 +132,6 @@ Authors
 .. |Build Status| image:: https://travis-ci.org/rtfd/commonmark.py.svg?branch=master
    :target: https://travis-ci.org/rtfd/commonmark.py
    
-.. |Doc Link| image:: https://readthedocs.org/projects/commonmark-py/badge/?version=latest
-   :target: https://commonmark-py.readthedocs.io/en/latest/?badge=latest
+.. |Doc Link| image:: https://readthedocs.org/projects/commonmarkpy/badge/?version=latest
+   :target: https://commonmarkpy.readthedocs.io/en/latest/?badge=latest
    :alt: Documentation Status
