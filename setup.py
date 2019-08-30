@@ -53,7 +53,7 @@ setup(
     },
     cmdclass={'test': Test},
     install_requires=[
-        'future>=0.14.0',
+        'future>=0.14.0;python_version<"3"',
     ],
     tests_require=tests_require,
     extras_require={'test': tests_require},
