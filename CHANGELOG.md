@@ -1,5 +1,6 @@
 ## x.y.z (unreleased)
-- CommonMark now requires `future >= 0.14.0` on Python 2, for uniform `builtins` imports in Python 2/3
+- commonmark.py now requires `future >= 0.14.0` on Python 2, for uniform `builtins` imports in Python 2/3
+- Added CHANGELOG.md to the manifest file.
 
 ## 0.9.0 (2019-05-02)
 - The CommonMark spec has been updated to 0.29. Completed by @iamahuman.
