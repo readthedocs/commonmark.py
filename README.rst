@@ -12,7 +12,7 @@ to date with changes in ``commonmark.js``.
 commonmark.py is tested against the CommonMark spec with Python versions
 2.7, 3.4, 3.5, 3.6, and 3.7.
 
-**Current version:** 0.9.0
+**Current version:** 0.9.1
 
 |Pypi Link| |Build Status| |Doc Link|
 

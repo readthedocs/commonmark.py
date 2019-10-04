@@ -34,7 +34,7 @@ with io.open(path.join(this_directory, 'README.rst'), encoding='utf-8') as f:
 setup(
     name="commonmark",
     packages=find_packages(exclude=['tests']),
-    version="0.9.0",
+    version="0.9.1",
     license="BSD-3-Clause",
     description="Python parser for the CommonMark Markdown spec",
     long_description=long_description,
