@@ -10,7 +10,7 @@ stable we will release the first ``1.0`` version and attempt to keep up
 to date with changes in ``commonmark.js``.
 
 commonmark.py is tested against the CommonMark spec with Python versions
-2.7, 3.5, 3.6, and 3.7.
+2.7, 3.5, 3.6, 3.7, and 3.8.
 
 **Current version:** 0.9.1
 
