@@ -1,2 +1,2 @@
 flake8==3.7.9
-hypothesis==3.9.1
+hypothesis==3.23.3
