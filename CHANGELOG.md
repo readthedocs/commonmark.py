@@ -1,4 +1,5 @@
 ## x.y.z (unreleased)
+- Remove testing on python 3.4.
 
 ## 0.9.1 (2019-10-04)
 - commonmark.py now requires `future >= 0.14.0` on Python 2, for uniform `builtins` imports in Python 2/3
