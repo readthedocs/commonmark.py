@@ -1,2 +1,2 @@
-flake8==3.8.1
+flake8==3.8.2
 hypothesis==3.23.3
