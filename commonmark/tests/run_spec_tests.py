@@ -2,7 +2,7 @@
 # coding: utf-8
 from __future__ import division, print_function, unicode_literals
 import re
-import time
+import timeit
 import codecs
 import argparse
 import sys
@@ -93,10 +93,10 @@ def main():
     nbspChar = '\u00A0'
 
     def showSpaces(t):
-            t = re.sub("\\t", tabChar, t)
-            t = re.sub(" ", spaceChar, t)
-            t = re.sub(nbspChar, spaceChar, t)
-            return t
+        t = re.sub("\\t", tabChar, t)
+        t = re.sub(" ", spaceChar, t)
+        t = re.sub(nbspChar, spaceChar, t)
+        return t
 
     t = re.sub("\r\n", "\n", data)
 
@@ -104,10 +104,10 @@ def main():
         re.compile("^<!-- END TESTS -->(.|[\n])*", flags=re.M), '', t)
     testMatch = re.findall(
         re.compile(
-            "^`{32} example\n"
-            "([\s\S]*?)^\.\n([\s\S]*?)"
-            "^`{32}$"
-            "|^#{1,6} *(.*)$",
+            r'^`{32} example\n'
+            r'([\s\S]*?)^\.\n([\s\S]*?)'
+            r'^`{32}$'
+            r'|^#{1,6} *(.*)$',
             re.M),
         tests)
 
@@ -124,7 +124,7 @@ def main():
 
     current_section = ""
 
-    startTime = time.clock()
+    startTime = timeit.default_timer()
 
     if args.i:
         print(
@@ -223,7 +223,7 @@ def main():
 
     print('\n' + str(passed) + ' tests passed, ' + str(failed) + ' failed')
 
-    endTime = time.clock()
+    endTime = timeit.default_timer()
     runTime = endTime - startTime
 
     if args.s:

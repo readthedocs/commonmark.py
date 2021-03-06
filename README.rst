@@ -1,7 +1,7 @@
-CommonMark-py
+commonmark.py
 =============
 
-CommonMark-py is a pure Python port of `jgm <https://github.com/jgm>`__'s
+commonmark.py is a pure Python port of `jgm <https://github.com/jgm>`__'s
 `commonmark.js <https://github.com/jgm/commonmark.js>`__, a
 Markdown parser and renderer for the
 `CommonMark <http://commonmark.org>`__ specification, using only native
@@ -9,12 +9,12 @@ modules. Once both this project and the CommonMark specification are
 stable we will release the first ``1.0`` version and attempt to keep up
 to date with changes in ``commonmark.js``.
 
-CommonMark-py is tested against the CommonMark spec with Python versions
-2.6, 2.7, 3.3, 3.4, 3.5, 3.6, and 3.7.
+commonmark.py is tested against the CommonMark spec with Python versions
+2.7, 3.5, 3.6, 3.7, and 3.8.
 
-**Current version:** 0.8.1
+**Current version:** 0.9.1
 
-|Build Status| |Doc Link|
+|Pypi Link| |Build Status| |Doc Link|
 
 Installation
 ------------
@@ -83,7 +83,7 @@ a pull request adding your test to the existing test suite.
 Tests
 -----
 
-To work on CommonMark-py, you will need to be able to run the test suite to
+To work on commonmark.py, you will need to be able to run the test suite to
 make sure your changes don't break anything. To run the tests, you can do
 something like this:
 
@@ -106,7 +106,7 @@ tracing.
     $ ./venv/bin/python commonmark/tests/run_spec_tests.py -h
     usage: run_spec_tests.py [-h] [-t T] [-p] [-f] [-i] [-d] [-np] [-s]
 
-    script to run the CommonMark specification tests against the CommonMark-py
+    script to run the CommonMark specification tests against the commonmark.py
     parser.
 
     optional arguments:
@@ -126,9 +126,12 @@ Authors
 -  `Roland Shoemaker <https://github.com/rolandshoemaker>`__
 -  `Nikolas Nyby <https://github.com/nikolas>`__
 
-.. |Build Status| image:: https://travis-ci.org/rtfd/CommonMark-py.svg?branch=master
-   :target: https://travis-ci.org/rtfd/CommonMark-py
+.. |Pypi Link| image:: https://img.shields.io/pypi/v/commonmark.svg
+   :target: https://pypi.org/project/commonmark/
+
+.. |Build Status| image:: https://travis-ci.org/rtfd/commonmark.py.svg?branch=master
+   :target: https://travis-ci.org/rtfd/commonmark.py
    
-.. |Doc Link| image:: https://readthedocs.org/projects/commonmark-py/badge/?version=latest
-   :target: https://commonmark-py.readthedocs.io/en/latest/?badge=latest
+.. |Doc Link| image:: https://readthedocs.org/projects/commonmarkpy/badge/?version=latest
+   :target: https://commonmarkpy.readthedocs.io/en/latest/?badge=latest
    :alt: Documentation Status

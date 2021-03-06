@@ -21,10 +21,8 @@ class Test(Command):
 
 
 tests_require = [
-    'flake8==3.5.0',
-    'hypothesis==3.55.3',
-    # For python 2.6
-    'hypothesislegacysupport',
+    'flake8==3.8.3',
+    'hypothesis==4.24.4',
 ]
 
 
@@ -36,7 +34,7 @@ with io.open(path.join(this_directory, 'README.rst'), encoding='utf-8') as f:
 setup(
     name="commonmark",
     packages=find_packages(exclude=['tests']),
-    version="0.8.1",
+    version="0.9.1",
     license="BSD-3-Clause",
     description="Python parser for the CommonMark Markdown spec",
     long_description=long_description,
@@ -46,7 +44,7 @@ setup(
     author_email="rolandshoemaker@gmail.com",
     maintainer="Nikolas Nyby",
     maintainer_email="nikolas@gnu.org",
-    url="https://github.com/rtfd/CommonMark-py",
+    url="https://github.com/rtfd/commonmark.py",
     keywords=["markup", "markdown", "commonmark"],
     entry_points={
         'console_scripts': [
@@ -55,7 +53,7 @@ setup(
     },
     cmdclass={'test': Test},
     install_requires=[
-        'future',
+        'future>=0.14.0;python_version<"3"',
     ],
     tests_require=tests_require,
     extras_require={'test': tests_require},

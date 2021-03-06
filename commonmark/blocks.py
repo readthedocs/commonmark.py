@@ -1,12 +1,10 @@
 from __future__ import absolute_import, unicode_literals
 
 import re
-from importlib import import_module
 from commonmark import common
 from commonmark.common import unescape_string
 from commonmark.inlines import InlineParser
 from commonmark.node import Node
-from commonmark.utils import to_camel_case
 
 
 CODE_INDENT = 4
@@ -21,7 +19,7 @@ reHtmlBlockOpen = [
         r'^<[/]?(?:address|article|aside|base|basefont|blockquote|body|'
         r'caption|center|col|colgroup|dd|details|dialog|dir|div|dl|dt|'
         r'fieldset|figcaption|figure|footer|form|frame|frameset|h1|head|'
-        r'header|hr|html|iframe|legend|li|link|main|menu|menuitem|meta|'
+        r'header|hr|html|iframe|legend|li|link|main|menu|menuitem|'
         r'nav|noframes|ol|optgroup|option|p|param|section|source|title|'
         r'summary|table|tbody|td|tfoot|th|thead|title|tr|track|ul)'
         r'(?:\s|[/]?[>]|$)',
@@ -45,7 +43,7 @@ reNonSpace = re.compile(r'[^ \t\f\v\r\n]')
 reBulletListMarker = re.compile(r'^[*+-]')
 reOrderedListMarker = re.compile(r'^(\d{1,9})([.)])')
 reATXHeadingMarker = re.compile(r'^#{1,6}(?:[ \t]+|$)')
-reCodeFence = re.compile(r'^`{3,}(?!.*`)|^~{3,}(?!.*~)')
+reCodeFence = re.compile(r'^`{3,}(?!.*`)|^~{3,}')
 reClosingCodeFence = re.compile(r'^(?:`{3,}|~{3,})(?= *$)')
 reSetextHeadingLine = re.compile(r'^(?:=+|-+)[ \t]*$')
 reLineEnding = re.compile(r'\r\n|\n|\r')
@@ -57,7 +55,7 @@ def is_blank(s):
 
 
 def is_space_or_tab(s):
-    return s == ' ' or s == '\t'
+    return s in (' ', '\t')
 
 
 def peek(ln, pos):
@@ -73,9 +71,12 @@ def ends_with_blank_line(block):
     while block:
         if block.last_line_blank:
             return True
-        if (block.t == 'list' or block.t == 'item'):
+        if not block.last_line_checked and \
+                block.t in ('list', 'item'):
+            block.last_line_checked = True
             block = block.last_child
         else:
+            block.last_line_checked = True
             break
 
     return False
@@ -94,6 +95,8 @@ def parse_list_marker(parser, container):
         'padding': None,
         'marker_offset': parser.indent,
     }
+    if parser.indent >= 4:
+        return None
     m = re.search(reBulletListMarker, rest)
     m2 = re.search(reOrderedListMarker, rest)
     if m:
@@ -515,15 +518,25 @@ class BlockStarts(object):
                 parser.current_line[parser.next_nonspace:])
             if m:
                 parser.close_unmatched_blocks()
-                heading = Node('heading', container.sourcepos)
-                heading.level = 1 if m.group()[0] == '=' else 2
-                heading.string_content = container.string_content
-                container.insert_after(heading)
-                container.unlink()
-                parser.tip = heading
-                parser.advance_offset(
-                    len(parser.current_line) - parser.offset, False)
-                return 2
+                # resolve reference link definitiosn
+                while peek(container.string_content, 0) == '[':
+                    pos = parser.inline_parser.parseReference(
+                            container.string_content, parser.refmap)
+                    if not pos:
+                        break
+                    container.string_content = container.string_content[pos:]
+                if container.string_content:
+                    heading = Node('heading', container.sourcepos)
+                    heading.level = 1 if m.group()[0] == '=' else 2
+                    heading.string_content = container.string_content
+                    container.insert_after(heading)
+                    container.unlink()
+                    parser.tip = heading
+                    parser.advance_offset(
+                        len(parser.current_line) - parser.offset, False)
+                    return 2
+                else:
+                    return 0
 
         return 0
 
@@ -610,13 +623,8 @@ class Parser(object):
         """ Add block of type tag as a child of the tip.  If the tip can't
         accept children, close and finalize it and try its parent,
         and so on til we find a block that can accept children."""
-        block_class = getattr(import_module('commonmark.blocks'),
-                              to_camel_case(self.tip.t))
-        while not block_class.can_contain(tag):
+        while not self.blocks[self.tip.t].can_contain(tag):
             self.finalize(self.tip, self.line_number - 1)
-            block_class = getattr(
-                import_module('commonmark.blocks'),
-                to_camel_case(self.tip.t))
 
         column_number = offset + 1
         new_block = Node(tag, [[self.line_number, column_number], [0, 0]])
@@ -725,15 +733,15 @@ class Parser(object):
         # For each containing block, try to parse the associated line start.
         # Bail out on failure: container will point to the last matching block.
         # Set all_matched to false if not all containers match.
-        last_child = container.last_child
-        while last_child and last_child.is_open:
+        while True:
+            last_child = container.last_child
+            if not (last_child and last_child.is_open):
+                break
             container = last_child
 
             self.find_next_nonspace()
-            block_class = getattr(
-                import_module('commonmark.blocks'),
-                to_camel_case(container.t))
-            rv = block_class.continue_(self, container)
+
+            rv = self.blocks[container.t].continue_(self, container)
             if rv == 0:
                 # we've matched, keep going
                 pass
@@ -745,21 +753,19 @@ class Parser(object):
                 self.last_line_length = len(ln)
                 return
             else:
-                raise ValueError('returned illegal value, must be 0, 1, or 2')
+                raise ValueError(
+                        'continue_ returned illegal value, must be 0, 1, or 2')
 
             if not all_matched:
                 # back up to last matching block
                 container = container.parent
                 break
 
-            last_child = container.last_child
-
         self.all_closed = (container == self.oldtip)
         self.last_matched_container = container
 
-        block_class = getattr(import_module('commonmark.blocks'),
-                              to_camel_case(container.t))
-        matched_leaf = container.t != 'paragraph' and block_class.accepts_lines
+        matched_leaf = container.t != 'paragraph' and \
+            self.blocks[container.t].accepts_lines
         starts = self.block_starts
         starts_len = len(starts.METHODS)
         # Unless last matched container is a code block, try new container
@@ -824,9 +830,7 @@ class Parser(object):
                 cont.last_line_blank = last_line_blank
                 cont = cont.parent
 
-            block_class = getattr(import_module('commonmark.blocks'),
-                                  to_camel_case(t))
-            if block_class.accepts_lines:
+            if self.blocks[t].accepts_lines:
                 self.add_line()
                 # if HtmlBlock, check for end condition
                 if t == 'html_block' and \
@@ -853,9 +857,8 @@ class Parser(object):
         above = block.parent
         block.is_open = False
         block.sourcepos[1] = [line_number, self.last_line_length]
-        block_class = getattr(import_module('commonmark.blocks'),
-                              to_camel_case(block.t))
-        block_class.finalize(self, block)
+
+        self.blocks[block.t].finalize(self, block)
 
         self.tip = above
 
@@ -897,3 +900,9 @@ class Parser(object):
             self.finalize(self.tip, length)
         self.process_inlines(self.doc)
         return self.doc
+
+
+CAMEL_RE = re.compile("(.)([A-Z](?:[a-z]+|(?<=[a-z0-9].)))")
+Parser.blocks = dict(
+    (CAMEL_RE.sub(r'\1_\2', cls.__name__).lower(), cls)
+    for cls in Block.__subclasses__())

@@ -5,11 +5,12 @@ import sys
 from commonmark import common
 from commonmark.common import normalize_uri, unescape_string
 from commonmark.node import Node
+from commonmark.normalize_reference import normalize_reference
 
 if sys.version_info >= (3, 0):
     if sys.version_info >= (3, 4):
-        import html.parser
-        HTMLunescape = html.parser.HTMLParser().unescape
+        import html
+        HTMLunescape = html.unescape
     else:
         from .entitytrans import _unescape
         HTMLunescape = _unescape
@@ -22,7 +23,7 @@ else:
 ESCAPED_CHAR = '\\\\' + common.ESCAPABLE
 
 rePunctuation = re.compile(
-    r'[!"#$%&\'()*+,\-./:;<=>?@\[\]^_`{|}~\xA1\xA7\xAB\xB6\xB7\xBB'
+    r'[!"#$%&\'()*+,\-./:;<=>?@\[\]\\^_`{|}~\xA1\xA7\xAB\xB6\xB7\xBB'
     r'\xBF\u037E\u0387\u055A-\u055F\u0589\u058A\u05BE\u05C0\u05C3'
     r'\u05C6\u05F3\u05F4\u0609\u060A\u060C\u060D\u061B\u061E\u061F'
     r'\u066A-\u066D\u06D4\u0700-\u070D\u07F7-\u07F9\u0830-\u083E'
@@ -54,10 +55,8 @@ reLinkTitle = re.compile(
     '|' +
     '\'(' + ESCAPED_CHAR + '|[^\'\\x00])*\'' +
     '|' +
-    '\\((' + ESCAPED_CHAR + '|[^)\\x00])*\\))')
-reLinkDestinationBraces = re.compile(
-    '^(?:[<](?:[^ <>\\t\\n\\\\\\x00]' + '|' + ESCAPED_CHAR + '|' +
-    '\\\\)*[>])')
+    '\\((' + ESCAPED_CHAR + '|[^()\\x00])*\\))')
+reLinkDestinationBraces = re.compile(r'^(?:<(?:[^<>\n\\\x00]|\\.)*>)')
 
 reEscapable = re.compile('^' + common.ESCAPABLE)
 reEntityHere = re.compile('^' + common.ENTITY, re.IGNORECASE)
@@ -79,19 +78,9 @@ reUnicodeWhitespaceChar = re.compile(r'^\s')
 reFinalSpace = re.compile(r' *$')
 reInitialSpace = re.compile(r'^ *')
 reSpaceAtEndOfLine = re.compile(r'^ *(?:\n|$)')
-reLinkLabel = re.compile('^\\[(?:[^\\\\\\[\\]]|' + ESCAPED_CHAR +
-                         '|\\\\){0,1000}\\]')
+reLinkLabel = re.compile(r'^\[(?:[^\\\[\]]|\\.){0,1000}\]')
 # Matches a string of non-special characters.
 reMain = re.compile(r'^[^\n`\[\]\\!<&*_\'"]+', re.MULTILINE)
-
-
-def normalizeReference(s):
-    """Normalize reference label.
-
-    Collapse internal whitespace to single space, remove
-    leading/trailing whitespace, case fold.
-    """
-    return re.sub(r'\s+', ' ', s.strip()).upper()
 
 
 def text(s):
@@ -175,12 +164,14 @@ class InlineParser(object):
         after_open_ticks = self.pos
         matched = self.match(reTicks)
         while matched is not None:
-            if (matched == ticks):
+            if matched == ticks:
                 node = Node('code', None)
-                c = self.subject[after_open_ticks:self.pos - len(ticks)]
-                c = c.strip()
-                c = re.sub(reWhitespace, ' ', c)
-                node.literal = c
+                contents = self.subject[after_open_ticks:self.pos-len(ticks)] \
+                    .replace('\n', ' ')
+                if contents.lstrip(' ') and contents[0] == contents[-1] == ' ':
+                    node.literal = contents[1:-1]
+                else:
+                    node.literal = contents
                 block.append_child(node)
                 return True
             matched = self.match(reTicks)
@@ -394,8 +385,9 @@ class InlineParser(object):
                        opener != openers_bottom[closercc]):
                     odd_match = (closer.get('can_open') or
                                  opener.get('can_close')) and \
-                                 (opener.get('origdelims') +
-                                  closer.get('origdelims')) % 3 == 0
+                                 closer['origdelims'] % 3 != 0 and \
+                                 (opener['origdelims'] +
+                                  closer['origdelims']) % 3 == 0
                     if opener.get('cc') == closercc and \
                        opener.get('can_open') and \
                        not odd_match:
@@ -502,12 +494,17 @@ class InlineParser(object):
         """
         res = self.match(reLinkDestinationBraces)
         if res is None:
+            if self.peek() == '<':
+                return None
             # TODO handrolled parser; res should be None or the string
             savepos = self.pos
             openparens = 0
-            c = self.peek()
-            while c is not None:
-                if c == '\\':
+            while True:
+                c = self.peek()
+                if c is None:
+                    break
+                if c == '\\' and re.search(
+                        reEscapable, self.subject[self.pos+1:self.pos+2]):
                     self.pos += 1
                     if self.peek() is not None:
                         self.pos += 1
@@ -524,7 +521,8 @@ class InlineParser(object):
                     break
                 else:
                     self.pos += 1
-                c = self.peek()
+            if self.pos == savepos and c != ')':
+                return None
             res = self.subject[savepos:self.pos]
             return normalize_uri(unescape_string(res))
         else:
@@ -539,7 +537,7 @@ class InlineParser(object):
         # Note: our regex will allow something of form [..\];
         # we disallow it here rather than using lookahead in the regex:
         m = self.match(reLinkLabel)
-        if m is None or len(m) > 1001 or re.search(r'([^\\]\\\]$|\[\n\]$)', m):
+        if m is None or len(m) > 1001:
             return 0
         else:
             return len(m)
@@ -647,7 +645,7 @@ class InlineParser(object):
 
             if reflabel:
                 # lookup rawlabel in refmap
-                link = self.refmap.get(normalizeReference(reflabel))
+                link = self.refmap.get(normalize_reference(reflabel))
                 if link:
                     dest = link['destination']
                     title = link['title']
@@ -779,13 +777,15 @@ class InlineParser(object):
         self.spnl()
 
         dest = self.parseLinkDestination()
-        if (dest is None or len(dest) == 0):
+        if dest is None:
             self.pos = startpos
             return 0
 
         beforetitle = self.pos
         self.spnl()
-        title = self.parseLinkTitle()
+        title = None
+        if self.pos != beforetitle:
+            title = self.parseLinkTitle()
         if title is None:
             title = ''
             # rewind before spaces
@@ -810,13 +810,13 @@ class InlineParser(object):
             self.pos = startpos
             return 0
 
-        normlabel = normalizeReference(rawlabel)
-        if refmap.get(normlabel) == '':
+        normlabel = normalize_reference(rawlabel)
+        if normlabel == '':
             # label must contain non-whitespace characters
             self.pos = startpos
             return 0
 
-        if refmap.get(normlabel) is None:
+        if not refmap.get(normlabel):
             refmap[normlabel] = {
                 'destination': dest,
                 'title': title
@@ -875,8 +875,6 @@ class InlineParser(object):
         self.brackets = None
         while (self.parseInline(block)):
             pass
-        # allow raw string to be garbage collected
-        block.string_content = None
         self.processEmphasis(None)
 
     parse = parseInlines
