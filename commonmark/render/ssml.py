@@ -38,8 +38,8 @@ class SsmlRenderer(Renderer):
         else:
             self.buf += '</speak>'
 
-    def escape(self, text, preserve_entities):
-        return escape_xml(text, preserve_entities)
+    def escape(self, text):
+        return escape_xml(text)
 
     def tag(self, name, attrs=None, selfclosing=None):
         """Helper function to produce an HTML tag."""
@@ -74,10 +74,10 @@ class SsmlRenderer(Renderer):
         if entering:
             if not (self.options.get('safe') and
                     potentially_unsafe(node.destination)):
-                attrs.append(['href', self.escape(node.destination, True)])
+                attrs.append(['href', self.escape(node.destination)])
 
             if node.title:
-                attrs.append(['title', self.escape(node.title, True)])
+                attrs.append(['title', self.escape(node.title)])
 
             self.tag('a', attrs)
         else:
@@ -91,14 +91,14 @@ class SsmlRenderer(Renderer):
                     self.lit('<img src="" alt="')
                 else:
                     self.lit('<img src="' +
-                             self.escape(node.destination, True) +
+                             self.escape(node.destination) +
                              '" alt="')
             self.disable_tags += 1
         else:
             self.disable_tags -= 1
             if self.disable_tags == 0:
                 if node.title:
-                    self.lit('" title="' + self.escape(node.title, True))
+                    self.lit('" title="' + self.escape(node.title))
                 self.lit('" />')
 
     def emph(self, node, entering):
@@ -239,7 +239,7 @@ class SsmlRenderer(Renderer):
     # Helper methods #
 
     def out(self, s):
-        self.lit(self.escape(s, False))
+        self.lit(self.escape(s))
 
     def attrs(self, node):
         att = []
