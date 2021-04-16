@@ -21,7 +21,7 @@ class Test(Command):
 
 
 tests_require = [
-    'flake8==3.8.4',
+    'flake8==3.9.1',
     'hypothesis==4.24.4',
 ]
 
