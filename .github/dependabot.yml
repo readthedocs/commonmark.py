@@ -1,0 +1,41 @@
+version: 2
+updates:
+- package-ecosystem: pip
+  directory: "/"
+  schedule:
+    interval: daily
+    time: "13:00"
+  open-pull-requests-limit: 10
+  ignore:
+  - dependency-name: hypothesis
+    versions:
+    - ">= 5.a, < 6"
+  - dependency-name: hypothesis
+    versions:
+    - 6.0.4
+    - 6.1.0
+    - 6.1.1
+    - 6.10.0
+    - 6.2.0
+    - 6.3.0
+    - 6.3.1
+    - 6.3.2
+    - 6.3.3
+    - 6.3.4
+    - 6.4.0
+    - 6.4.3
+    - 6.6.0
+    - 6.6.1
+    - 6.7.0
+    - 6.8.0
+    - 6.8.1
+    - 6.8.3
+    - 6.8.4
+    - 6.8.5
+    - 6.8.8
+    - 6.8.9
+    - 6.9.1
+    - 6.9.2
+  - dependency-name: flake8
+    versions:
+    - 3.9.0
