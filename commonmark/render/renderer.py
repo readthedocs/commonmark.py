@@ -2,10 +2,12 @@ from __future__ import unicode_literals
 
 
 class Renderer(object):
-    def render(self, ast):
+    def render(self, ast, strict=False):
         """Walks the AST and calls member methods for each Node type.
 
         @param ast {Node} The root of the abstract syntax tree.
+        @param strict {bool} Whether unimplemented node types should raise
+            an exception.
         """
         walker = ast.walker()
 
@@ -15,7 +17,7 @@ class Renderer(object):
         event = walker.nxt()
         while event is not None:
             type_ = event['node'].t
-            if hasattr(self, type_):
+            if strict or hasattr(self, type_):
                 getattr(self, type_)(event['node'], event['entering'])
             event = walker.nxt()
 
