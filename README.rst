@@ -1,6 +1,18 @@
 commonmark.py
 =============
 
+|No Maintenance Intended|
+
+**Warning:** commonmark.py is now deprecated. We recommend using `markdown-it-py`_
+for a docutils bridge going forward. See `this issue`_ for background
+and discussion.
+
+.. _markdown-it-py: https://github.com/executablebooks/markdown-it-py
+.. _this issue: https://github.com/readthedocs/commonmark.py/issues/308
+
+.. |No Maintenance Intended| image:: http://unmaintained.tech/badge.svg
+   :target: http://unmaintained.tech/
+
 commonmark.py is a pure Python port of `jgm <https://github.com/jgm>`__'s
 `commonmark.js <https://github.com/jgm/commonmark.js>`__, a
 Markdown parser and renderer for the
