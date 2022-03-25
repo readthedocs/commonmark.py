@@ -4,7 +4,7 @@ commonmark.py
 |No Maintenance Intended|
 
 **Warning:** commonmark.py is now deprecated. We recommend using `markdown-it-py`_
-for a docutils bridge going forward. See `this issue`_ for background
+for a commonmark parser going forward. See `this issue`_ for background
 and discussion.
 
 .. _markdown-it-py: https://github.com/executablebooks/markdown-it-py
