@@ -1,4 +1,5 @@
-## x.y.z (unreleased)
+## 0.9.2 (2026-05-28)
+- Deprecate package. Use markdown-it-py instead.
 - Remove testing on python 3.4.
 
 ## 0.9.1 (2019-10-04)

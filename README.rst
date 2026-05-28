@@ -7,6 +7,8 @@ commonmark.py
 for a commonmark parser going forward. See `this issue`_ for background
 and discussion.
 
+--
+
 .. _markdown-it-py: https://github.com/executablebooks/markdown-it-py
 .. _this issue: https://github.com/readthedocs/commonmark.py/issues/308
 
@@ -24,7 +26,7 @@ to date with changes in ``commonmark.js``.
 commonmark.py is tested against the CommonMark spec with Python versions
 2.7, 3.5, 3.6, 3.7, and 3.8.
 
-**Current version:** 0.9.1
+**Current version:** 0.9.2
 
 |Pypi Link| |Build Status| |Doc Link|
 
