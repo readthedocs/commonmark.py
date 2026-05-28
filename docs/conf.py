@@ -51,8 +51,8 @@ master_doc = 'index'
 
 # General information about the project.
 project = 'commonmark.py'
-copyright = '2014-2019, Roland Shoemaker, Bibek Kafle, Nik Nyby'
-author = 'Roland Shoemaker, Bibek Kafle, Nik Nyby'
+copyright = '2014-2019, Roland Shoemaker, Bibek Kafle'
+author = 'Roland Shoemaker, Bibek Kafle'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the

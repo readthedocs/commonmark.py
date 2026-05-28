@@ -136,7 +136,6 @@ Authors
 
 -  `Bibek Kafle <https://github.com/kafle>`__
 -  `Roland Shoemaker <https://github.com/rolandshoemaker>`__
--  `Nikolas Nyby <https://github.com/nikolas>`__
 
 .. |Pypi Link| image:: https://img.shields.io/pypi/v/commonmark.svg
    :target: https://pypi.org/project/commonmark/
